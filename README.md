@@ -1,2 +1,1 @@
-# java-leaning
-JavaでWebアプリ作成
+# About my first project on GitHub
