@@ -19,7 +19,7 @@ public class StudentManagementApplication {
         <html lang="ja">
           <head>
           <meta charset="UTF-8">
-          <title>Hello Spring!!</title>
+          <title>Hello RaiseTech!</title>
           </head>
           <body>
             <h1>Hello Spring!!</h1>
