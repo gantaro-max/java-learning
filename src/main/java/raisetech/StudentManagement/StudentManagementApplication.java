@@ -23,7 +23,7 @@ public class StudentManagementApplication {
           </head>
           <body>
             <h1>Hello RaiseTech!!</h1>
-            <h2>Hello RaiseTech!!<h2>
+            <h2>Hello RaiseTech!!</h2>
           </body>
         </html>
         """;
