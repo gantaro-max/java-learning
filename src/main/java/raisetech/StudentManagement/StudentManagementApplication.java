@@ -22,7 +22,8 @@ public class StudentManagementApplication {
           <title>Hello RaiseTech!</title>
           </head>
           <body>
-            <h1>Hello Spring!!</h1>
+            <h1>Hello RaiseTech!!</h1>
+            <h2>Hello RaiseTech!!</h2>
           </body>
         </html>
         """;
