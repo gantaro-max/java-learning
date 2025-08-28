@@ -13,7 +13,7 @@ public class StudentManagementApplication {
 		SpringApplication.run(StudentManagementApplication.class, args);
 	}
   @GetMapping("/hello")
-  public String hello(){
+  public String hello() {
     return """        
         <!DOCTYPE html>
         <html lang="ja">
