@@ -38,7 +38,7 @@ public class StudentManagementApplication {
            <title>登録</title>
         </head>
         <body>
-           <登録情報入力>
+           <h1>登録情報入力</h1>
            <form action="/regist" method="POST">
                名前：<input type="text" name="name"><br>
                年齢：<input type="number" name="age"><br>
