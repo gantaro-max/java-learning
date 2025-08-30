@@ -20,11 +20,14 @@ public class StudentManagementApplication {
 	}
   @PostMapping("/regist")
   public String registUser(@RequestParam("name")String name,
-      @RequestParam("age")int age,@RequestParam("email")String email){
-    lu.add(name,age,email);
+      @RequestParam(value="age",defaultValue = "0")int age,
+      @RequestParam(value="email",defaultValue = "")String email,
+      @RequestParam("submit")String submit){
+    String msg = (submit.equals("update")) ? lu.addUser(name,age,email) : lu.deleteUser(name);
     List<User> userList = lu.getUserList();
     return StudentManagementApplication.firstHalf()
         + userList.stream().map(User::toString).collect(Collectors.joining("<br>"))
+        + "<br><br>"+msg
         + StudentManagementApplication.secondHalf();
   }
   @GetMapping("/first")
@@ -40,10 +43,11 @@ public class StudentManagementApplication {
         <body>
            <h1>登録情報入力</h1>
            <form action="/regist" method="POST">
-               名前：<input type="text" name="name"><br>
-               年齢：<input type="number" name="age"><br>
-               email:<input type="email" name="email"><br>
-               <input type="submit" value="送信">
+               名前：<input type="text" name="name" required><br>
+               年齢：<input type="number" name="age" ><br>
+               email:<input type="email" name="email" ><br><br>
+               <button type="submit" value="update" name="submit">登録更新</button><br>
+               <button type="submit" value="delete" name="submit">削除</button>
            </form>
   
         </body>
@@ -111,10 +115,24 @@ class User{
 }
 
 class ListUser{
-  private List<User> userList = new ArrayList<>();
+  private final List<User> userList = new ArrayList<>();
 
-  public void add(String name,int age,String email){
-    userList.add(new User(name,age,email));
+  public String addUser(String name,int age,String email){
+    boolean isUpdated = userList.stream().filter(user -> name.equals(user.getName()))
+        .findFirst().map(user -> {user.setAge(age);user.setEmail(email);return true;})
+        .orElse(false);
+    String msg;
+    if (isUpdated){
+      msg = name+"さんを更新しました。";
+    }else{
+      userList.add(new User(name,age,email));
+      msg = name+"さんを登録しました。";
+    }
+    return msg;
+  }
+  public String deleteUser(String name){
+    boolean isDeleted=userList.removeIf(user -> name.equals(user.getName()));
+    return isDeleted ? name+"さんを削除しました" : "削除対象が見つかりません";
   }
   public List<User> getUserList() {
     return userList;
