@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Select;
 public interface StudentRepository {
 
   @Select("SELECT * FROM students")
-  List<Student> search();
+  List<Student> getSearch();
 
   @Select("SELECT * FROM students_courses")
   List<StudentsCourses> allCourses();
