@@ -20,12 +20,12 @@ public class StudentController {
 
   @GetMapping("/studentList")
   public List<Student> getStudentList() {
-    return studentService.searchStudentList();
+    return studentService.getStudentList();
   }
 
   @GetMapping("/students-courses")
-  public List<StudentsCourses> getAllCourses() {
-    return studentService.searchAllCourses();
+  public List<StudentsCourses> getStudentCoursList() {
+    return studentService.getStudentCourseList();
   }
 
 }
