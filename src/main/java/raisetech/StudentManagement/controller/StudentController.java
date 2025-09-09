@@ -11,21 +11,21 @@ import raisetech.StudentManagement.service.StudentService;
 @RestController
 public class StudentController {
 
-  private StudentService service;
+  private StudentService studentService;
 
   @Autowired
-  public StudentController(StudentService service) {
-    this.service = service;
+  public StudentController(StudentService studentService) {
+    this.studentService = studentService;
   }
 
   @GetMapping("/studentList")
-  public List<Student> getStudentList(){
-    return service.searchStudentList();
+  public List<Student> getStudentList() {
+    return studentService.searchStudentList();
   }
 
   @GetMapping("/students-courses")
-  public List<StudentsCourses> getAllCourses(){
-    return service.searchAllCourses();
+  public List<StudentsCourses> getAllCourses() {
+    return studentService.searchAllCourses();
   }
 
 }
