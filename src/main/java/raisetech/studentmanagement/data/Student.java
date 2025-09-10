@@ -1,4 +1,4 @@
-package raisetech.StudentManagement.data;
+package raisetech.studentmanagement.data;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Student {
+
   private String studentId;
   private String fullName;
   private String kanaName;
@@ -14,4 +15,6 @@ public class Student {
   private String address;
   private int age;
   private String gender;
+  private String remark;
+  private boolean isDeleted;
 }
