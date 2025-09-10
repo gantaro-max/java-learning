@@ -13,8 +13,8 @@ import raisetech.studentmanagement.service.StudentService;
 @RestController
 public class StudentController {
 
-  private StudentService studentService;
-  private StudentConverter studentConverter;
+  private final StudentService studentService;
+  private final StudentConverter studentConverter;
 
   @Autowired
   public StudentController(StudentService studentService, StudentConverter studentConverter) {
