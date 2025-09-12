@@ -1,6 +1,9 @@
 package raisetech.studentmanagement.controller.converter;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,10 +20,23 @@ public class StudentConverter {
       1001, "AWS", 2001, "WP", 3001, "FE",
       4001, "JAVA,", 5001, "DE", 6001, "WM");
 
-  public String covertCourseIdToName(Integer courseNum) {
-    return courses.entrySet().stream().filter(course -> course.getKey().equals(courseNum))
-        .map(Entry::getValue).findFirst().orElse("該当なし");
+  public Map<String, StudentsCourses> getStringStudentsCoursesMap(List<Student> students,
+      List<StudentsCourses> studentCourses) {
+    Map<String, StudentsCourses> studentsCoursesList = new HashMap<>();
+    students.forEach(stu -> {
+      studentCourses.forEach(stc -> {
+        if (stu.getStudentId().equals(stc.getStudentId())) {
+          studentsCoursesList.put(stu.getFullName(), stc);
+        }
+      });
+    });
+
+    return studentsCoursesList.entrySet().stream()
+        .sorted(Map.Entry.comparingByValue(Comparator.comparing(StudentsCourses::getCourseId)))
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
+            LinkedHashMap::new));
   }
+
 
   public List<StudentDetail> convertStudentDetails(List<Student> students,
       List<StudentsCourses> studentCourses) {
@@ -41,7 +57,12 @@ public class StudentConverter {
     StudentsCourses newCourse = new StudentsCourses();
     newCourse.setCourseId(String.valueOf(studentDetail.getCourseNum()));
     newCourse.setStudentId(student.getStudentId());
-    newCourse.setCourseName(covertCourseIdToName(studentDetail.getCourseNum()));
+    newCourse.setCourseName(getCourseNameById(studentDetail.getCourseNum()));
     return newCourse;
+  }
+
+  public String getCourseNameById(Integer courseNum) {
+    return courses.entrySet().stream().filter(course -> course.getKey().equals(courseNum))
+        .map(Entry::getValue).findFirst().orElse("該当なし");
   }
 }

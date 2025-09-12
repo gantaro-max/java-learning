@@ -1,6 +1,7 @@
 package raisetech.studentmanagement.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,6 +39,19 @@ public class StudentController {
     return "studentList";
   }
 
+  @GetMapping("/studentsCoursesList")
+  public String getStudentCoursesList(Model model) {
+    List<Student> students = studentService.getStudentList();
+    List<StudentsCourses> studentCourses = studentService.getStudentCourseList();
+
+    Map<String, StudentsCourses> studentsCoursesList = studentConverter.getStringStudentsCoursesMap(
+        students, studentCourses);
+
+    model.addAttribute("studentCoursesList", studentsCoursesList);
+
+    return "studentsCoursesList";
+  }
+
   @GetMapping("/students-courses")
   public List<StudentsCourses> getStudentCoursList() {
     return studentService.getStudentCourseList();
@@ -57,14 +71,11 @@ public class StudentController {
     }
     Student student = studentDetail.getStudent();
     student.setStudentId(UUID.randomUUID().toString());
-    StudentsCourses newCourse = studentConverter.getConvertNewCourse(studentDetail,
-        student);
+    StudentsCourses newCourse = studentConverter.getConvertNewCourse(studentDetail, student);
 
     studentService.setStudentData(student);
     studentService.setNewCourse(newCourse);
 
-    System.out.println(
-        studentDetail.getStudent() + "\n登録されました。");
     return "redirect:/studentList";
   }
 

@@ -21,19 +21,22 @@
   <input type="number" id="age" min="18" th:field="*{student.age}"><br>
   <label for="gender">性別：</label>
   <input type="text" id="gender" th:field="*{student.gender}"><br>
-  <label for="remark">備考：</label>
-  <input type="text" id="remark" th:field="*{student.remark}"><br>
   <label for="courseName">コース名：</label>
-  <select id="courseName" th:field="*{courseNum}" required><br>
+  <select id="courseName" th:field="*{courseNum}" required>
     <option value=1001>AWS</option>
     <option value=2001>WP</option>
     <option value=3001>FE</option>
     <option value=4001>JAVA</option>
     <option value=5001>DE</option>
     <option value=6001>WM</option>
-  </select>
+  </select><br>
+  <label for="remark">備考：</label>
+  <input type="text" id="remark" th:field="*{student.remark}"><br>
   <button type="submit" value="1">登録</button>
 </form>
+<br><br>
+<a th:href="@{/studentList}">受講生一覧</a><br>
+<a th:href="@{/studentsCoursesList}">受講生コース一覧</a>
 
 </body>
 </html>
