@@ -25,4 +25,12 @@ public class StudentService {
     return repository.getStudentCourseList();
   }
 
+  public void setStudentData(Student student) {
+    repository.setStudentData(student);
+  }
+
+  public void setNewCourse(StudentsCourses newCourse) {
+    repository.setNewCourse(newCourse);
+  }
+
 }

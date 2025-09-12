@@ -17,4 +17,11 @@ public class Student {
   private String gender;
   private String remark;
   private boolean isDeleted;
+
+  @Override
+  public String toString() {
+    return "id:" + studentId + ",name:" + fullName + ",(" + kanaName + "," + nickName + ")\n"
+        + "mail:" + email + ",area:" + address + ",age:" + age + ",gender:" + gender + ",備考:"
+        + remark;
+  }
 }
