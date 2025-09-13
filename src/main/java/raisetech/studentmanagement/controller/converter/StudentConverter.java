@@ -18,7 +18,7 @@ public class StudentConverter {
 
   private final Map<Integer, String> courses = Map.of(
       1001, "AWS", 2001, "WP", 3001, "FE",
-      4001, "JAVA,", 5001, "DE", 6001, "WM");
+      4001, "JAVA", 5001, "DE", 6001, "WM");
 
   public Map<String, StudentsCourses> getStringStudentsCoursesMap(List<Student> students,
       List<StudentsCourses> studentCourses) {

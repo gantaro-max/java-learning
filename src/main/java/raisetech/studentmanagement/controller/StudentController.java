@@ -59,7 +59,9 @@ public class StudentController {
 
   @GetMapping("/newStudent")
   public String newStudent(Model model) {
-    model.addAttribute("studentDetail", new StudentDetail());
+    StudentDetail studentDetail = new StudentDetail();
+    studentDetail.setStudent(new Student());
+    model.addAttribute("studentDetail", studentDetail);
     return "registerStudent";
   }
 
@@ -73,8 +75,7 @@ public class StudentController {
     student.setStudentId(UUID.randomUUID().toString());
     StudentsCourses newCourse = studentConverter.getConvertNewCourse(studentDetail, student);
 
-    studentService.setStudentData(student);
-    studentService.setNewCourse(newCourse);
+    studentService.setStudentNewCourse(student, newCourse);
 
     return "redirect:/studentList";
   }
