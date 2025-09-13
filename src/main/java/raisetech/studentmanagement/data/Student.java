@@ -18,7 +18,7 @@ public class Student {
   private String kanaName;
   private String nickName;
   @NotEmpty(message = "emailは空にできません。")
-  @Email(message = "有効なールアドレス形式で入力して下さい。")
+  @Email(message = "有効なメールアドレス形式で入力して下さい。")
   private String email;
   private String address;
   @Min(value = 18, message = "登録は18以上になります。")

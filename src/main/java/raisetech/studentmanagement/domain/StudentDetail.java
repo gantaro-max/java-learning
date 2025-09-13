@@ -16,7 +16,6 @@ public class StudentDetail {
   @NotNull(message = "受講生情報は必須です。")
   private Student student;
   private List<StudentsCourses> studentsCourses;
-  @Valid
   @NotNull(message = "コース選択は必須です。")
   private Integer courseNum;
 
