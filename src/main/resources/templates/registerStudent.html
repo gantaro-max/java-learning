@@ -18,13 +18,15 @@
   <label for="nickName">ニックネーム：</label>
   <input type="text" id="nickName" th:field="*{student.nickName}"><br>
   <label for="email">メールアドレス：</label>
-  <input type="email" id="email" th:field="*{student.email}" required><br>
+  <input type="text" id="email" th:field="*{student.email}" required><br>
   <p th:if="${#fields.hasErrors('student.email')}" th:errors="*{student.email}"
      style="color:red;"></p>
   <label for="address">地域：</label>
-  <input type="text" id="address" th:field="*{student.address}"><br>
+  <input type="email" id="address" th:field="*{student.address}"><br>
   <label for="age">年齢：</label>
   <input type="number" id="age" min="18" th:field="*{student.age}"><br>
+  <p th:if="${#fields.hasErrors('student.age')}" th:errors="*{student.age}"
+     style="color:red;"></p>
   <label for="gender">性別：</label>
   <input type="text" id="gender" th:field="*{student.gender}"><br>
   <label for="courseName">コース名：</label>
