@@ -8,17 +8,17 @@
 <h1>受講生登録</h1>
 <form th:action="@{/registerStudent}" th:object="${studentDetail}" method="POST">
   <label for="fullName">名前：</label>
-  <input type="text" id="fullName" th:field="*{student.fullName}" required><br>
+  <input type="text" id="fullName" th:field="*{student.fullName}"><br>
   <p th:if="${#fields.hasErrors('student.fullName')}" th:errors="*{student.fullName}"
      style="color:red;"></p>
   <label for="kanaName">名前（カナ）：</label>
-  <input type="text" id="kanaName" th:field="*{student.kanaName}" required><br>
+  <input type="text" id="kanaName" th:field="*{student.kanaName}"><br>
   <p th:if="${#fields.hasErrors('student.kanaName')}" th:errors="*{student.kanaName}"
      style="color:red;"></p>
   <label for="nickName">ニックネーム：</label>
   <input type="text" id="nickName" th:field="*{student.nickName}"><br>
   <label for="email">メールアドレス：</label>
-  <input type="email" id="email" th:field="*{student.email}" required><br>
+  <input type="email" id="email" th:field="*{student.email}"><br>
   <p th:if="${#fields.hasErrors('student.email')}" th:errors="*{student.email}"
      style="color:red;"></p>
   <label for="address">地域：</label>
