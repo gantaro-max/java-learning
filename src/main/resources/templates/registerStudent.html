@@ -9,12 +9,18 @@
 <form th:action="@{/registerStudent}" th:object="${studentDetail}" method="POST">
   <label for="fullName">名前：</label>
   <input type="text" id="fullName" th:field="*{student.fullName}" required><br>
+  <p th:if="${#fields.hasErrors('student.fullName')}" th:errors="*{student.fullName}"
+     style="color:red;"></p>
   <label for="kanaName">名前（カナ）：</label>
   <input type="text" id="kanaName" th:field="*{student.kanaName}" required><br>
+  <p th:if="${#fields.hasErrors('student.kanaName')}" th:errors="*{student.kanaName}"
+     style="color:red;"></p>
   <label for="nickName">ニックネーム：</label>
-  <input type="text" id="nickName" th:field="*{student.nickName}" required><br>
+  <input type="text" id="nickName" th:field="*{student.nickName}"><br>
   <label for="email">メールアドレス：</label>
-  <input type="text" id="email" th:field="*{student.email}" required><br>
+  <input type="email" id="email" th:field="*{student.email}" required><br>
+  <p th:if="${#fields.hasErrors('student.email')}" th:errors="*{student.email}"
+     style="color:red;"></p>
   <label for="address">地域：</label>
   <input type="text" id="address" th:field="*{student.address}"><br>
   <label for="age">年齢：</label>
@@ -30,6 +36,7 @@
     <option value=5001>DE</option>
     <option value=6001>WM</option>
   </select><br>
+  <p th:if="${#fields.hasErrors('courseNum')}" th:errors="*{courseNum}" style="color:red;"></p>
   <label for="remark">備考：</label>
   <input type="text" id="remark" th:field="*{student.remark}"><br>
   <button type="submit" value="1">登録</button>

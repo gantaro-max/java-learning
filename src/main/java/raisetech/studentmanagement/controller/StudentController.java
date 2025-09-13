@@ -1,5 +1,6 @@
 package raisetech.studentmanagement.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -66,7 +67,7 @@ public class StudentController {
   }
 
   @PostMapping("/registerStudent")
-  public String getRegisterStudent(@ModelAttribute StudentDetail studentDetail,
+  public String getRegisterStudent(@Valid @ModelAttribute StudentDetail studentDetail,
       BindingResult result) {
     if (result.hasErrors()) {
       return "registerStudent";
