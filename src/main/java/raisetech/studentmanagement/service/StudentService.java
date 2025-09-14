@@ -40,4 +40,9 @@ public class StudentService {
     repository.setNewCourse(newCourse);
   }
 
+  @Transactional
+  public void updateStudent(Student student) {
+    repository.updateStudent(student);
+  }
+
 }

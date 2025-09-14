@@ -85,9 +85,21 @@ public class StudentController {
   @GetMapping("/updateView/{studentId}")
   public String updateView(@PathVariable String studentId, Model model) {
     StudentDetail studentDetail = studentService.getStudentDetail(studentId);
-    model.addAttribute("studentDetail", studentDetail);
+    model.addAttribute("student", studentDetail.getStudent());
+    model.addAttribute("studentsCourses", studentDetail.getStudentsCourses());
 
     return "updateStudent";
+  }
+
+  @PostMapping("/updateStudent")
+  public String updateStudent(@Valid @ModelAttribute Student student,
+      BindingResult result) {
+    if (result.hasErrors()) {
+      return "updateStudent";
+    }
+    studentService.updateStudent(student);
+
+    return "redirect:/studentList";
   }
 
 }

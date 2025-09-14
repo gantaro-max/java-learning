@@ -6,32 +6,32 @@
 </head>
 <body>
 <h1>受講生更新</h1>
-<form th:action="@{/updateStudent}" th:object="${studentDetail}" method="POST">
+<form th:action="@{/updateStudent}" th:object="${student}" method="POST">
   <label for="studentId">ID：</label>
-  <input type="text" id="studentId" th:field="*{student.studentId}" readonly
+  <input type="text" id="studentId" th:field="*{studentId}" readonly
          style="background-color:lightgray;"><br>
   <label for="fullName">名前：</label>
-  <input type="text" id="fullName" th:field="*{student.fullName}" readonly
+  <input type="text" id="fullName" th:field="*{fullName}" readonly
          style="background-color:lightgray;"><br>
   <label for="kanaName">名前（カナ）：</label>
-  <input type="text" id="kanaName" th:field="*{student.kanaName}" readonly
+  <input type="text" id="kanaName" th:field="*{kanaName}" readonly
          style="background-color:lightgray;"><br>
   <label for="nickName">ニックネーム：</label>
-  <input type="text" id="nickName" th:field="*{student.nickName}"><br>
+  <input type="text" id="nickName" th:field="*{nickName}"><br>
   <label for="email">メールアドレス：</label>
-  <input type="email" id="email" th:field="*{student.email}" required><br>
-  <p th:if="${#fields.hasErrors('student.email')}" th:errors="*{student.email}"
+  <input type="email" id="email" th:field="*{email}" required><br>
+  <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
      style="color:red;"></p>
   <label for="address">地域：</label>
-  <input type="text" id="address" th:field="*{student.address}"><br>
+  <input type="text" id="address" th:field="*{address}"><br>
   <label for="age">年齢：</label>
-  <input type="number" id="age" min="18" th:field="*{student.age}"><br>
-  <p th:if="${#fields.hasErrors('student.age')}" th:errors="*{student.age}"
+  <input type="number" id="age" min="18" th:field="*{age}"><br>
+  <p th:if="${#fields.hasErrors('age')}" th:errors="*{age}"
      style="color:red;"></p>
   <label for="gender">性別：</label>
-  <input type="text" id="gender" th:field="*{student.gender}"><br>
+  <input type="text" id="gender" th:field="*{gender}"><br>
   <label for="remark">備考：</label>
-  <input type="text" id="remark" th:field="*{student.remark}"><br>
+  <input type="text" id="remark" th:field="*{remark}"><br>
   <button type="submit" value="2">更新</button>
 </form>
 <table border-collapse="collapse" border="1">
@@ -43,7 +43,7 @@
   </tr>
   </thead>
   <tbody>
-  <tr th:each="sc : ${studentDetail.studentsCourses}">
+  <tr th:each="sc : ${studentsCourses}">
     <td th:text="${sc.courseName}">JAVA</td>
     <td th:text="${#temporals.format(sc.startDate ,'yyyy/MM/dd')}">2025/08/14</td>
     <td th:text="${sc.completeDate != null ? #temporals.format(sc.completeDate ,'yyyy/MM/dd') :'未修了'}">
