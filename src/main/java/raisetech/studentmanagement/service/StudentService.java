@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
+import raisetech.studentmanagement.domain.StudentDetail;
 import raisetech.studentmanagement.repository.StudentRepository;
 
 @Service
@@ -26,12 +27,12 @@ public class StudentService {
     return repository.getStudentCourseList();
   }
 
-//  public void setStudentData(Student student) {
-//    repository.setStudentData(student);
-//  }
-//  public void setNewCourse(StudentsCourses newCourse) {
-//    repository.setNewCourse(newCourse);
-//  }
+  public StudentDetail getStudentDetail(String studentId) {
+    StudentDetail studentDetail = new StudentDetail();
+    studentDetail.setStudentsCourses(repository.getStudentCourses(studentId));
+    studentDetail.setStudent(repository.getStudentData(studentId));
+    return studentDetail;
+  }
 
   @Transactional
   public void setStudentNewCourse(Student student, StudentsCourses newCourse) {
