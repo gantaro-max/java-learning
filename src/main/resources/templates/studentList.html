@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1>受講生情報一覧</h1>
-<table border="1" border-collapse="collapse">
+<table border="1" style="border-collapse:collapse;">
   <thead>
   <tr>
     <th>ID</th>
@@ -35,7 +35,9 @@
   </tr>
   </tbody>
 </table>
-<br><br>
+<br>
+<p th:text="${errorMsg}" style="color:red;"></p>
+<br>
 <a th:href="@{/studentsCoursesList}">受講生コース一覧</a><br>
 <a th:href="@{/newStudent}">受講生登録</a>
 </body>

@@ -85,16 +85,26 @@ public class StudentController {
   @GetMapping("/updateView/{studentId}")
   public String updateView(@PathVariable String studentId, Model model) {
     StudentDetail studentDetail = studentService.getStudentDetail(studentId);
+    if (studentDetail.getStudent() == null) {
+      String nullStudentMsg = "該当の受講生が見つかりません。";
+      List<Student> students = studentService.getStudentList();
+      List<StudentsCourses> studentCourses = studentService.getStudentCourseList();
+      model.addAttribute("studentList",
+          studentConverter.convertStudentDetails(students, studentCourses));
+      model.addAttribute("errorMsg", nullStudentMsg);
+      return "studentList";
+    }
     model.addAttribute("student", studentDetail.getStudent());
     model.addAttribute("studentsCourses", studentDetail.getStudentsCourses());
-
     return "updateStudent";
   }
 
   @PostMapping("/updateStudent")
   public String updateStudent(@Valid @ModelAttribute Student student,
-      BindingResult result) {
+      BindingResult result, Model model) {
     if (result.hasErrors()) {
+      StudentDetail studentDetail = studentService.getStudentDetail(student.getStudentId());
+      model.addAttribute("studentsCourses", studentDetail.getStudentsCourses());
       return "updateStudent";
     }
     studentService.updateStudent(student);
