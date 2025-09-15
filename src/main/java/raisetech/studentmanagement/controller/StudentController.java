@@ -3,6 +3,7 @@ package raisetech.studentmanagement.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -83,9 +84,9 @@ public class StudentController {
   }
 
   @GetMapping("/updateView/{studentId}")
-  public String updateView(@PathVariable String studentId, Model model) {
-    StudentDetail studentDetail = studentService.getStudentDetail(studentId);
-    if (studentDetail.getStudent() == null) {
+  public String updateView(@PathVariable("studentId") String studentId, Model model) {
+    Optional<StudentDetail> studentDetail = studentService.getStudentDetail(studentId);
+    if (studentDetail.isEmpty()) {
       String nullStudentMsg = "該当の受講生が見つかりません。";
       List<Student> students = studentService.getStudentList();
       List<StudentsCourses> studentCourses = studentService.getStudentCourseList();
@@ -94,8 +95,8 @@ public class StudentController {
       model.addAttribute("errorMsg", nullStudentMsg);
       return "studentList";
     }
-    model.addAttribute("student", studentDetail.getStudent());
-    model.addAttribute("studentsCourses", studentDetail.getStudentsCourses());
+    model.addAttribute("student", studentDetail.get().getStudent());
+    model.addAttribute("studentsCourses", studentDetail.get().getStudentsCourses());
     return "updateStudent";
   }
 
@@ -103,12 +104,16 @@ public class StudentController {
   public String updateStudent(@Valid @ModelAttribute Student student,
       BindingResult result, Model model) {
     if (result.hasErrors()) {
-      StudentDetail studentDetail = studentService.getStudentDetail(student.getStudentId());
-      model.addAttribute("studentsCourses", studentDetail.getStudentsCourses());
+      Optional<StudentDetail> opStudentDetail = studentService.getStudentDetail(
+          student.getStudentId());
+      opStudentDetail.ifPresentOrElse(detail -> {
+        model.addAttribute("studentsCourses", detail.getStudentsCourses());
+      }, () -> {
+        model.addAttribute("errorMsg", "該当コースが見つかりません");
+      });
       return "updateStudent";
     }
     studentService.updateStudent(student);
-
     return "redirect:/studentList";
   }
 

@@ -1,6 +1,7 @@
 package raisetech.studentmanagement.service;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +28,17 @@ public class StudentService {
     return repository.getStudentCourseList();
   }
 
-  public StudentDetail getStudentDetail(String studentId) {
+  public Optional<StudentDetail> getStudentDetail(String studentId) {
+    Student student = repository.getStudentData(studentId);
+    Optional<Student> opStudent = Optional.ofNullable(student);
+    if (opStudent.isEmpty()) {
+      return Optional.empty();
+    }
+    Student foundStudent = opStudent.get();
     StudentDetail studentDetail = new StudentDetail();
+    studentDetail.setStudent(foundStudent);
     studentDetail.setStudentsCourses(repository.getStudentCourses(studentId));
-    studentDetail.setStudent(repository.getStudentData(studentId));
-    return studentDetail;
+    return Optional.of(studentDetail);
   }
 
   @Transactional
