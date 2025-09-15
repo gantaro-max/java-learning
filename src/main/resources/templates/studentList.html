@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1>受講生情報一覧</h1>
-<table border="1">
+<table border="1" style="border-collapse:collapse;">
   <thead>
   <tr>
     <th>ID</th>
@@ -23,7 +23,8 @@
   <tbody>
   <tr th:each="studentDetail : ${studentList}">
     <td th:text="${studentDetail.student.studentId}">5</td>
-    <td th:text="${studentDetail.student.fullName}">五味太郎</td>
+    <td><a th:href="@{/updateView/{studentId}(studentId=${studentDetail.student.studentId})}"
+           th:text="${studentDetail.student.fullName}"></a></td>
     <td th:text="${studentDetail.student.kanaName}">ゴミタロウ</td>
     <td th:text="${studentDetail.student.nickName}">ごっさん</td>
     <td th:text="${studentDetail.student.email}">gomi@example.com</td>
@@ -34,7 +35,9 @@
   </tr>
   </tbody>
 </table>
-<br><br>
+<br>
+<p th:text="${errorMsg}" style="color:red;"></p>
+<br>
 <a th:href="@{/studentsCoursesList}">受講生コース一覧</a><br>
 <a th:href="@{/newStudent}">受講生登録</a>
 </body>

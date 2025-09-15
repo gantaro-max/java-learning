@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1>受講生コース情報一覧</h1>
-<table border="1">
+<table border="1" style="border-collapse:collapse;">
   <thead>
   <tr>
     <th>コースID</th>
@@ -21,7 +21,8 @@
   <tr th:each="entry : ${studentCoursesList}">
     <td th:text="${entry.value.courseId}">1010</td>
     <td th:text="${entry.value.studentId}">11</td>
-    <td th:text="${entry.key}">山口勉</td>
+    <td><a th:href="@{/updateView/{studentId}(studentId=${entry.value.studentId})}"
+           th:text="${entry.key}"></a></td>
     <td th:text="${entry.value.courseName}">WM</td>
     <td th:text="${entry.value.startDate}">2024</td>
     <td th:text="${entry.value.completeDate}">2025</td>
