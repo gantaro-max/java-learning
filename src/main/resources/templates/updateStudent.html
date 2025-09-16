@@ -32,8 +32,16 @@
   <input type="text" id="gender" th:field="*{gender}"><br>
   <label for="remark">備考：</label>
   <input type="text" id="remark" th:field="*{remark}"><br>
+  <label>受講状況</label><br>
+  <input type="radio" name="deleted" value="false" th:checked="*{deleted==false}"
+         id="deleted-false">
+  <label for="deleted-false">受講中</label>
+  <input type="radio" name="deleted" value="true" th:checked="*{deleted==true}"
+         id="deleted-true">
+  <label for="deleted-true">受講停止</label><br><br>
   <button type="submit" value="2">更新</button>
 </form>
+<br>
 <table border="1" style="border-collapse:collapse;">
   <thead>
   <tr>

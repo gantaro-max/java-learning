@@ -3,7 +3,6 @@ package raisetech.studentmanagement.controller.converter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,23 +19,21 @@ public class StudentConverter {
       1001, "AWS", 2001, "WP", 3001, "FE",
       4001, "JAVA", 5001, "DE", 6001, "WM");
 
-  public Map<String, StudentsCourses> getStringStudentsCoursesMap(List<Student> students,
+  public Map<String, List<StudentsCourses>> getStringStudentsCoursesMap(List<Student> students,
       List<StudentsCourses> studentCourses) {
-    Map<String, StudentsCourses> studentsCoursesList = new HashMap<>();
+    Map<String, List<StudentsCourses>> studentsCoursesMap = new HashMap<>();
     students.forEach(stu -> {
+      List<StudentsCourses> scList = new ArrayList<>();
       studentCourses.forEach(stc -> {
         if (stu.getStudentId().equals(stc.getStudentId())) {
-          studentsCoursesList.put(stu.getFullName(), stc);
+          scList.add(stc);
         }
       });
+      studentsCoursesMap.put(stu.getFullName(), scList);
     });
 
-    return studentsCoursesList.entrySet().stream()
-        .sorted(Map.Entry.comparingByValue(Comparator.comparing(StudentsCourses::getCourseId)))
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
-            LinkedHashMap::new));
+    return studentsCoursesMap;
   }
-
 
   public List<StudentDetail> convertStudentDetails(List<Student> students,
       List<StudentsCourses> studentCourses) {
@@ -50,7 +47,8 @@ public class StudentConverter {
       studentDetail.setStudentsCourses(convertStudentCourses);
       studentDetails.add(studentDetail);
     });
-    return studentDetails;
+    return studentDetails.stream()
+        .sorted(Comparator.comparing(std -> std.getStudent().getStudentId())).toList();
   }
 
   public StudentsCourses getConvertNewCourse(StudentDetail studentDetail, Student student) {

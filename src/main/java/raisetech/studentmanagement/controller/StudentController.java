@@ -2,7 +2,6 @@ package raisetech.studentmanagement.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +46,10 @@ public class StudentController {
     List<Student> students = studentService.getStudentList();
     List<StudentsCourses> studentCourses = studentService.getStudentCourseList();
 
-    Map<String, StudentsCourses> studentsCoursesList = studentConverter.getStringStudentsCoursesMap(
-        students, studentCourses);
+    List<StudentDetail> studentDetailList = studentConverter.convertStudentDetails(students,
+        studentCourses);
 
-    model.addAttribute("studentCoursesList", studentsCoursesList);
+    model.addAttribute("studentDetailList", studentDetailList);
 
     return "studentsCoursesList";
   }

@@ -40,7 +40,7 @@
   </select><br>
   <p th:if="${#fields.hasErrors('courseNum')}" th:errors="*{courseNum}" style="color:red;"></p>
   <label for="remark">備考：</label>
-  <input type="text" id="remark" th:field="*{student.remark}"><br>
+  <input type="text" id="remark" th:field="*{student.remark}"><br><br>
   <button type="submit" value="1">登録</button>
 </form>
 <br><br>

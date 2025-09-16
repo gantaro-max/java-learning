@@ -17,12 +17,12 @@
     <th>修了日時</th>
   </tr>
   </thead>
-  <tbody th:each="studentDetail : ${studentDetailList}">
-  <tr th:each="course , stat : ${studentDetail.studentsCourses}">
+  <tbody th:each="entry : ${studentCoursesMap}">
+  <tr th:each="course , stat : ${entry.value}">
     <td th:text="${course.courseId}">1010</td>
     <td th:text="${course.studentId}">11</td>
     <td><a th:href="@{/updateView/{studentId}(studentId=${course.studentId})}"
-           th:text="${studentDetail.student.fullName}"></a></td>
+           th:text="${entry.key}"></a></td>
     <td th:text="${course.courseName}">WM</td>
     <td th:text="${course.startDate}">2024</td>
     <td th:text="${course.completeDate}">2025</td>
@@ -30,7 +30,3 @@
   </tbody>
 </table>
 <br><br>
-<a th:href="@{/studentList}">受講生一覧</a><br>
-<a th:href="@{/newStudent}">受講生登録</a>
-</body>
-</html>
