@@ -3,6 +3,8 @@ package raisetech.studentmanagement.repository;
 import java.util.List;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import raisetech.studentmanagement.data.Student;
@@ -12,12 +14,14 @@ import raisetech.studentmanagement.data.StudentsCourses;
 public interface StudentRepository {
 
   @Select("SELECT * FROM students WHERE is_deleted = FALSE")
+  @Results({@Result(property = "deleted", column = "is_deleted")})
   List<Student> getStudentList();
 
   @Select("SELECT * FROM students_courses")
   List<StudentsCourses> getStudentCourseList();
 
   @Select("SELECT * FROM students WHERE is_deleted = FALSE AND student_id = #{studentId}")
+  @Results({@Result(property = "deleted", column = "is_deleted")})
   Student getStudentData(String studentId);
 
   @Select("SELECT * FROM students_courses WHERE student_id = #{studentId}")
@@ -36,6 +40,7 @@ public interface StudentRepository {
       "UPDATE students SET nick_name = #{nickName},email = #{email},address = #{address}"
           + ",age = #{age},gender = #{gender},remark = #{remark},is_deleted = #{deleted}"
           + " WHERE student_id = #{studentId}")
+  @Results({@Result(property = "deleted", column = "is_deleted")})
   void updateStudent(Student student);
 
 }

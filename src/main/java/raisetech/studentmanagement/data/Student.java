@@ -1,6 +1,5 @@
 package raisetech.studentmanagement.data;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -26,6 +25,5 @@ public class Student {
   private int age;
   private String gender;
   private String remark;
-  @Column(name = "is_deleted")
   private boolean deleted;
 }
