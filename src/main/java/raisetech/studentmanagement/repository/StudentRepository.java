@@ -40,7 +40,6 @@ public interface StudentRepository {
       "UPDATE students SET nick_name = #{nickName},email = #{email},address = #{address}"
           + ",age = #{age},gender = #{gender},remark = #{remark},is_deleted = #{deleted}"
           + " WHERE student_id = #{studentId}")
-  @Results({@Result(property = "deleted", column = "is_deleted")})
   void updateStudent(Student student);
 
 }
