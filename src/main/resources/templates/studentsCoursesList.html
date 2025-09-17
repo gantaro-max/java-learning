@@ -17,15 +17,15 @@
     <th>修了日時</th>
   </tr>
   </thead>
-  <tbody>
-  <tr th:each="entry : ${studentCoursesList}">
-    <td th:text="${entry.value.courseId}">1010</td>
-    <td th:text="${entry.value.studentId}">11</td>
-    <td><a th:href="@{/updateView/{studentId}(studentId=${entry.value.studentId})}"
-           th:text="${entry.key}"></a></td>
-    <td th:text="${entry.value.courseName}">WM</td>
-    <td th:text="${entry.value.startDate}">2024</td>
-    <td th:text="${entry.value.completeDate}">2025</td>
+  <tbody th:each="studentDetail : ${studentDetailList}">
+  <tr th:each="course , stat : ${studentDetail.studentsCourses}">
+    <td th:text="${course.courseId}">1010</td>
+    <td th:text="${course.studentId}">11</td>
+    <td><a th:href="@{/updateView/{studentId}(studentId=${course.studentId})}"
+           th:text="${studentDetail.student.fullName}"></a></td>
+    <td th:text="${course.courseName}">WM</td>
+    <td th:text="${course.startDate}">2024</td>
+    <td th:text="${course.completeDate}">2025</td>
   </tr>
   </tbody>
 </table>
