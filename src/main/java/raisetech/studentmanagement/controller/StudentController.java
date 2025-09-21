@@ -5,20 +5,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import raisetech.studentmanagement.controller.converter.StudentConverter;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.StudentDetail;
 import raisetech.studentmanagement.service.StudentService;
 
-@Controller
+@RestController
 public class StudentController {
 
   private final StudentService studentService;
@@ -31,14 +33,10 @@ public class StudentController {
   }
 
   @GetMapping("/studentList")
-  public String getStudentList(Model model) {
+  public List<StudentDetail> getStudentList(Model model) {
     List<Student> students = studentService.getStudentList();
     List<StudentsCourses> studentCourses = studentService.getStudentCourseList();
-
-    model.addAttribute("studentList",
-        studentConverter.convertStudentDetails(students, studentCourses));
-
-    return "studentList";
+    return studentConverter.convertStudentDetails(students, studentCourses);
   }
 
   @GetMapping("/studentsCoursesList")
@@ -100,20 +98,9 @@ public class StudentController {
   }
 
   @PostMapping("/updateStudent")
-  public String updateStudent(@Valid @ModelAttribute Student student,
-      BindingResult result, Model model) {
-    if (result.hasErrors()) {
-      Optional<StudentDetail> opStudentDetail = studentService.getStudentDetail(
-          student.getStudentId());
-      opStudentDetail.ifPresentOrElse(detail -> {
-        model.addAttribute("studentsCourses", detail.getStudentsCourses());
-      }, () -> {
-        model.addAttribute("errorMsg", "該当コースが見つかりません");
-      });
-      return "updateStudent";
-    }
+  public ResponseEntity<String> updateStudent(@RequestBody Student student) {
     studentService.updateStudent(student);
-    return "redirect:/studentList";
+    return ResponseEntity.ok("更新処理が成功しました");
   }
 
 }
