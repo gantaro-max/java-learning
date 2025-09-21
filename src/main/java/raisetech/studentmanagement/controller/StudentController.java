@@ -33,23 +33,17 @@ public class StudentController {
   }
 
   @GetMapping("/studentList")
-  public List<StudentDetail> getStudentList(Model model) {
+  public List<StudentDetail> getStudentList() {
     List<Student> students = studentService.getStudentList();
     List<StudentsCourses> studentCourses = studentService.getStudentCourseList();
     return studentConverter.convertStudentDetails(students, studentCourses);
   }
 
   @GetMapping("/studentsCoursesList")
-  public String getStudentCoursesList(Model model) {
+  public List<StudentDetail> getStudentCoursesList() {
     List<Student> students = studentService.getStudentList();
     List<StudentsCourses> studentCourses = studentService.getStudentCourseList();
-
-    List<StudentDetail> studentDetailList = studentConverter.convertStudentDetails(students,
-        studentCourses);
-
-    model.addAttribute("studentDetailList", studentDetailList);
-
-    return "studentsCoursesList";
+    return studentConverter.convertStudentDetails(students, studentCourses);
   }
 
   @GetMapping("/students-courses")
