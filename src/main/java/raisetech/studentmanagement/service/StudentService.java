@@ -44,7 +44,7 @@ public class StudentService {
    * @return 受講生
    */
   public Optional<StudentDetail> getStudentDetail(String studentId) {
-    Student student = repository.getStudentData(studentId);
+    Student student = repository.getStudentById(studentId);
     Optional<Student> opStudent = Optional.ofNullable(student);
     if (opStudent.isEmpty()) {
       return Optional.empty();

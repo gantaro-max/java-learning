@@ -41,7 +41,7 @@ public interface StudentRepository {
    */
   @Select("SELECT * FROM students WHERE is_deleted = FALSE AND student_id = #{studentId}")
   @Results({@Result(property = "deleted", column = "is_deleted")})
-  Student getStudentData(String studentId);
+  Student getStudentById(String studentId);
 
   /**
    * 受講生IDに紐づく受講生コース情報の検索を行います。
