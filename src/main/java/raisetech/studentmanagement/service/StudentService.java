@@ -50,9 +50,8 @@ public class StudentService {
       return Optional.empty();
     }
     Student foundStudent = opStudent.get();
-    StudentDetail studentDetail = new StudentDetail();
-    studentDetail.setStudent(foundStudent);
-    studentDetail.setStudentsCourses(repository.getStudentCourses(studentId));
+    StudentDetail studentDetail = new StudentDetail(foundStudent,
+        repository.getStudentCourses(studentId));
     return Optional.of(studentDetail);
   }
 
