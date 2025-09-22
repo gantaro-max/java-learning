@@ -1,24 +1,24 @@
 package raisetech.studentmanagement.controller;
 
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import raisetech.studentmanagement.controller.converter.StudentConverter;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.StudentDetail;
 import raisetech.studentmanagement.service.StudentService;
 
-@Controller
+@RestController
 public class StudentController {
 
   private final StudentService studentService;
@@ -31,27 +31,17 @@ public class StudentController {
   }
 
   @GetMapping("/studentList")
-  public String getStudentList(Model model) {
+  public List<StudentDetail> getStudentList() {
     List<Student> students = studentService.getStudentList();
     List<StudentsCourses> studentCourses = studentService.getStudentCourseList();
-
-    model.addAttribute("studentList",
-        studentConverter.convertStudentDetails(students, studentCourses));
-
-    return "studentList";
+    return studentConverter.convertStudentDetails(students, studentCourses);
   }
 
   @GetMapping("/studentsCoursesList")
-  public String getStudentCoursesList(Model model) {
+  public List<StudentDetail> getStudentCoursesList() {
     List<Student> students = studentService.getStudentList();
     List<StudentsCourses> studentCourses = studentService.getStudentCourseList();
-
-    List<StudentDetail> studentDetailList = studentConverter.convertStudentDetails(students,
-        studentCourses);
-
-    model.addAttribute("studentDetailList", studentDetailList);
-
-    return "studentsCoursesList";
+    return studentConverter.convertStudentDetails(students, studentCourses);
   }
 
   @GetMapping("/students-courses")
@@ -68,11 +58,7 @@ public class StudentController {
   }
 
   @PostMapping("/registerStudent")
-  public String getRegisterStudent(@Valid @ModelAttribute StudentDetail studentDetail,
-      BindingResult result) {
-    if (result.hasErrors()) {
-      return "registerStudent";
-    }
+  public String getRegisterStudent(StudentDetail studentDetail) {
     Student student = studentDetail.getStudent();
     student.setStudentId(UUID.randomUUID().toString());
     StudentsCourses newCourse = studentConverter.getConvertNewCourse(studentDetail, student);
@@ -100,20 +86,16 @@ public class StudentController {
   }
 
   @PostMapping("/updateStudent")
-  public String updateStudent(@Valid @ModelAttribute Student student,
-      BindingResult result, Model model) {
-    if (result.hasErrors()) {
-      Optional<StudentDetail> opStudentDetail = studentService.getStudentDetail(
-          student.getStudentId());
-      opStudentDetail.ifPresentOrElse(detail -> {
-        model.addAttribute("studentsCourses", detail.getStudentsCourses());
-      }, () -> {
-        model.addAttribute("errorMsg", "該当コースが見つかりません");
-      });
-      return "updateStudent";
+  public ResponseEntity<String> updateStudent(@RequestBody Student student) {
+    if (student.getStudentId() == null || student.getStudentId().isEmpty()) {
+      return new ResponseEntity<>("リクエストが不正です", HttpStatus.BAD_REQUEST);
+    }
+    Student searchStudent = studentService.getStudentData(student.getStudentId());
+    if (searchStudent == null) {
+      return new ResponseEntity<>("該当の受講生が見つかりません", HttpStatus.NOT_FOUND);
     }
     studentService.updateStudent(student);
-    return "redirect:/studentList";
+    return ResponseEntity.ok("更新処理が成功しました");
   }
 
 }
