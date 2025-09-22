@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -86,6 +87,13 @@ public class StudentController {
 
   @PostMapping("/updateStudent")
   public ResponseEntity<String> updateStudent(@RequestBody Student student) {
+    if (student.getStudentId() == null || student.getStudentId().isEmpty()) {
+      return new ResponseEntity<>("リクエストが不正です", HttpStatus.BAD_REQUEST);
+    }
+    Student searchStudent = studentService.getStudentData(student.getStudentId());
+    if (searchStudent == null) {
+      return new ResponseEntity<>("該当の受講生が見つかりません", HttpStatus.NOT_FOUND);
+    }
     studentService.updateStudent(student);
     return ResponseEntity.ok("更新処理が成功しました");
   }

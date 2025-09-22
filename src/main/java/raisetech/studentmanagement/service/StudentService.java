@@ -41,6 +41,10 @@ public class StudentService {
     return Optional.of(studentDetail);
   }
 
+  public Student getStudentData(String studentId) {
+    return repository.getStudentData(studentId);
+  }
+
   @Transactional
   public void setStudentNewCourse(Student student, StudentsCourses newCourse) {
     repository.setStudentData(student);
