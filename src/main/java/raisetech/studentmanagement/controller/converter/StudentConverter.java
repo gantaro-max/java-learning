@@ -2,7 +2,6 @@ package raisetech.studentmanagement.controller.converter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,6 +11,9 @@ import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.StudentDetail;
 
+/**
+ * 受講生詳細を受講性や受講生コース情報、もしくはその逆に変換するコンバーターです。
+ */
 @Component
 public class StudentConverter {
 
@@ -19,22 +21,11 @@ public class StudentConverter {
       1001, "AWS", 2001, "WP", 3001, "FE",
       4001, "JAVA", 5001, "DE", 6001, "WM");
 
-  public Map<String, List<StudentsCourses>> getStringStudentsCoursesMap(List<Student> students,
-      List<StudentsCourses> studentCourses) {
-    Map<String, List<StudentsCourses>> studentsCoursesMap = new HashMap<>();
-    students.forEach(stu -> {
-      List<StudentsCourses> scList = new ArrayList<>();
-      studentCourses.forEach(stc -> {
-        if (stu.getStudentId().equals(stc.getStudentId())) {
-          scList.add(stc);
-        }
-      });
-      studentsCoursesMap.put(stu.getFullName(), scList);
-    });
-
-    return studentsCoursesMap;
-  }
-
+  /**
+   * 受講生に紐づく受講生コース情報をマッピングする。 受講生コース情報は受講生に対して複数存在するのでループを回して受講生詳細情報を組み立てる。
+   *
+   * @return 受講生詳細情報のリスト
+   */
   public List<StudentDetail> convertStudentDetails(List<Student> students,
       List<StudentsCourses> studentCourses) {
     List<StudentDetail> studentDetails = new ArrayList<>();
