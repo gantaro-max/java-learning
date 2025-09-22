@@ -33,19 +33,9 @@ public class StudentController {
   }
 
   /**
-   * 受講生一覧検索です。 論理削除している受講生を除く受講生検索を行います。
+   * 受講生一覧と受講生コース一覧検索です。 論理削除している受講生を除く受講生検索と受講生に紐づく受講生コース情報の検索を行います。
    *
-   * @return 受講生一覧（論理削除を除く全件）
-   */
-  @GetMapping("/studentList")
-  public List<StudentDetail> getStudentList() {
-    return service.getStudentDetailList();
-  }
-
-  /**
-   * 受講生コース一覧検索です。 論理削除している受講生を除いて受講生に紐づく受講生コース情報の検索を行います。
-   *
-   * @return 受講生コース一覧（論理削除を除く全件）
+   * @return 受講生一覧（論理削除を除く全件）と受講生コース一覧（受講生の論理削除分を除く全件）
    */
   @GetMapping("/studentsCoursesList")
   public List<StudentDetail> getStudentCoursesList() {
