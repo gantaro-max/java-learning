@@ -1,5 +1,6 @@
 package raisetech.studentmanagement.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import raisetech.studentmanagement.controller.converter.StudentConverter;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
+import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
+import raisetech.studentmanagement.domain.UpdateStudent;
 import raisetech.studentmanagement.service.StudentService;
 
 /**
@@ -33,9 +36,9 @@ public class StudentController {
   }
 
   /**
-   * 受講生一覧と受講生コース一覧検索です。 論理削除している受講生を除く受講生検索と受講生に紐づく受講生コース情報の検索を行います。
+   * 受講生詳細の一覧検索です。 論理削除している受講生を除く受講生詳細一覧の検索を行います。
    *
-   * @return 受講生一覧（論理削除を除く全件）と受講生コース一覧（受講生の論理削除分を除く全件）
+   * @return 受講生詳細一覧（論理削除を除く全件）
    */
   @GetMapping("/studentsCoursesList")
   public List<StudentDetail> getStudentCoursesList() {
@@ -43,7 +46,7 @@ public class StudentController {
   }
 
   /**
-   * 受講生の登録処理です。受講生情報と受講生コース情報を登録します。
+   * 受講生詳細の登録を行います。
    *
    * @param studentDetail 受講生詳細
    * @return 登録処理の結果
@@ -51,10 +54,18 @@ public class StudentController {
   @PostMapping("/registerStudent")
   public ResponseEntity<String> getRegisterStudent(@RequestBody StudentDetail studentDetail) {
     Student student = studentDetail.getStudent();
+
     student.setStudentId(UUID.randomUUID().toString());
     StudentsCourses newCourse = converter.getConvertNewCourse(studentDetail, student);
     Student registerStudent = service.setStudentNewCourse(student, newCourse);
     return ResponseEntity.ok("登録処理が成功しました studentId:" + registerStudent.getStudentId());
+  }
+
+  @PostMapping("/register")
+  public ResponseEntity<StudentDetail> getRegisterStudent(
+      @Valid @RequestBody RegisterStudent registerStudent) {
+    StudentDetail registerDetail = service.setStudentNewCourse(registerStudent);
+    return new ResponseEntity<>(registerDetail, HttpStatus.CREATED);
   }
 
   /**
@@ -90,6 +101,14 @@ public class StudentController {
     }
     service.updateStudent(student);
     return ResponseEntity.ok("更新処理が成功しました");
+  }
+
+  public ResponseEntity<StudentDetail> updateStudent(
+      @Valid @RequestBody UpdateStudent updateStudent) {
+
+    StudentDetail updateDetail = new StudentDetail();
+
+    return new ResponseEntity<>(updateDetail, HttpStatus.OK);
   }
 
 }

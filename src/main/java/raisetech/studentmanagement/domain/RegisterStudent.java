@@ -1,21 +1,15 @@
-package raisetech.studentmanagement.data;
+package raisetech.studentmanagement.domain;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class Student {
+public class RegisterStudent {
 
-  private String studentId;
   @NotEmpty(message = "名前は空にできません。")
   private String fullName;
   @NotEmpty(message = "カナ名は空にできません。")
@@ -26,8 +20,9 @@ public class Student {
   private String email;
   private String address;
   @Min(value = 18, message = "登録は18以上になります。")
-  private int age;
+  private Integer age;
   private String gender;
   private String remark;
-  private boolean deleted;
+  @NotEmpty(message = "コースIDは空にできません。")
+  private String courseId;
 }

@@ -57,8 +57,9 @@ public interface StudentRepository {
       + ",#{nickName},#{email},#{address},#{age},#{gender},#{remark})")
   void setStudentData(Student student);
 
-  @Insert("INSERT INTO students_courses(course_id,student_id,course_name) VALUES(#{courseId}"
-      + ",#{studentId},#{courseName})")
+  @Insert(
+      "INSERT INTO students_courses(course_id,student_id,course_name,start_date) VALUES(#{courseId}"
+          + ",#{studentId},#{courseName},#{startDate})")
   void setNewCourse(StudentsCourses newCourse);
 
   @Update(

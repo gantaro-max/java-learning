@@ -1,5 +1,6 @@
 package raisetech.studentmanagement.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import raisetech.studentmanagement.controller.converter.StudentConverter;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
+import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
 import raisetech.studentmanagement.repository.StudentRepository;
 
@@ -27,9 +29,9 @@ public class StudentService {
   }
 
   /**
-   * 受講生の一覧検索です。 全件検索を行うので、条件指定は行いません。
+   * 受講生詳細の一覧検索です。 論理削除している受講生を除く受講生詳細一覧の検索を行います。
    *
-   * @return 受講生一覧（全件）
+   * @return 受講生詳細一覧（論理削除を除く全件）
    */
   public List<StudentDetail> getStudentDetailList() {
     List<Student> students = repository.getStudentList();
@@ -41,7 +43,7 @@ public class StudentService {
    * 受講生検索です。 studentIdに紐づく受講生の情報を取得したあと、その受講生に紐づく受講生コース情報を取得して設定します。
    *
    * @param studentId 受講生ID
-   * @return 受講生
+   * @return 受講生詳細
    */
   public Optional<StudentDetail> getStudentDetail(String studentId) {
     Student student = repository.getStudentById(studentId);
@@ -55,6 +57,13 @@ public class StudentService {
     return Optional.of(studentDetail);
   }
 
+  /**
+   * 受講生と受講生コース情報の登録を行います。
+   *
+   * @param student   受講生
+   * @param newCourse 受講生コース情報
+   * @return 受講生
+   */
   @Transactional
   public Student setStudentNewCourse(Student student, StudentsCourses newCourse) {
     repository.setStudentData(student);
@@ -62,6 +71,20 @@ public class StudentService {
     return student;
   }
 
+  @Transactional
+  public StudentDetail setStudentNewCourse(RegisterStudent registerStudent) {
+    Student student = converter.convertStudent(registerStudent);
+    StudentsCourses newStudentCourse = converter.convertStudentCourse(registerStudent, student);
+    repository.setStudentData(student);
+    repository.setNewCourse(newStudentCourse);
+    return new StudentDetail(student, new ArrayList<>(List.of(newStudentCourse)));
+  }
+
+  /**
+   * 受講生の更新処理を行います。
+   *
+   * @param student 受講生
+   */
   @Transactional
   public void updateStudent(Student student) {
     repository.updateStudent(student);
