@@ -59,20 +59,6 @@ public class StudentService {
     return Optional.of(studentDetail);
   }
 
-//  /**
-//   * 受講生と受講生コース情報の登録を行います。
-//   *
-//   * @param student   受講生
-//   * @param newCourse 受講生コース情報
-//   * @return 受講生
-//   */
-//  @Transactional
-//  public Student setStudentNewCourse(Student student, StudentsCourses newCourse) {
-//    repository.setStudentData(student);
-//    repository.setNewCourse(newCourse);
-//    return student;
-//  }
-
   /**
    * 受講生と受講生コース情報の登録を行います。
    *
@@ -89,16 +75,6 @@ public class StudentService {
     List<StudentsCourses> newStudentsCourses = repository.getStudentCourses(student.getStudentId());
     return new StudentDetail(responseStudent, newStudentsCourses);
   }
-
-//  /**
-//   * 受講生の更新処理を行います。
-//   *
-//   * @param student 受講生
-//   */
-//  @Transactional
-//  public void updateStudent(Student student) {
-//    repository.updateStudent(student);
-//  }
 
   /**
    * 受講生の更新処理を行います。

@@ -24,12 +24,10 @@ import raisetech.studentmanagement.service.StudentService;
 public class StudentController {
 
   private final StudentService service;
-  private final StudentConverter converter;
 
   @Autowired
   public StudentController(StudentService service, StudentConverter converter) {
     this.service = service;
-    this.converter = converter;
   }
 
   /**
@@ -41,22 +39,6 @@ public class StudentController {
   public List<StudentDetail> getStudentCoursesList() {
     return service.getStudentDetailList();
   }
-
-//  /**
-//   * 受講生詳細の登録を行います。
-//   *
-//   * @param studentDetail 受講生詳細
-//   * @return 登録処理の結果
-//   */
-//  @PostMapping("/registerStudent")
-//  public ResponseEntity<String> getRegisterStudent(@RequestBody StudentDetail studentDetail) {
-//    Student student = studentDetail.getStudent();
-//
-//    student.setStudentId(UUID.randomUUID().toString());
-//    StudentsCourses newCourse = converter.getConvertNewCourse(studentDetail, student);
-//    Student registerStudent = service.setStudentNewCourse(student, newCourse);
-//    return ResponseEntity.ok("登録処理が成功しました studentId:" + registerStudent.getStudentId());
-//  }
 
   /**
    * 受講生詳細の登録を行います。
@@ -86,25 +68,6 @@ public class StudentController {
     StudentDetail studentDetail = detail.get();
     return new ResponseEntity<>(studentDetail, HttpStatus.OK);
   }
-
-//  /**
-//   * 受講生情報の更新処理です。 受講生の更新を行いその結果を返します。
-//   *
-//   * @param student 受講生情報
-//   * @return 更新処理の結果
-//   */
-//  @PostMapping("/updateStudent")
-//  public ResponseEntity<String> updateStudent(@RequestBody Student student) {
-//    if (student.getStudentId() == null || student.getStudentId().isEmpty()) {
-//      return new ResponseEntity<>("リクエストが不正です", HttpStatus.BAD_REQUEST);
-//    }
-//    Optional<StudentDetail> searchStudent = service.getStudentDetail(student.getStudentId());
-//    if (searchStudent.isEmpty()) {
-//      return new ResponseEntity<>("該当の受講生が見つかりません", HttpStatus.NOT_FOUND);
-//    }
-//    service.updateStudent(student);
-//    return ResponseEntity.ok("更新処理が成功しました");
-//  }
 
   /**
    * 受講生情報の更新処理です。 受講生の更新を行いその結果を返します。

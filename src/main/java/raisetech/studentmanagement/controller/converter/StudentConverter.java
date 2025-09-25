@@ -48,14 +48,6 @@ public class StudentConverter {
         .sorted(Comparator.comparing(std -> std.getResponseStudent().getStudentId())).toList();
   }
 
-//  public StudentsCourses getConvertNewCourse(StudentDetail studentDetail, Student student) {
-//    StudentsCourses newCourse = new StudentsCourses();
-//    newCourse.setCourseId(String.valueOf(studentDetail.getCourseNum()));
-//    newCourse.setStudentId(student.getStudentId());
-//    newCourse.setCourseName(getCourseNameById(studentDetail.getCourseNum()));
-//    return newCourse;
-//  }
-
   public String getCourseNameById(String courseId) {
     return courses.entrySet().stream().filter(course -> course.getKey().equals(courseId))
         .map(Entry::getValue).findFirst().orElse("該当なし");
