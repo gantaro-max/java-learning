@@ -81,7 +81,7 @@ public class StudentController {
   public ResponseEntity<StudentDetail> updateView(@PathVariable("studentId") String studentId) {
     Optional<StudentDetail> detail = service.getStudentDetail(studentId);
     if (detail.isEmpty()) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      throw new RuntimeException("該当が見つかりませんでした ID:" + studentId);
     }
     StudentDetail studentDetail = detail.get();
     return new ResponseEntity<>(studentDetail, HttpStatus.OK);
