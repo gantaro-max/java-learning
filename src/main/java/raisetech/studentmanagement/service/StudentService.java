@@ -1,6 +1,5 @@
 package raisetech.studentmanagement.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,7 @@ import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
+import raisetech.studentmanagement.domain.UpdateStudent;
 import raisetech.studentmanagement.repository.StudentRepository;
 
 /**
@@ -73,11 +73,12 @@ public class StudentService {
 
   @Transactional
   public StudentDetail setStudentNewCourse(RegisterStudent registerStudent) {
-    Student student = converter.convertStudent(registerStudent);
+    Student student = converter.convertRegisterToStudent(registerStudent);
     StudentsCourses newStudentCourse = converter.convertStudentCourse(registerStudent, student);
     repository.setStudentData(student);
     repository.setNewCourse(newStudentCourse);
-    return new StudentDetail(student, new ArrayList<>(List.of(newStudentCourse)));
+    List<StudentsCourses> newStudentsCourses = repository.getStudentCourses(student.getStudentId());
+    return new StudentDetail(student, newStudentsCourses);
   }
 
   /**
@@ -88,6 +89,14 @@ public class StudentService {
   @Transactional
   public void updateStudent(Student student) {
     repository.updateStudent(student);
+  }
+
+  @Transactional
+  public StudentDetail updateStudent(UpdateStudent updateStudent) {
+    Student newStudent = converter.convertUpdateToStudent(updateStudent);
+    repository.updateStudent(newStudent);
+    List<StudentsCourses> studentsCourses = repository.getStudentCourses(newStudent.getStudentId());
+    return new StudentDetail(newStudent, studentsCourses);
   }
 
 }

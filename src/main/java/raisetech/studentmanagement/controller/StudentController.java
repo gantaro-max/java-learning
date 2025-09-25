@@ -103,11 +103,10 @@ public class StudentController {
     return ResponseEntity.ok("更新処理が成功しました");
   }
 
+  @PostMapping("/update")
   public ResponseEntity<StudentDetail> updateStudent(
       @Valid @RequestBody UpdateStudent updateStudent) {
-
-    StudentDetail updateDetail = new StudentDetail();
-
+    StudentDetail updateDetail = service.updateStudent(updateStudent);
     return new ResponseEntity<>(updateDetail, HttpStatus.OK);
   }
 

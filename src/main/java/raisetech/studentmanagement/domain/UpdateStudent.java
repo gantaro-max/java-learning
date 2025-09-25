@@ -10,13 +10,19 @@ import lombok.Setter;
 @Setter
 public class UpdateStudent {
 
+  @NotEmpty(message = "IDは空にできません。")
+  private String studentId;
+  @NotEmpty(message = "名前は空にできません。")
+  private String fullName;
+  @NotEmpty(message = "カナ名は空にできません。")
+  private String kanaName;
   private String nickName;
   @NotEmpty(message = "emailは空にできません。")
   @Email(message = "有効なメールアドレス形式で入力して下さい。")
   private String email;
   private String address;
   @Min(value = 18, message = "登録は18以上になります。")
-  private String age;
+  private Integer age;
   private String gender;
   private String remark;
   private boolean deleted;

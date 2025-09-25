@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
+import raisetech.studentmanagement.domain.ResponseStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
+import raisetech.studentmanagement.domain.UpdateStudent;
 
 /**
  * 受講生詳細を受講性や受講生コース情報、もしくはその逆に変換するコンバーターです。
@@ -69,11 +71,24 @@ public class StudentConverter {
     return studentsCourses;
   }
 
-  public Student convertStudent(RegisterStudent registerStudent) {
+  public Student convertRegisterToStudent(RegisterStudent registerStudent) {
     return new Student(UUID.randomUUID().toString(), registerStudent.getFullName(),
         registerStudent.getKanaName(), registerStudent.getNickName(), registerStudent.getEmail(),
         registerStudent.getAddress(), registerStudent.getAge(), registerStudent.getGender(),
         registerStudent.getRemark(), false);
+  }
+
+  public Student convertUpdateToStudent(UpdateStudent updateStudent) {
+    return new Student(updateStudent.getStudentId(), updateStudent.getFullName(),
+        updateStudent.getKanaName(), updateStudent.getNickName(), updateStudent.getEmail(),
+        updateStudent.getAddress(), updateStudent.getAge(), updateStudent.getGender(),
+        updateStudent.getRemark(), updateStudent.isDeleted());
+  }
+
+  public ResponseStudent convertStudentToResponse(Student student) {
+    return new ResponseStudent(student.getStudentId(), student.getFullName(), student.getKanaName(),
+        student.getNickName(), student.getEmail(), student.getAddress(), student.getAge(),
+        student.getGender(), student.getRemark());
   }
 
 
