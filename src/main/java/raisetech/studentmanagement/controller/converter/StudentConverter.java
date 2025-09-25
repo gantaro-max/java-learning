@@ -36,7 +36,8 @@ public class StudentConverter {
     List<StudentDetail> studentDetails = new ArrayList<>();
     students.forEach(student -> {
       StudentDetail studentDetail = new StudentDetail();
-      studentDetail.setStudent(student);
+      ResponseStudent responseStudent = convertStudentToResponse(student);
+      studentDetail.setResponseStudent(responseStudent);
       List<StudentsCourses> convertStudentCourses = studentCourses.stream()
           .filter(studentCourse -> student.getStudentId().equals(studentCourse.getStudentId()))
           .collect(Collectors.toList());
@@ -44,19 +45,19 @@ public class StudentConverter {
       studentDetails.add(studentDetail);
     });
     return studentDetails.stream()
-        .sorted(Comparator.comparing(std -> std.getStudent().getStudentId())).toList();
+        .sorted(Comparator.comparing(std -> std.getResponseStudent().getStudentId())).toList();
   }
 
-  public StudentsCourses getConvertNewCourse(StudentDetail studentDetail, Student student) {
-    StudentsCourses newCourse = new StudentsCourses();
-    newCourse.setCourseId(String.valueOf(studentDetail.getCourseNum()));
-    newCourse.setStudentId(student.getStudentId());
-    newCourse.setCourseName(getCourseNameById(studentDetail.getCourseNum()));
-    return newCourse;
-  }
+//  public StudentsCourses getConvertNewCourse(StudentDetail studentDetail, Student student) {
+//    StudentsCourses newCourse = new StudentsCourses();
+//    newCourse.setCourseId(String.valueOf(studentDetail.getCourseNum()));
+//    newCourse.setStudentId(student.getStudentId());
+//    newCourse.setCourseName(getCourseNameById(studentDetail.getCourseNum()));
+//    return newCourse;
+//  }
 
-  public String getCourseNameById(String courseNum) {
-    return courses.entrySet().stream().filter(course -> course.getKey().equals(courseNum))
+  public String getCourseNameById(String courseId) {
+    return courses.entrySet().stream().filter(course -> course.getKey().equals(courseId))
         .map(Entry::getValue).findFirst().orElse("該当なし");
   }
 

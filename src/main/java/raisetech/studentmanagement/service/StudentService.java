@@ -9,6 +9,7 @@ import raisetech.studentmanagement.controller.converter.StudentConverter;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
+import raisetech.studentmanagement.domain.ResponseStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
 import raisetech.studentmanagement.domain.UpdateStudent;
 import raisetech.studentmanagement.repository.StudentRepository;
@@ -52,51 +53,66 @@ public class StudentService {
       return Optional.empty();
     }
     Student foundStudent = opStudent.get();
-    StudentDetail studentDetail = new StudentDetail(foundStudent,
+    ResponseStudent responseStudent = converter.convertStudentToResponse(foundStudent);
+    StudentDetail studentDetail = new StudentDetail(responseStudent,
         repository.getStudentCourses(studentId));
     return Optional.of(studentDetail);
   }
 
+//  /**
+//   * 受講生と受講生コース情報の登録を行います。
+//   *
+//   * @param student   受講生
+//   * @param newCourse 受講生コース情報
+//   * @return 受講生
+//   */
+//  @Transactional
+//  public Student setStudentNewCourse(Student student, StudentsCourses newCourse) {
+//    repository.setStudentData(student);
+//    repository.setNewCourse(newCourse);
+//    return student;
+//  }
+
   /**
    * 受講生と受講生コース情報の登録を行います。
    *
-   * @param student   受講生
-   * @param newCourse 受講生コース情報
-   * @return 受講生
+   * @param registerStudent 受講生登録情報
+   * @return 受講生詳細
    */
-  @Transactional
-  public Student setStudentNewCourse(Student student, StudentsCourses newCourse) {
-    repository.setStudentData(student);
-    repository.setNewCourse(newCourse);
-    return student;
-  }
-
   @Transactional
   public StudentDetail setStudentNewCourse(RegisterStudent registerStudent) {
     Student student = converter.convertRegisterToStudent(registerStudent);
     StudentsCourses newStudentCourse = converter.convertStudentCourse(registerStudent, student);
     repository.setStudentData(student);
     repository.setNewCourse(newStudentCourse);
+    ResponseStudent responseStudent = converter.convertStudentToResponse(student);
     List<StudentsCourses> newStudentsCourses = repository.getStudentCourses(student.getStudentId());
-    return new StudentDetail(student, newStudentsCourses);
+    return new StudentDetail(responseStudent, newStudentsCourses);
   }
+
+//  /**
+//   * 受講生の更新処理を行います。
+//   *
+//   * @param student 受講生
+//   */
+//  @Transactional
+//  public void updateStudent(Student student) {
+//    repository.updateStudent(student);
+//  }
 
   /**
    * 受講生の更新処理を行います。
    *
-   * @param student 受講生
+   * @param updateStudent 受講生更新情報
+   * @return 受講生詳細
    */
-  @Transactional
-  public void updateStudent(Student student) {
-    repository.updateStudent(student);
-  }
-
   @Transactional
   public StudentDetail updateStudent(UpdateStudent updateStudent) {
     Student newStudent = converter.convertUpdateToStudent(updateStudent);
     repository.updateStudent(newStudent);
+    ResponseStudent responseStudent = converter.convertStudentToResponse(newStudent);
     List<StudentsCourses> studentsCourses = repository.getStudentCourses(newStudent.getStudentId());
-    return new StudentDetail(newStudent, studentsCourses);
+    return new StudentDetail(responseStudent, studentsCourses);
   }
 
 }

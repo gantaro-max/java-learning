@@ -3,7 +3,6 @@ package raisetech.studentmanagement.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.studentmanagement.controller.converter.StudentConverter;
-import raisetech.studentmanagement.data.Student;
-import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
 import raisetech.studentmanagement.domain.UpdateStudent;
@@ -45,23 +42,29 @@ public class StudentController {
     return service.getStudentDetailList();
   }
 
+//  /**
+//   * 受講生詳細の登録を行います。
+//   *
+//   * @param studentDetail 受講生詳細
+//   * @return 登録処理の結果
+//   */
+//  @PostMapping("/registerStudent")
+//  public ResponseEntity<String> getRegisterStudent(@RequestBody StudentDetail studentDetail) {
+//    Student student = studentDetail.getStudent();
+//
+//    student.setStudentId(UUID.randomUUID().toString());
+//    StudentsCourses newCourse = converter.getConvertNewCourse(studentDetail, student);
+//    Student registerStudent = service.setStudentNewCourse(student, newCourse);
+//    return ResponseEntity.ok("登録処理が成功しました studentId:" + registerStudent.getStudentId());
+//  }
+
   /**
    * 受講生詳細の登録を行います。
    *
-   * @param studentDetail 受講生詳細
+   * @param registerStudent 受講生登録情報
    * @return 登録処理の結果
    */
   @PostMapping("/registerStudent")
-  public ResponseEntity<String> getRegisterStudent(@RequestBody StudentDetail studentDetail) {
-    Student student = studentDetail.getStudent();
-
-    student.setStudentId(UUID.randomUUID().toString());
-    StudentsCourses newCourse = converter.getConvertNewCourse(studentDetail, student);
-    Student registerStudent = service.setStudentNewCourse(student, newCourse);
-    return ResponseEntity.ok("登録処理が成功しました studentId:" + registerStudent.getStudentId());
-  }
-
-  @PostMapping("/register")
   public ResponseEntity<StudentDetail> getRegisterStudent(
       @Valid @RequestBody RegisterStudent registerStudent) {
     StudentDetail registerDetail = service.setStudentNewCourse(registerStudent);
@@ -72,38 +75,44 @@ public class StudentController {
    * 受講生検索です。 studentIdに紐づく任意の受講生の情報を取得します。
    *
    * @param studentId 受講生ID
-   * @return 受講生
+   * @return 検索処理の結果
    */
   @GetMapping("/updateView/{studentId}")
-  public StudentDetail updateView(@PathVariable("studentId") String studentId) {
+  public ResponseEntity<StudentDetail> updateView(@PathVariable("studentId") String studentId) {
     Optional<StudentDetail> detail = service.getStudentDetail(studentId);
-    StudentDetail studentDetail = new StudentDetail();
-    if (detail.isPresent()) {
-      studentDetail = detail.get();
+    if (detail.isEmpty()) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-    return studentDetail;
+    StudentDetail studentDetail = detail.get();
+    return new ResponseEntity<>(studentDetail, HttpStatus.OK);
   }
+
+//  /**
+//   * 受講生情報の更新処理です。 受講生の更新を行いその結果を返します。
+//   *
+//   * @param student 受講生情報
+//   * @return 更新処理の結果
+//   */
+//  @PostMapping("/updateStudent")
+//  public ResponseEntity<String> updateStudent(@RequestBody Student student) {
+//    if (student.getStudentId() == null || student.getStudentId().isEmpty()) {
+//      return new ResponseEntity<>("リクエストが不正です", HttpStatus.BAD_REQUEST);
+//    }
+//    Optional<StudentDetail> searchStudent = service.getStudentDetail(student.getStudentId());
+//    if (searchStudent.isEmpty()) {
+//      return new ResponseEntity<>("該当の受講生が見つかりません", HttpStatus.NOT_FOUND);
+//    }
+//    service.updateStudent(student);
+//    return ResponseEntity.ok("更新処理が成功しました");
+//  }
 
   /**
    * 受講生情報の更新処理です。 受講生の更新を行いその結果を返します。
    *
-   * @param student 受講生情報
+   * @param updateStudent 受講生更新情報
    * @return 更新処理の結果
    */
   @PostMapping("/updateStudent")
-  public ResponseEntity<String> updateStudent(@RequestBody Student student) {
-    if (student.getStudentId() == null || student.getStudentId().isEmpty()) {
-      return new ResponseEntity<>("リクエストが不正です", HttpStatus.BAD_REQUEST);
-    }
-    Optional<StudentDetail> searchStudent = service.getStudentDetail(student.getStudentId());
-    if (searchStudent.isEmpty()) {
-      return new ResponseEntity<>("該当の受講生が見つかりません", HttpStatus.NOT_FOUND);
-    }
-    service.updateStudent(student);
-    return ResponseEntity.ok("更新処理が成功しました");
-  }
-
-  @PostMapping("/update")
   public ResponseEntity<StudentDetail> updateStudent(
       @Valid @RequestBody UpdateStudent updateStudent) {
     StudentDetail updateDetail = service.updateStudent(updateStudent);
