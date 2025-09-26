@@ -1,5 +1,6 @@
 package raisetech.studentmanagement.exception;
 
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,7 +12,10 @@ public class ProjectExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<String> validationException(MethodArgumentNotValidException e) {
-    return new ResponseEntity<>("不正なリクエストです", HttpStatus.BAD_REQUEST);
+    String errorMsg = e.getBindingResult().getFieldErrors().stream()
+        .map(fieldError -> fieldError.getField() + ":" + fieldError.getDefaultMessage()).collect(
+            Collectors.joining("\n"));
+    return ResponseEntity.badRequest().body(errorMsg);
   }
 
   @ExceptionHandler(ResourceNotFoundException.class)

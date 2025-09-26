@@ -81,7 +81,7 @@ public class StudentController {
    * @param updateStudent 受講生更新情報
    * @return 更新処理の結果
    */
-  @PutMapping("/updateStudent")
+  @PutMapping("/students")
   public ResponseEntity<StudentDetail> updateStudent(
       @Valid @RequestBody UpdateStudent updateStudent) {
     StudentDetail updateDetail = service.updateStudent(updateStudent);

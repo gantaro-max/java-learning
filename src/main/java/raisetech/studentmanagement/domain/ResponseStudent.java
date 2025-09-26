@@ -17,7 +17,7 @@ public class ResponseStudent {
   private String nickName;
   private String email;
   private String address;
-  private int age;
+  private Integer age;
   private String gender;
   private String remark;
 
