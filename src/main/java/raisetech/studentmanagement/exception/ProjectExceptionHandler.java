@@ -14,8 +14,8 @@ public class ProjectExceptionHandler {
     return new ResponseEntity<>("不正なリクエストです", HttpStatus.BAD_REQUEST);
   }
 
-  @ExceptionHandler(RuntimeException.class)
-  public ResponseEntity<String> notFoundException(RuntimeException e) {
+  @ExceptionHandler(ResourceNotFoundException.class)
+  public ResponseEntity<String> notFoundException(ResourceNotFoundException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
   }
 

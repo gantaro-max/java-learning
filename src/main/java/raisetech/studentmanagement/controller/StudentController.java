@@ -1,6 +1,7 @@
 package raisetech.studentmanagement.controller;
 
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +13,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import raisetech.studentmanagement.controller.converter.StudentConverter;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
 import raisetech.studentmanagement.domain.UpdateStudent;
+import raisetech.studentmanagement.exception.ResourceNotFoundException;
 import raisetech.studentmanagement.service.StudentService;
 
 /**
@@ -36,7 +39,7 @@ public class StudentController {
    *
    * @return 受講生詳細一覧（論理削除を除く全件）
    */
-  @GetMapping("/studentsCoursesList")
+  @GetMapping("/students")
   public List<StudentDetail> getStudentCoursesList() {
     return service.getStudentDetailList();
   }
@@ -47,11 +50,13 @@ public class StudentController {
    * @param registerStudent 受講生登録情報
    * @return 登録処理の結果
    */
-  @PostMapping("/registerStudent")
+  @PostMapping("/students")
   public ResponseEntity<StudentDetail> getRegisterStudent(
       @Valid @RequestBody RegisterStudent registerStudent) {
     StudentDetail registerDetail = service.setStudentNewCourse(registerStudent);
-    return new ResponseEntity<>(registerDetail, HttpStatus.CREATED);
+    URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{studentId}")
+        .buildAndExpand(registerDetail.getResponseStudent().getStudentId()).toUri();
+    return ResponseEntity.created(location).body(registerDetail);
   }
 
   /**
@@ -60,11 +65,11 @@ public class StudentController {
    * @param studentId 受講生ID
    * @return 検索処理の結果
    */
-  @GetMapping("/updateView/{studentId}")
+  @GetMapping("/students/{studentId}")
   public ResponseEntity<StudentDetail> updateView(@PathVariable("studentId") String studentId) {
     Optional<StudentDetail> detail = service.getStudentDetail(studentId);
     if (detail.isEmpty()) {
-      throw new RuntimeException("該当が見つかりませんでした ID:" + studentId);
+      throw new ResourceNotFoundException("該当が見つかりませんでした ID:" + studentId);
     }
     StudentDetail studentDetail = detail.get();
     return new ResponseEntity<>(studentDetail, HttpStatus.OK);
