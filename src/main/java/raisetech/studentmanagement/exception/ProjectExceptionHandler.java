@@ -1,6 +1,8 @@
 package raisetech.studentmanagement.exception;
 
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,10 +13,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ProjectExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<String> validationException(MethodArgumentNotValidException e) {
-    String errorMsg = e.getBindingResult().getFieldErrors().stream()
-        .map(fieldError -> fieldError.getField() + ":" + fieldError.getDefaultMessage()).collect(
-            Collectors.joining("\n"));
+  public ResponseEntity<List<Map<String, String>>> validationException(
+      MethodArgumentNotValidException e) {
+    List<Map<String, String>> errorMsg = e.getBindingResult().getFieldErrors().stream()
+        .map(fieldError -> {
+          Map<String, String> error = new HashMap<>();
+          error.put("field", fieldError.getField());
+          error.put("message",
+              fieldError.getDefaultMessage() != null ? fieldError.getDefaultMessage()
+                  : "エラーメッセージが設定されていません");
+          return error;
+        }).toList();
     return ResponseEntity.badRequest().body(errorMsg);
   }
 
