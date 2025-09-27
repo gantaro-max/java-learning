@@ -12,6 +12,7 @@ import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.ResponseStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
 import raisetech.studentmanagement.domain.UpdateStudent;
+import raisetech.studentmanagement.exception.ResourceNotFoundException;
 import raisetech.studentmanagement.repository.StudentRepository;
 
 /**
@@ -83,8 +84,12 @@ public class StudentService {
    * @return 受講生詳細
    */
   @Transactional
-  public StudentDetail updateStudent(UpdateStudent updateStudent) {
-    Student newStudent = converter.convertUpdateToStudent(updateStudent);
+  public StudentDetail updateStudent(UpdateStudent updateStudent, String studentId) {
+    Student searchStudent = repository.getStudentById(studentId);
+    if (searchStudent == null) {
+      throw new ResourceNotFoundException("該当の受講生が見つかりません");
+    }
+    Student newStudent = converter.convertUpdateToStudent(updateStudent, searchStudent);
     repository.updateStudent(newStudent);
     ResponseStudent responseStudent = converter.convertStudentToResponse(newStudent);
     List<StudentsCourses> studentsCourses = repository.getStudentCourses(newStudent.getStudentId());

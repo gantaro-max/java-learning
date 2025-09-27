@@ -81,10 +81,10 @@ public class StudentController {
    * @param updateStudent 受講生更新情報
    * @return 更新処理の結果
    */
-  @PutMapping("/students")
-  public ResponseEntity<StudentDetail> updateStudent(
+  @PutMapping("/students/{studentId}")
+  public ResponseEntity<StudentDetail> updateStudent(@PathVariable("studentId") String studentId,
       @Valid @RequestBody UpdateStudent updateStudent) {
-    StudentDetail updateDetail = service.updateStudent(updateStudent);
+    StudentDetail updateDetail = service.updateStudent(updateStudent, studentId);
     return new ResponseEntity<>(updateDetail, HttpStatus.OK);
   }
 

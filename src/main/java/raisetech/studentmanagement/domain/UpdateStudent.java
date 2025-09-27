@@ -11,8 +11,6 @@ import lombok.Setter;
 @Setter
 public class UpdateStudent {
 
-  @NotEmpty(message = "IDは空にできません。")
-  private String studentId;
   @NotEmpty(message = "名前は空にできません。")
   private String fullName;
   @NotEmpty(message = "カナ名は空にできません。")

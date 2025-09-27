@@ -71,11 +71,18 @@ public class StudentConverter {
         registerStudent.getRemark(), false);
   }
 
-  public Student convertUpdateToStudent(UpdateStudent updateStudent) {
-    return new Student(updateStudent.getStudentId(), updateStudent.getFullName(),
-        updateStudent.getKanaName(), updateStudent.getNickName(), updateStudent.getEmail(),
-        updateStudent.getAddress(), updateStudent.getAge(), updateStudent.getGender(),
-        updateStudent.getRemark(), updateStudent.isDeleted());
+  public Student convertUpdateToStudent(UpdateStudent updateStudent, Student student) {
+    student.setFullName(updateStudent.getFullName());
+    student.setKanaName(updateStudent.getKanaName());
+    student.setNickName(updateStudent.getNickName());
+    student.setEmail(updateStudent.getEmail());
+    student.setAddress(updateStudent.getAddress());
+    student.setAge(updateStudent.getAge());
+    student.setGender(updateStudent.getGender());
+    student.setRemark(updateStudent.getRemark());
+    student.setDeleted(updateStudent.isDeleted());
+
+    return student;
   }
 
   public ResponseStudent convertStudentToResponse(Student student) {
