@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import raisetech.studentmanagement.controller.converter.StudentConverter;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
 import raisetech.studentmanagement.domain.UpdateStudent;
@@ -30,7 +29,7 @@ public class StudentController {
   private final StudentService service;
 
   @Autowired
-  public StudentController(StudentService service, StudentConverter converter) {
+  public StudentController(StudentService service) {
     this.service = service;
   }
 
