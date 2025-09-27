@@ -2,7 +2,7 @@ package raisetech.studentmanagement.domain;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,12 +11,12 @@ import lombok.Setter;
 @Setter
 public class UpdateStudent {
 
-  @NotEmpty(message = "名前は空にできません。")
+  @NotBlank(message = "名前は空にできません")
   private String fullName;
-  @NotEmpty(message = "カナ名は空にできません。")
+  @NotBlank(message = "カナ名は空にできません")
   private String kanaName;
   private String nickName;
-  @NotEmpty(message = "emailは空にできません。")
+  @NotBlank(message = "emailは空にできません")
   @Email(message = "有効なメールアドレス形式で入力して下さい。")
   private String email;
   private String address;

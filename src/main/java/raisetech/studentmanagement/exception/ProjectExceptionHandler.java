@@ -1,5 +1,7 @@
 package raisetech.studentmanagement.exception;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,14 @@ public class ProjectExceptionHandler {
                   : "エラーメッセージが設定されていません");
           return error;
         }).toList();
+    return ResponseEntity.badRequest().body(errorMsg);
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<List<String>> constViolaException(
+      ConstraintViolationException e) {
+    List<String> errorMsg = e.getConstraintViolations().stream()
+        .map(ConstraintViolation::getMessage).toList();
     return ResponseEntity.badRequest().body(errorMsg);
   }
 
