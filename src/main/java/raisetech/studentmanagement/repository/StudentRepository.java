@@ -1,12 +1,7 @@
 package raisetech.studentmanagement.repository;
 
 import java.util.List;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Results;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 
@@ -21,8 +16,6 @@ public interface StudentRepository {
    *
    * @return 受講生一覧（全件）
    */
-  @Select("SELECT * FROM students WHERE is_deleted = FALSE")
-  @Results({@Result(property = "deleted", column = "is_deleted")})
   List<Student> getStudentList();
 
   /**
@@ -30,7 +23,6 @@ public interface StudentRepository {
    *
    * @return 受講生コース情報（全件）
    */
-  @Select("SELECT * FROM students_courses")
   List<StudentsCourses> getStudentCourseList();
 
   /**
@@ -39,8 +31,6 @@ public interface StudentRepository {
    * @param studentId 受講生ID
    * @return 受講生
    */
-  @Select("SELECT * FROM students WHERE is_deleted = FALSE AND student_id = #{studentId}")
-  @Results({@Result(property = "deleted", column = "is_deleted")})
   Student getStudentById(String studentId);
 
   /**
@@ -49,23 +39,27 @@ public interface StudentRepository {
    * @param studentId 受講生ID
    * @return 受講生IDに紐づく受講生コース情報
    */
-  @Select("SELECT * FROM students_courses WHERE student_id = #{studentId}")
-  List<StudentsCourses> getStudentCourses(String studentId);
+  List<StudentsCourses> getStudentCourse(String studentId);
 
-  @Insert("INSERT INTO students(student_id,full_name,kana_name,nick_name,email,address"
-      + ",age,gender,remark) VALUES(#{studentId},#{fullName},#{kanaName}"
-      + ",#{nickName},#{email},#{address},#{age},#{gender},#{remark})")
+  /**
+   * 受講生の登録を行います。
+   *
+   * @param student 受講生
+   */
   void setStudentData(Student student);
 
-  @Insert(
-      "INSERT INTO students_courses(course_id,student_id,course_name,start_date) VALUES(#{courseId}"
-          + ",#{studentId},#{courseName},#{startDate})")
+  /**
+   * 受講生コース情報の登録を行います。
+   *
+   * @param newCourse 受講生コース情報
+   */
   void setNewCourse(StudentsCourses newCourse);
 
-  @Update(
-      "UPDATE students SET nick_name = #{nickName},email = #{email},address = #{address}"
-          + ",age = #{age},gender = #{gender},remark = #{remark},is_deleted = #{deleted}"
-          + " WHERE student_id = #{studentId}")
+  /**
+   * 受講生情報の更新処理です。
+   *
+   * @param student 受講生
+   */
   void updateStudent(Student student);
 
 }

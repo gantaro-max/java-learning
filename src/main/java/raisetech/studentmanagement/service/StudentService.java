@@ -38,7 +38,7 @@ public class StudentService {
   public List<StudentDetail> getStudentDetailList() {
     List<Student> students = repository.getStudentList();
     List<StudentsCourses> studentsCourses = repository.getStudentCourseList();
-    return converter.convertStudentDetails(students, studentsCourses);
+    return converter.convertStudentDetailList(students, studentsCourses);
   }
 
   /**
@@ -56,7 +56,7 @@ public class StudentService {
     Student foundStudent = opStudent.get();
     ResponseStudent responseStudent = converter.convertStudentToResponse(foundStudent);
     StudentDetail studentDetail = new StudentDetail(responseStudent,
-        repository.getStudentCourses(studentId));
+        repository.getStudentCourse(studentId));
     return Optional.of(studentDetail);
   }
 
@@ -73,7 +73,7 @@ public class StudentService {
     repository.setStudentData(student);
     repository.setNewCourse(newStudentCourse);
     ResponseStudent responseStudent = converter.convertStudentToResponse(student);
-    List<StudentsCourses> newStudentsCourses = repository.getStudentCourses(student.getStudentId());
+    List<StudentsCourses> newStudentsCourses = repository.getStudentCourse(student.getStudentId());
     return new StudentDetail(responseStudent, newStudentsCourses);
   }
 
@@ -92,7 +92,7 @@ public class StudentService {
     Student newStudent = converter.convertUpdateToStudent(updateStudent, searchStudent);
     repository.updateStudent(newStudent);
     ResponseStudent responseStudent = converter.convertStudentToResponse(newStudent);
-    List<StudentsCourses> studentsCourses = repository.getStudentCourses(newStudent.getStudentId());
+    List<StudentsCourses> studentsCourses = repository.getStudentCourse(newStudent.getStudentId());
     return new StudentDetail(responseStudent, studentsCourses);
   }
 

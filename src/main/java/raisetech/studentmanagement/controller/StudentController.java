@@ -1,12 +1,14 @@
 package raisetech.studentmanagement.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +26,7 @@ import raisetech.studentmanagement.service.StudentService;
  * 受講生の検索や更新などを行うREST APIとして受け付けるControllerです。
  */
 @RestController
+@Validated
 public class StudentController {
 
   private final StudentService service;
@@ -39,7 +42,7 @@ public class StudentController {
    * @return 受講生詳細一覧（論理削除を除く全件）
    */
   @GetMapping("/students")
-  public List<StudentDetail> getStudentCoursesList() {
+  public List<StudentDetail> getStudentCourseList() {
     return service.getStudentDetailList();
   }
 
@@ -50,7 +53,7 @@ public class StudentController {
    * @return 登録処理の結果
    */
   @PostMapping("/students")
-  public ResponseEntity<StudentDetail> getRegisterStudent(
+  public ResponseEntity<StudentDetail> registerStudent(
       @Valid @RequestBody RegisterStudent registerStudent) {
     StudentDetail registerDetail = service.setStudentNewCourse(registerStudent);
     URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{studentId}")
@@ -65,7 +68,9 @@ public class StudentController {
    * @return 検索処理の結果
    */
   @GetMapping("/students/{studentId}")
-  public ResponseEntity<StudentDetail> updateView(@PathVariable("studentId") String studentId) {
+  public ResponseEntity<StudentDetail> searchStudent(
+      @NotBlank(message = "studentIdは必須です")
+      @PathVariable("studentId") String studentId) {
     Optional<StudentDetail> detail = service.getStudentDetail(studentId);
     if (detail.isEmpty()) {
       throw new ResourceNotFoundException("該当が見つかりませんでした ID:" + studentId);
@@ -81,7 +86,9 @@ public class StudentController {
    * @return 更新処理の結果
    */
   @PutMapping("/students/{studentId}")
-  public ResponseEntity<StudentDetail> updateStudent(@PathVariable("studentId") String studentId,
+  public ResponseEntity<StudentDetail> updateStudent(
+      @NotBlank(message = "studentIdは必須です")
+      @PathVariable("studentId") String studentId,
       @Valid @RequestBody UpdateStudent updateStudent) {
     StudentDetail updateDetail = service.updateStudent(updateStudent, studentId);
     return new ResponseEntity<>(updateDetail, HttpStatus.OK);
