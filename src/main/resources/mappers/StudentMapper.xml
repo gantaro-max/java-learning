@@ -6,30 +6,30 @@
     <result property="deleted" column="is_deleted"/>
   </resultMap>
   <select id="getStudentList" resultMap="studentResultMap">
-    SELECT * FROM students WHERE is_deleted = false;
+    SELECT * FROM students WHERE is_deleted = false
   </select>
   <select id="getStudentCourseList" resultType="raisetech.studentmanagement.data.StudentsCourses">
-    SELECT * FROM students_courses;
+    SELECT * FROM students_courses
   </select>
   <select id="getStudentById" resultMap="studentResultMap">
-    SELECT * FROM students WHERE is_deleted = false AND student_id = #{studentId};
+    SELECT * FROM students WHERE is_deleted = false AND student_id = #{studentId}
   </select>
   <select id="getStudentCourse" resultType="raisetech.studentmanagement.data.StudentsCourses">
-    SELECT * FROM students_courses WHERE student_id = #{studentId};
+    SELECT * FROM students_courses WHERE student_id = #{studentId}
   </select>
 
   <insert id="setStudentData" parameterType="raisetech.studentmanagement.data.Student">
     INSERT INTO students(student_id,full_name,kana_name,nick_name,email,address,age,gender,remark)
-    VALUES(#{studentId},#{fullName},#{kanaName},#{nickName},#{email},#{address},#{age},#{gender},#{remark});
+    VALUES(#{studentId},#{fullName},#{kanaName},#{nickName},#{email},#{address},#{age},#{gender},#{remark})
   </insert>
   <insert id="setNewCourse" parameterType="raisetech.studentmanagement.data.StudentsCourses">
     INSERT INTO students_courses(course_id,student_id,course_name,start_date)
-    VALUES(#{courseId},#{studentId},#{courseName},#{startDate});
+    VALUES(#{courseId},#{studentId},#{courseName},#{startDate})
   </insert>
 
   <update id="updateStudent" parameterType="raisetech.studentmanagement.data.Student">
     UPDATE students SET nick_name = #{nickName},email = #{email},address = #{address},age =
     #{age},gender = #{gender},remark = #{remark},is_deleted = #{deleted} WHERE student_id =
-    #{studentId};
+    #{studentId}
   </update>
 </mapper>
