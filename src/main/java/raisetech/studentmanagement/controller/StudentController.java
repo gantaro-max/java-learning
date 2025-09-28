@@ -42,7 +42,7 @@ public class StudentController {
    * @return 受講生詳細一覧（論理削除を除く全件）
    */
   @GetMapping("/students")
-  public List<StudentDetail> getStudentCoursesList() {
+  public List<StudentDetail> getStudentCourseList() {
     return service.getStudentDetailList();
   }
 
@@ -53,7 +53,7 @@ public class StudentController {
    * @return 登録処理の結果
    */
   @PostMapping("/students")
-  public ResponseEntity<StudentDetail> getRegisterStudent(
+  public ResponseEntity<StudentDetail> registerStudent(
       @Valid @RequestBody RegisterStudent registerStudent) {
     StudentDetail registerDetail = service.setStudentNewCourse(registerStudent);
     URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{studentId}")
@@ -68,7 +68,7 @@ public class StudentController {
    * @return 検索処理の結果
    */
   @GetMapping("/students/{studentId}")
-  public ResponseEntity<StudentDetail> updateView(
+  public ResponseEntity<StudentDetail> searchStudent(
       @NotBlank(message = "studentIdは必須です")
       @PathVariable("studentId") String studentId) {
     Optional<StudentDetail> detail = service.getStudentDetail(studentId);

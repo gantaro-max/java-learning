@@ -3,8 +3,6 @@ package raisetech.studentmanagement.repository;
 import java.util.List;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Result;
-import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import raisetech.studentmanagement.data.Student;
@@ -21,8 +19,6 @@ public interface StudentRepository {
    *
    * @return 受講生一覧（全件）
    */
-  @Select("SELECT * FROM students WHERE is_deleted = FALSE")
-  @Results({@Result(property = "deleted", column = "is_deleted")})
   List<Student> getStudentList();
 
   /**
@@ -30,7 +26,6 @@ public interface StudentRepository {
    *
    * @return 受講生コース情報（全件）
    */
-  @Select("SELECT * FROM students_courses")
   List<StudentsCourses> getStudentCourseList();
 
   /**
@@ -39,8 +34,6 @@ public interface StudentRepository {
    * @param studentId 受講生ID
    * @return 受講生
    */
-  @Select("SELECT * FROM students WHERE is_deleted = FALSE AND student_id = #{studentId}")
-  @Results({@Result(property = "deleted", column = "is_deleted")})
   Student getStudentById(String studentId);
 
   /**
@@ -50,7 +43,7 @@ public interface StudentRepository {
    * @return 受講生IDに紐づく受講生コース情報
    */
   @Select("SELECT * FROM students_courses WHERE student_id = #{studentId}")
-  List<StudentsCourses> getStudentCourses(String studentId);
+  List<StudentsCourses> getStudentCourse(String studentId);
 
   @Insert("INSERT INTO students(student_id,full_name,kana_name,nick_name,email,address"
       + ",age,gender,remark) VALUES(#{studentId},#{fullName},#{kanaName}"

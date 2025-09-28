@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="raisetech.studentmanagement.repository.StudentRepository">
+  <resultMap id="studentResultMap" type="raisetech.studentmanagement.data.Student">
+    <result property="deleted" column="is_deleted"/>
+  </resultMap>
+  <select id="getStudentList" resultMap="studentResultMap">
+    SELECT * FROM students WHERE is_deleted = false;
+  </select>
+  <select id="getStudentCourseList" resultType="raisetech.studentmanagement.data.StudentsCourses">
+    SELECT * FROM students_courses;
+  </select>
+  <select id="getStudentById" resultMap="studentResultMap">
+    SELECT * FROM students WHERE is_deleted = false AND student_id = #{studentId};
+  </select>
+  
+</mapper>

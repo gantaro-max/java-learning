@@ -1,10 +1,10 @@
 package raisetech.studentmanagement.exception;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,10 +30,10 @@ public class ProjectExceptionHandler {
   }
 
   @ExceptionHandler(ConstraintViolationException.class)
-  public ResponseEntity<List<String>> constViolaException(
+  public ResponseEntity<Map<String, String>> constViolaException(
       ConstraintViolationException e) {
-    List<String> errorMsg = e.getConstraintViolations().stream()
-        .map(ConstraintViolation::getMessage).toList();
+    Map<String, String> errorMsg = e.getConstraintViolations().stream()
+        .collect(Collectors.toMap(mapper -> "message", mapper -> e.getMessage()));
     return ResponseEntity.badRequest().body(errorMsg);
   }
 

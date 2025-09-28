@@ -31,7 +31,7 @@ public class StudentConverter {
    *
    * @return 受講生詳細情報のリスト
    */
-  public List<StudentDetail> convertStudentDetails(List<Student> students,
+  public List<StudentDetail> convertStudentDetailList(List<Student> students,
       List<StudentsCourses> studentCourses) {
     List<StudentDetail> studentDetails = new ArrayList<>();
     students.forEach(student -> {
@@ -48,15 +48,28 @@ public class StudentConverter {
         .sorted(Comparator.comparing(std -> std.getResponseStudent().getStudentId())).toList();
   }
 
+  /**
+   * フィールドcoursesからコースIDに紐づくコース名を取得
+   *
+   * @param courseId コースID
+   * @return コース名
+   */
   public String getCourseNameById(String courseId) {
     return courses.entrySet().stream().filter(course -> course.getKey().equals(courseId))
         .map(Entry::getValue).findFirst().orElse("該当なし");
   }
 
+  /**
+   * 登録情報のcourseIdと受講生情報のstudentIdから受講生コース情報を作る
+   *
+   * @param registerStudent 登録情報
+   * @param student         受講生情報
+   * @return 受講生コース情報
+   */
   public StudentsCourses convertStudentCourse(RegisterStudent registerStudent, Student student) {
     StudentsCourses studentsCourses = new StudentsCourses();
 
-    studentsCourses.setCourseId(String.valueOf(registerStudent.getCourseId()));
+    studentsCourses.setCourseId(registerStudent.getCourseId());
     studentsCourses.setStudentId(student.getStudentId());
     studentsCourses.setCourseName(getCourseNameById(registerStudent.getCourseId()));
     studentsCourses.setStartDate(LocalDateTime.now());
