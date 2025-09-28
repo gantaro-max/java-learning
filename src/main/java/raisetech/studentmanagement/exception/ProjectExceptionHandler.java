@@ -4,7 +4,6 @@ import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,10 +29,15 @@ public class ProjectExceptionHandler {
   }
 
   @ExceptionHandler(ConstraintViolationException.class)
-  public ResponseEntity<Map<String, String>> constViolaException(
+  public ResponseEntity<List<Map<String, String>>> constViolaException(
       ConstraintViolationException e) {
-    Map<String, String> errorMsg = e.getConstraintViolations().stream()
-        .collect(Collectors.toMap(mapper -> "message", mapper -> e.getMessage()));
+    List<Map<String, String>> errorMsg = e.getConstraintViolations().stream().map(cveError -> {
+      Map<String, String> cveErrorMsg = new HashMap<>();
+      cveErrorMsg.put("field", cveError.getPropertyPath().toString());
+      cveErrorMsg.put("message", cveError.getMessage());
+      return cveErrorMsg;
+    }).toList();
+
     return ResponseEntity.badRequest().body(errorMsg);
   }
 
