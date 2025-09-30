@@ -1,0 +1,111 @@
+package raisetech.studentmanagement.controller;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import raisetech.studentmanagement.domain.RegisterStudent;
+import raisetech.studentmanagement.domain.UpdateStudent;
+import raisetech.studentmanagement.exception.ResourceNotFoundException;
+import raisetech.studentmanagement.service.StudentService;
+
+@WebMvcTest(StudentController.class)
+@Import(StudentControllerTest.TestConfig.class)
+class StudentControllerTest {
+
+  @Autowired
+  private MockMvc mockMvc;
+  @Autowired
+  private StudentService studentService;
+  @Autowired
+  private ObjectMapper objectMapper;
+
+  private static final String UUID_REGEXP =
+      "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+
+  @TestConfiguration
+  static class TestConfig {
+
+    @Bean
+    public StudentService studentService() {
+      return Mockito.mock(StudentService.class);
+    }
+  }
+
+  @Test
+  void 存在しないIDの生徒を取得しようとした際に404を返す() throws Exception {
+    when(studentService.getStudentDetail("999")).thenThrow(
+        new ResourceNotFoundException("受講生が見つかりません"));
+    mockMvc.perform(get("/students/999")).andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.message").value("受講生が見つかりません"));
+  }
+
+  @Test
+  void IDに空白が入っていた際に400を返す() throws Exception {
+    String invalidStudentId = "%20";
+    mockMvc.perform(get("/students/" + invalidStudentId)).andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$[*].message").value("IDの形式が不正です"));
+  }
+
+  @Test
+  void 新規登録バリデーションエラーの際に400を返す() throws Exception {
+    RegisterStudent invalidRegister = new RegisterStudent();
+    invalidRegister.setFullName("");
+    invalidRegister.setKanaName("");
+    invalidRegister.setEmail("");
+    invalidRegister.setAge(null);
+    invalidRegister.setCourseId("");
+
+    mockMvc.perform(post("/students").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(invalidRegister)))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$", hasSize(5)))
+        .andExpect(jsonPath("$[*].message", containsInAnyOrder(
+            "名前は必須です", "カナ名は必須です", "emailは必須です",
+            "年齢は空にできません", "コースIDは空にできません"
+        )));
+  }
+
+  @Test
+  void 更新処理バリデーションエラーの際に400を返す() throws Exception {
+    UpdateStudent invalidUpdate = new UpdateStudent();
+    invalidUpdate.setFullName("");
+    invalidUpdate.setKanaName("");
+    invalidUpdate.setEmail("345678");
+    invalidUpdate.setAge(5);
+
+    mockMvc.perform(put("/students/1").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(invalidUpdate)))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$", hasSize(4)))
+        .andExpect(jsonPath("$[*].message", containsInAnyOrder(
+            "名前は空にできません", "カナ名は空にできません",
+            "有効なメールアドレス形式で入力して下さい",
+            "登録は18以上になります"
+        )));
+  }
+
+  @Test
+  void 予期せぬエラーが発生した際に500を返す() throws Exception {
+    String testUuid = "43a70504-27d3-42f2-8590-a66c4886779a";
+    when(studentService.getStudentDetail(testUuid)).thenThrow(
+        new RuntimeException("データベース接続エラー"));
+    mockMvc.perform(get("/students/" + testUuid)).andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.message").value("サーバー内部で予期せぬエラーが発生しました"));
+  }
+
+
+}

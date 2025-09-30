@@ -4,6 +4,8 @@ import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ProjectExceptionHandler {
+
+  private static final Logger logger = LoggerFactory.getLogger(ProjectExceptionHandler.class);
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<List<Map<String, String>>> validationException(
@@ -42,14 +46,18 @@ public class ProjectExceptionHandler {
   }
 
   @ExceptionHandler(ResourceNotFoundException.class)
-  public ResponseEntity<String> notFoundException(ResourceNotFoundException e) {
-    return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+  public ResponseEntity<Map<String, String>> notFoundException(ResourceNotFoundException e) {
+    Map<String, String> body = new HashMap<>();
+    body.put("message", e.getMessage());
+    return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<String> otherException(Exception e) {
-    return new ResponseEntity<>("サーバー内部で予期せぬエラーが発生しました",
-        HttpStatus.INTERNAL_SERVER_ERROR);
+  public ResponseEntity<Map<String, String>> otherException(Exception e) {
+    logger.error("サーバー内部で予期せぬエラーが発生しました", e);
+    Map<String, String> body = new HashMap<>();
+    body.put("message", "サーバー内部で予期せぬエラーが発生しました");
+    return ResponseEntity.internalServerError().body(body);
   }
 
 }

@@ -1,7 +1,7 @@
 package raisetech.studentmanagement.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +30,11 @@ import raisetech.studentmanagement.service.StudentService;
 public class StudentController {
 
   private final StudentService service;
+
+  //UUIDの正規表現
+  private static final String UUID_REGEXP =
+      "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+
 
   @Autowired
   public StudentController(StudentService service) {
@@ -69,9 +74,9 @@ public class StudentController {
    */
   @GetMapping("/students/{studentId}")
   public ResponseEntity<StudentDetail> searchStudent(
-      @NotBlank(message = "studentIdは必須です")
+      @Pattern(regexp = UUID_REGEXP, message = "IDの形式が不正です")
       @PathVariable("studentId") String studentId) {
-    Optional<StudentDetail> detail = service.getStudentDetail(studentId);
+    Optional<StudentDetail> detail = service.getStudentDetail(studentId != null ? studentId : "");
     if (detail.isEmpty()) {
       throw new ResourceNotFoundException("該当が見つかりませんでした ID:" + studentId);
     }
@@ -87,11 +92,18 @@ public class StudentController {
    */
   @PutMapping("/students/{studentId}")
   public ResponseEntity<StudentDetail> updateStudent(
-      @NotBlank(message = "studentIdは必須です")
+      @Pattern(regexp = UUID_REGEXP, message = "IDの形式が不正です")
       @PathVariable("studentId") String studentId,
       @Valid @RequestBody UpdateStudent updateStudent) {
     StudentDetail updateDetail = service.updateStudent(updateStudent, studentId);
     return new ResponseEntity<>(updateDetail, HttpStatus.OK);
   }
+
+//  @GetMapping("trigger-error500")
+//  public String triggerError() {
+//    String str = null;
+//    System.out.println(str.length());
+//    return "";
+//  }
 
 }
