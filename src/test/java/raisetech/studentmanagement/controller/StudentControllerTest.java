@@ -51,7 +51,7 @@ class StudentControllerTest {
   @Test
   void 存在しないIDの生徒を取得しようとした際に404を返す() throws Exception {
     String testUuid = "00000000-0000-0000-0000-000000000000";
-    when(studentService.getStudentDetail("999")).thenThrow(
+    when(studentService.getStudentDetail(testUuid)).thenThrow(
         new ResourceNotFoundException("該当ありません"));
     mockMvc.perform(get("/students/" + testUuid)).andExpect(status().isNotFound())
         .andExpect(jsonPath("$.timestamp").isNotEmpty())
