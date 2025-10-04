@@ -31,7 +31,7 @@ public class StudentController {
 
   private final StudentService service;
 
-  //UUIDの正規表現
+  // UUIDの正規表現
   private static final String UUID_REGEXP =
       "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
 
@@ -73,10 +73,9 @@ public class StudentController {
    * @return 検索処理の結果
    */
   @GetMapping("/students/{studentId}")
-  public ResponseEntity<StudentDetail> searchStudent(
-      @Pattern(regexp = UUID_REGEXP, message = "IDの形式が不正です")
-      @PathVariable("studentId") String studentId) {
-    Optional<StudentDetail> detail = service.getStudentDetail(studentId != null ? studentId : "");
+  public ResponseEntity<StudentDetail> searchStudent(@Pattern(regexp = UUID_REGEXP,
+      message = "IDの形式が不正です") @PathVariable("studentId") String studentId) {
+    Optional<StudentDetail> detail = service.getStudentDetail(studentId);
     if (detail.isEmpty()) {
       throw new ResourceNotFoundException("該当が見つかりませんでした ID:" + studentId);
     }
@@ -92,18 +91,12 @@ public class StudentController {
    */
   @PutMapping("/students/{studentId}")
   public ResponseEntity<StudentDetail> updateStudent(
-      @Pattern(regexp = UUID_REGEXP, message = "IDの形式が不正です")
-      @PathVariable("studentId") String studentId,
+      @Pattern(regexp = UUID_REGEXP,
+          message = "IDの形式が不正です") @PathVariable("studentId") String studentId,
       @Valid @RequestBody UpdateStudent updateStudent) {
     StudentDetail updateDetail = service.updateStudent(updateStudent, studentId);
     return new ResponseEntity<>(updateDetail, HttpStatus.OK);
   }
 
-//  @GetMapping("trigger-error500")
-//  public String triggerError() {
-//    String str = null;
-//    System.out.println(str.length());
-//    return "";
-//  }
 
 }
