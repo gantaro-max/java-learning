@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-@Schema(description = "受講生更新")
+@Schema(description = "更新用受講生情報")
 @Getter
 @Setter
 public class UpdateStudent {

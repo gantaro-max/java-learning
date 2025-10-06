@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-@Schema(description = "受講生登録Request")
+@Schema(description = "登録用受講生情報")
 @Getter
 @Setter
 public class RegisterStudent {
