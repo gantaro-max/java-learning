@@ -32,7 +32,7 @@ public class UpdateStudent {
   @NotNull(message = "年齢は空にできません")
   @Min(value = 18, message = "登録は18以上になります")
   private Integer age;
-  @Schema(description = "年齢")
+  @Schema(description = "性別")
   private String gender;
   @Schema(description = "備考")
   private String remark;
