@@ -1,5 +1,6 @@
 package raisetech.studentmanagement.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import java.net.URI;
@@ -46,6 +47,7 @@ public class StudentController {
    *
    * @return 受講生詳細一覧（論理削除を除く全件）
    */
+  @Operation(summary = "一覧検索", description = "受講生詳細の一覧を検索します")
   @GetMapping("/students")
   public List<StudentDetail> getStudentCourseList() {
     return service.getStudentDetailList();
@@ -57,6 +59,7 @@ public class StudentController {
    * @param registerStudent 受講生登録情報
    * @return 登録処理の結果
    */
+  @Operation(summary = "受講生登録", description = "受講生と受講生コース情報を登録します")
   @PostMapping("/students")
   public ResponseEntity<StudentDetail> registerStudent(
       @Valid @RequestBody RegisterStudent registerStudent) {
@@ -72,6 +75,7 @@ public class StudentController {
    * @param studentId 受講生ID
    * @return 検索処理の結果
    */
+  @Operation(summary = "受講生検索", description = "studentIdに紐づく任意の受講生の情報を検索します")
   @GetMapping("/students/{studentId}")
   public ResponseEntity<StudentDetail> searchStudent(@Pattern(regexp = UUID_REGEXP,
       message = "IDの形式が不正です") @PathVariable("studentId") String studentId) {
@@ -89,6 +93,7 @@ public class StudentController {
    * @param updateStudent 受講生更新情報
    * @return 更新処理の結果
    */
+  @Operation(summary = "受講生情報更新", description = "受講生情報の更新を行います")
   @PutMapping("/students/{studentId}")
   public ResponseEntity<StudentDetail> updateStudent(
       @Pattern(regexp = UUID_REGEXP,
