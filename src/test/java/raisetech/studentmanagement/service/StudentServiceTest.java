@@ -92,6 +92,7 @@ class StudentServiceTest {
 
   @Test
   void 受講生登録処理が動作すること() {
+    String studentId = "00000000-0000-0000-0000-000000000000";
     RegisterStudent registerStudent = new RegisterStudent();
     registerStudent.setFullName("山田太郎");
     registerStudent.setKanaName("ヤマダタロウ");
@@ -104,6 +105,7 @@ class StudentServiceTest {
     registerStudent.setCourseId("4001");
 
     Student student = new Student();
+    student.setStudentId(studentId);
     student.setFullName(registerStudent.getFullName());
     student.setKanaName(registerStudent.getKanaName());
     student.setNickName(registerStudent.getNickName());
@@ -205,3 +207,4 @@ class StudentServiceTest {
   }
 
 }
+
