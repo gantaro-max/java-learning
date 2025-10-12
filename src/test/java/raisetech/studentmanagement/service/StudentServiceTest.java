@@ -45,7 +45,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の一覧検索及び全件検索が動作すること() {
+  void 受講生詳細の全件検索が動作すること() {
     List<Student> studentList = new ArrayList<>();
     List<StudentsCourses> studentsCourses = new ArrayList<>();
     List<StudentDetail> checkDetailList = new ArrayList<>();
