@@ -20,6 +20,8 @@ import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.ResponseStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
+import raisetech.studentmanagement.domain.UpdateStudent;
+import raisetech.studentmanagement.exception.ResourceNotFoundException;
 import raisetech.studentmanagement.repository.StudentRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -130,7 +132,62 @@ class StudentServiceTest {
 
   @Test
   void 受講生更新処理が動作すること() {
+    String studentId = "00000000-0000-0000-0000-000000000000";
+    UpdateStudent updateStudent = new UpdateStudent();
+    updateStudent.setFullName("山田太郎");
+    updateStudent.setKanaName("ヤマダタロウ");
+    updateStudent.setNickName("ドカベン");
+    updateStudent.setEmail("yamada@example.com");
+    updateStudent.setAddress("神奈川県横浜市");
+    updateStudent.setAge(20);
+    updateStudent.setGender("男");
+    updateStudent.setRemark("受け放題");
+    updateStudent.setDeleted(false);
 
+    Student student = new Student();
+    student.setStudentId(studentId);
+    Student newStudent = new Student();
+    newStudent.setStudentId(studentId);
+    newStudent.setFullName(updateStudent.getFullName());
+    newStudent.setKanaName(updateStudent.getKanaName());
+    newStudent.setNickName(updateStudent.getNickName());
+    newStudent.setEmail(updateStudent.getEmail());
+    newStudent.setAddress(updateStudent.getAddress());
+    newStudent.setAge(updateStudent.getAge());
+    newStudent.setGender(updateStudent.getGender());
+    newStudent.setRemark(updateStudent.getRemark());
+    newStudent.setDeleted(updateStudent.isDeleted());
+
+    ResponseStudent responseStudent = new ResponseStudent();
+    List<StudentsCourses> studentsCoursesList = new ArrayList<>();
+
+    when(repository.getStudentById(studentId)).thenReturn(student);
+    when(converter.convertUpdateToStudent(updateStudent, student)).thenReturn(newStudent);
+    when(converter.convertStudentToResponse(newStudent)).thenReturn(responseStudent);
+    when(repository.getStudentCourse(newStudent.getStudentId())).thenReturn(studentsCoursesList);
+
+    StudentDetail studentDetail = sut.updateStudent(updateStudent, studentId);
+
+    verify(repository, times(1)).getStudentById(studentId);
+    verify(converter, times(1)).convertUpdateToStudent(updateStudent, student);
+    verify(converter, times(1)).convertStudentToResponse(newStudent);
+    verify(repository, times(1)).getStudentCourse(newStudent.getStudentId());
+    verify(repository, times(1)).updateStudent(captorStudent.capture());
+
+    Student capturedStudent = captorStudent.getValue();
+
+    Assertions.assertEquals(newStudent, capturedStudent);
+    Assertions.assertEquals(responseStudent, studentDetail.getResponseStudent());
+    Assertions.assertEquals(studentsCoursesList, studentDetail.getStudentsCourses());
+  }
+
+  @Test
+  void 存在しない受講生IDで更新処理がされた時に例外が投げられること() {
+    String studentId = "00000000-0000-0000-0000-000000000000";
+    UpdateStudent updateStudent = new UpdateStudent();
+    when(repository.getStudentById(studentId)).thenReturn(null);
+    Assertions.assertThrows(ResourceNotFoundException.class,
+        () -> sut.updateStudent(updateStudent, studentId));
   }
 
 }
