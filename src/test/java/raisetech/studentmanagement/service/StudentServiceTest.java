@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,17 +45,24 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の一覧検索_全件検索が動作すること() {
+  void 受講生詳細の一覧検索及び全件検索が動作すること() {
     List<Student> studentList = new ArrayList<>();
     List<StudentsCourses> studentsCourses = new ArrayList<>();
+    List<StudentDetail> checkDetailList = new ArrayList<>();
+    List<ResponseStudent> responseStudentList = new ArrayList<>();
+    List<List<StudentsCourses>> studentDetailCourses = new ArrayList<>();
     when(repository.getStudentList()).thenReturn(studentList);
     when(repository.getStudentCourseList()).thenReturn(studentsCourses);
+    when(converter.convertStudentDetailList(studentList, studentsCourses)).thenReturn(
+        checkDetailList);
 
-    sut.getStudentDetailList();
+    List<StudentDetail> studentDetailList = sut.getStudentDetailList();
 
     verify(repository, times(1)).getStudentList();
     verify(repository, times(1)).getStudentCourseList();
     verify(converter, times(1)).convertStudentDetailList(studentList, studentsCourses);
+
+    Assertions.assertEquals(checkDetailList, studentDetailList);
   }
 
   @Test
@@ -68,11 +76,17 @@ class StudentServiceTest {
     when(repository.getStudentCourse(studentId)).thenReturn(studentsCourses);
     when(converter.convertStudentToResponse(student)).thenReturn(responseStudent);
 
-    sut.getStudentDetail(studentId);
+    Optional<StudentDetail> opStudentDetail = sut.getStudentDetail(studentId);
 
     verify(repository, times(1)).getStudentById(studentId);
     verify(repository, times(1)).getStudentCourse(studentId);
     verify(converter, times(1)).convertStudentToResponse(student);
+
+    Assertions.assertTrue(opStudentDetail.isPresent());
+    StudentDetail studentDetail = opStudentDetail.get();
+
+    Assertions.assertEquals(responseStudent, studentDetail.getResponseStudent());
+    Assertions.assertEquals(studentsCourses, studentDetail.getStudentsCourses());
 
   }
 
