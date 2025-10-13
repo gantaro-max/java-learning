@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(of = {"courseId", "studentId", "startDate"})
 public class StudentsCourses {
 
   @NotEmpty(message = "コースIDは空にできません。")

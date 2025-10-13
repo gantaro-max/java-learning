@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(of = "studentId")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Student {
