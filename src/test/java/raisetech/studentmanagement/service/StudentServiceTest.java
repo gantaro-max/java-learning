@@ -45,12 +45,10 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の全件検索が動作すること() {
+  void getStudentAllDataShouldSucceed() {
     List<Student> studentList = new ArrayList<>();
     List<StudentsCourses> studentsCourses = new ArrayList<>();
     List<StudentDetail> checkDetailList = new ArrayList<>();
-    List<ResponseStudent> responseStudentList = new ArrayList<>();
-    List<List<StudentsCourses>> studentDetailCourses = new ArrayList<>();
     when(repository.getStudentList()).thenReturn(studentList);
     when(repository.getStudentCourseList()).thenReturn(studentsCourses);
     when(converter.convertStudentDetailList(studentList, studentsCourses)).thenReturn(
@@ -66,7 +64,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生IDに紐づく受講生を検索処理が動作すること() {
+  void getStudentByIdShouldSucceed() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     Student student = new Student();
     List<StudentsCourses> studentsCourses = new ArrayList<>();
@@ -91,7 +89,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生登録処理が動作すること() {
+  void createStudentShouldSucceed() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     RegisterStudent registerStudent = new RegisterStudent();
     registerStudent.setFullName("山田太郎");
@@ -147,7 +145,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生更新処理が動作すること() {
+  void updateStudentShouldSucceed() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     UpdateStudent updateStudent = new UpdateStudent();
     updateStudent.setFullName("山田太郎");
@@ -198,7 +196,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void 存在しない受講生IDで更新処理がされた時に例外が投げられること() {
+  void updateNotFoundStudentShouldThrowException() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     UpdateStudent updateStudent = new UpdateStudent();
     when(repository.getStudentById(studentId)).thenReturn(null);
