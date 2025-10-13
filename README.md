@@ -1,4 +1,7 @@
- ### ターミナルからもMySQLに接続できなくなった為、8.4を再インストールDB名を元のDB名と同じstudentmanagementで作成
- ### applicationPropertiesがstudentManagementとの表記になっていたのでstudentmanagementに修正し動作確認
+### ターミナルからもMySQLに接続できなくなった為、8.4を再インストールDB名を元のDB名と同じstudentmanagementで作成
+
+### applicationPropertiesがstudentManagementとの表記になっていたのでstudentmanagementに修正し動作確認
+
+
 
 
