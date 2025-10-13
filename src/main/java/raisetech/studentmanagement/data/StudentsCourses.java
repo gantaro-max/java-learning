@@ -2,11 +2,13 @@ package raisetech.studentmanagement.data;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"courseId", "studentId", "startDate"})
 public class StudentsCourses {
 
   @NotEmpty(message = "コースIDは空にできません。")

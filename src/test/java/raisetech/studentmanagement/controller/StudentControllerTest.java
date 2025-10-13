@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.UpdateStudent;
 import raisetech.studentmanagement.exception.ResourceNotFoundException;
@@ -87,8 +88,9 @@ class StudentControllerTest {
         .andExpect(jsonPath("$.message").value("入力にバリデーションエラーがあります"))
         .andExpect(jsonPath("$.path").value("/students"))
         .andExpect(jsonPath("$.errors", hasSize(5)))
-        .andExpect(jsonPath("$.errors[*].message", containsInAnyOrder("名前は必須です", "カナ名は必須です",
-            "emailは必須です", "年齢は空にできません", "コースIDは空にできません")));
+        .andExpect(
+            jsonPath("$.errors[*].message", containsInAnyOrder("名前は必須です", "カナ名は必須です",
+                "emailは必須です", "年齢は空にできません", "コースIDは空にできません")));
   }
 
   @Test
@@ -108,14 +110,16 @@ class StudentControllerTest {
         .andExpect(jsonPath("$.message").value("入力にバリデーションエラーがあります"))
         .andExpect(jsonPath("$.path").value("/students/1"))
         .andExpect(jsonPath("$.errors", hasSize(4)))
-        .andExpect(jsonPath("$.errors[*].message", containsInAnyOrder("名前は空にできません", "カナ名は空にできません",
-            "有効なメールアドレス形式で入力して下さい", "登録は18以上になります")));
+        .andExpect(jsonPath("$.errors[*].message",
+            containsInAnyOrder("名前は空にできません", "カナ名は空にできません",
+                "有効なメールアドレス形式で入力して下さい", "登録は18以上になります")));
   }
 
   @Test
   void 予期せぬエラーが発生した際に500を返す() throws Exception {
     String testUuid = "43a70504-27d3-42f2-8590-a66c4886779a";
-    when(studentService.getStudentDetail(testUuid)).thenThrow(new RuntimeException("データベース接続エラー"));
+    when(studentService.getStudentDetail(testUuid)).thenThrow(
+        new RuntimeException("データベース接続エラー"));
     mockMvc.perform(get("/students/" + testUuid)).andExpect(status().isInternalServerError())
         .andExpect(jsonPath("$.timestamp").isNotEmpty()).andExpect(jsonPath("$.status").value(500))
         .andExpect(jsonPath("$.error").value("Internal Server Error"))
