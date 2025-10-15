@@ -1,5 +1,8 @@
 package raisetech.studentmanagement.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -7,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,7 +62,7 @@ class StudentServiceTest {
     verify(repository, times(1)).getStudentCourseList();
     verify(converter, times(1)).convertStudentDetailList(studentList, studentsCourses);
 
-    Assertions.assertEquals(checkDetailList, studentDetailList);
+    assertThat(studentDetailList).isEqualTo(checkDetailList);
   }
 
   @Test
@@ -80,12 +82,11 @@ class StudentServiceTest {
     verify(repository, times(1)).getStudentCourse(studentId);
     verify(converter, times(1)).convertStudentToResponse(student);
 
-    Assertions.assertTrue(opStudentDetail.isPresent());
+    assertTrue(opStudentDetail.isPresent());
     StudentDetail studentDetail = opStudentDetail.get();
 
-    Assertions.assertEquals(responseStudent, studentDetail.getResponseStudent());
-    Assertions.assertEquals(studentsCourses, studentDetail.getStudentsCourses());
-
+    assertThat(studentDetail.getResponseStudent()).isEqualTo(responseStudent);
+    assertThat(studentDetail.getStudentsCourses()).isEqualTo(studentsCourses);
   }
 
   @Test
@@ -136,11 +137,11 @@ class StudentServiceTest {
     Student capturedStudent = captorStudent.getValue();
     StudentsCourses capturedStudentCourse = captorStudentCourse.getValue();
 
-    Assertions.assertEquals(student, capturedStudent);
-    Assertions.assertEquals(studentsCourses, capturedStudentCourse);
+    assertThat(capturedStudent).isEqualTo(student);
+    assertThat(capturedStudentCourse).isEqualTo(studentsCourses);
 
-    Assertions.assertEquals(responseStudent, studentDetail.getResponseStudent());
-    Assertions.assertEquals(studentsCoursesList, studentDetail.getStudentsCourses());
+    assertThat(studentDetail.getResponseStudent()).isEqualTo(responseStudent);
+    assertThat(studentDetail.getStudentsCourses()).isEqualTo(studentsCoursesList);
 
   }
 
@@ -190,9 +191,10 @@ class StudentServiceTest {
 
     Student capturedStudent = captorStudent.getValue();
 
-    Assertions.assertEquals(newStudent, capturedStudent);
-    Assertions.assertEquals(responseStudent, studentDetail.getResponseStudent());
-    Assertions.assertEquals(studentsCoursesList, studentDetail.getStudentsCourses());
+    assertThat(capturedStudent).isEqualTo(newStudent);
+    assertThat(studentDetail.getResponseStudent()).isEqualTo(responseStudent);
+    assertThat(studentDetail.getStudentsCourses()).isEqualTo(studentsCoursesList);
+
   }
 
   @Test
@@ -200,7 +202,7 @@ class StudentServiceTest {
     String studentId = "00000000-0000-0000-0000-000000000000";
     UpdateStudent updateStudent = new UpdateStudent();
     when(repository.getStudentById(studentId)).thenReturn(null);
-    Assertions.assertThrows(ResourceNotFoundException.class,
+    assertThrows(ResourceNotFoundException.class,
         () -> sut.updateStudent(updateStudent, studentId));
   }
 

@@ -49,8 +49,8 @@ public class StudentController {
    */
   @Operation(summary = "一覧検索", description = "受講生詳細の一覧を検索します")
   @GetMapping("/students")
-  public List<StudentDetail> getStudentCourseList() {
-    return service.getStudentDetailList();
+  public ResponseEntity<List<StudentDetail>> getStudentCourseList() {
+    return ResponseEntity.ok().body(service.getStudentDetailList());
   }
 
   /**

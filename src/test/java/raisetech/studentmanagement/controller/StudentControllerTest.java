@@ -1,8 +1,11 @@
 package raisetech.studentmanagement.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,6 +14,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +43,8 @@ class StudentControllerTest {
   @Autowired
   private ObjectMapper objectMapper;
 
+  private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
   @TestConfiguration
   static class TestConfig {
 
@@ -43,6 +52,30 @@ class StudentControllerTest {
     public StudentService studentService() {
       return Mockito.mock(StudentService.class);
     }
+  }
+
+  @Test
+  void 受講生詳細一覧検索が動作し空のリストが返ってくること() throws Exception {
+    mockMvc.perform(get("/students")).andExpect(status().isOk());
+    verify(studentService, times(1)).getStudentDetailList();
+  }
+
+  @Test
+  void 受講生新規登録が正常に行われることれること() throws Exception {
+    RegisterStudent registerStudent = new RegisterStudent();
+    registerStudent.setFullName("山田花子");
+    registerStudent.setKanaName("ヤマダハナコ");
+    registerStudent.setNickName("ハナコ");
+    registerStudent.setEmail("yamahana@example.com");
+    registerStudent.setAddress("東京都杉並区");
+    registerStudent.setAge(22);
+    registerStudent.setGender("女");
+    registerStudent.setRemark("なし");
+    registerStudent.setCourseId("4001");
+
+    Set<ConstraintViolation<RegisterStudent>> violations = validator.validate(registerStudent);
+
+    assertThat(violations.size()).isEqualTo(0);
   }
 
   @Test
