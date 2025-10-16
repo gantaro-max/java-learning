@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -86,8 +87,22 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生IDで受講生の検索が正常に行われること() {
-    String testUuid = "00000000-0000-0000-0000-000000000000";
+  void 受講生IDで受講生の検索が正常に行われること() throws Exception {
+    String testStudentId = "00000000-0000-0000-0000-000000000000";
+    StudentDetail studentDetail = new StudentDetail();
+    ResponseStudent responseStudent = new ResponseStudent();
+    responseStudent.setStudentId(testStudentId);
+    studentDetail.setResponseStudent(responseStudent);
+    studentDetail.setStudentsCourses(new ArrayList<>());
+    Optional<StudentDetail> opDetail = Optional.of(studentDetail);
+
+    when(studentService.getStudentDetail(testStudentId)).thenReturn(opDetail);
+
+    mockMvc.perform(get("/students/" + testStudentId)).andExpect(status().isOk());
+
+    verify(studentService, times(1)).getStudentDetail(testStudentId);
+    
+    assertThat(opDetail.get().getResponseStudent().getStudentId()).isEqualTo(testStudentId);
 
   }
 
