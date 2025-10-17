@@ -1,8 +1,13 @@
 package raisetech.studentmanagement.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,42 +16,146 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
+import raisetech.studentmanagement.domain.ResponseStudent;
+import raisetech.studentmanagement.domain.StudentDetail;
 import raisetech.studentmanagement.domain.UpdateStudent;
 import raisetech.studentmanagement.exception.ResourceNotFoundException;
 import raisetech.studentmanagement.service.StudentService;
 
 @WebMvcTest(StudentController.class)
-@Import(StudentControllerTest.TestConfig.class)
 class StudentControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
-  @Autowired
-  private StudentService studentService;
+
   @Autowired
   private ObjectMapper objectMapper;
 
-  @TestConfiguration
-  static class TestConfig {
+  @MockitoBean
+  private StudentService studentService;
 
-    @Bean
-    public StudentService studentService() {
-      return Mockito.mock(StudentService.class);
-    }
+  @Captor
+  private ArgumentCaptor<RegisterStudent> captorRegister;
+
+  @Captor
+  private ArgumentCaptor<UpdateStudent> captorUpdate;
+
+  @BeforeEach
+  void setCaptor() {
+    MockitoAnnotations.openMocks(this);
+  }
+
+
+  @Test
+  void 受講生詳細一覧検索が動作し空のリストが返ってくること() throws Exception {
+    List<StudentDetail> studentDetailList = new ArrayList<>();
+    when(studentService.getStudentDetailList()).thenReturn(studentDetailList);
+    mockMvc.perform(get("/students")).andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(0)));
+    verify(studentService, times(1)).getStudentDetailList();
   }
 
   @Test
-  void 存在しないIDの生徒を取得しようとした際に404を返す() throws Exception {
+  void 受講生新規登録が正常に行われること() throws Exception {
+    String responseId = "00000000-0000-0000-0000-000000000000";
+
+    RegisterStudent registerStudent = new RegisterStudent();
+    registerStudent.setFullName("山田花子");
+    registerStudent.setKanaName("ヤマダハナコ");
+    registerStudent.setNickName("ハナコ");
+    registerStudent.setEmail("yamahana@example.com");
+    registerStudent.setAddress("東京都杉並区");
+    registerStudent.setAge(22);
+    registerStudent.setGender("女");
+    registerStudent.setRemark("なし");
+    registerStudent.setCourseId("4001");
+    StudentDetail registerDetail = new StudentDetail();
+    ResponseStudent responseStudent = new ResponseStudent();
+    responseStudent.setStudentId(responseId);
+    registerDetail.setResponseStudent(responseStudent);
+    registerDetail.setStudentsCourses(new ArrayList<>(List.of(new StudentsCourses())));
+
+    when(studentService.setStudentNewCourse(any(RegisterStudent.class))).thenReturn(registerDetail);
+
+    mockMvc.perform(post("/students").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(registerStudent)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.responseStudent.studentId").value(responseId));
+    verify(studentService, times(1)).setStudentNewCourse(captorRegister.capture());
+
+    assertThat(captorRegister.getValue().getFullName()).isEqualTo(registerStudent.getFullName());
+  }
+
+  @Test
+  void 受講生IDで受講生の検索が正常に行われること() throws Exception {
+    String testStudentId = "00000000-0000-0000-0000-000000000000";
+    StudentDetail studentDetail = new StudentDetail();
+    ResponseStudent responseStudent = new ResponseStudent();
+    responseStudent.setStudentId(testStudentId);
+    studentDetail.setResponseStudent(responseStudent);
+    studentDetail.setStudentsCourses(new ArrayList<>());
+    Optional<StudentDetail> opDetail = Optional.of(studentDetail);
+
+    when(studentService.getStudentDetail(testStudentId)).thenReturn(opDetail);
+
+    mockMvc.perform(get("/students/" + testStudentId)).andExpect(status().isOk())
+        .andExpect(jsonPath("$.responseStudent.studentId").value(testStudentId));
+
+    verify(studentService, times(1)).getStudentDetail(testStudentId);
+
+  }
+
+  @Test
+  void 受講生の更新が正常に行われること() throws Exception {
+    String testStudentId = "00000000-0000-0000-0000-000000000000";
+    UpdateStudent updateStudent = new UpdateStudent();
+    updateStudent.setFullName("山田花子");
+    updateStudent.setKanaName("ヤマダハナコ");
+    updateStudent.setNickName("ハナコ");
+    updateStudent.setEmail("yamahana@example.com");
+    updateStudent.setAddress("東京都杉並区");
+    updateStudent.setAge(22);
+    updateStudent.setGender("女");
+    updateStudent.setRemark("なし");
+    updateStudent.setDeleted(false);
+
+    StudentDetail responseDetail = new StudentDetail();
+    ResponseStudent responseStudent = new ResponseStudent();
+    responseStudent.setStudentId(testStudentId);
+    responseDetail.setResponseStudent(responseStudent);
+    responseDetail.setStudentsCourses(new ArrayList<>());
+
+    when(studentService.updateStudent(any(UpdateStudent.class), eq(testStudentId))).thenReturn(
+        responseDetail);
+
+    mockMvc.perform(put("/students/" + testStudentId).contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(updateStudent))).andExpect(status().isOk())
+        .andExpect(jsonPath("$.responseStudent.studentId").value(testStudentId));
+
+    verify(studentService, times(1)).updateStudent(captorUpdate.capture(), eq(testStudentId));
+
+    assertThat(captorUpdate.getValue().getFullName()).isEqualTo(updateStudent.getFullName());
+
+
+  }
+
+  @Test
+  void 存在しないIDの受講生を取得しようとした際に404を返す() throws Exception {
     String testUuid = "00000000-0000-0000-0000-000000000000";
     when(studentService.getStudentDetail(testUuid))
         .thenThrow(new ResourceNotFoundException("該当ありません"));
