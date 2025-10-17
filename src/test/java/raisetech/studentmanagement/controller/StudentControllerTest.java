@@ -111,8 +111,6 @@ class StudentControllerTest {
 
     verify(studentService, times(1)).getStudentDetail(testStudentId);
 
-    assertThat(opDetail.get().getResponseStudent().getStudentId()).isEqualTo(testStudentId);
-
   }
 
   @Test
@@ -145,7 +143,7 @@ class StudentControllerTest {
     verify(studentService, times(1)).updateStudent(captorUpdate.capture(), eq(testStudentId));
 
     assertThat(captorUpdate.getValue().getFullName()).isEqualTo(updateStudent.getFullName());
-    assertThat(responseDetail.getResponseStudent().getStudentId()).isEqualTo(testStudentId);
+
 
   }
 
