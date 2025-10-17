@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,6 +49,9 @@ class StudentControllerTest {
 
   @Captor
   private ArgumentCaptor<RegisterStudent> captorRegister;
+
+  @Captor
+  private ArgumentCaptor<UpdateStudent> captorUpdate;
 
 
   @Test
@@ -101,8 +105,41 @@ class StudentControllerTest {
     mockMvc.perform(get("/students/" + testStudentId)).andExpect(status().isOk());
 
     verify(studentService, times(1)).getStudentDetail(testStudentId);
-    
+
     assertThat(opDetail.get().getResponseStudent().getStudentId()).isEqualTo(testStudentId);
+
+  }
+
+  @Test
+  void 受講生の更新が正常に行われること() throws Exception {
+    String testStudentId = "00000000-0000-0000-0000-000000000000";
+    UpdateStudent updateStudent = new UpdateStudent();
+    updateStudent.setFullName("山田花子");
+    updateStudent.setKanaName("ヤマダハナコ");
+    updateStudent.setNickName("ハナコ");
+    updateStudent.setEmail("yamahana@example.com");
+    updateStudent.setAddress("東京都杉並区");
+    updateStudent.setAge(22);
+    updateStudent.setGender("女");
+    updateStudent.setRemark("なし");
+    updateStudent.setDeleted(false);
+
+    StudentDetail responseDetail = new StudentDetail();
+    ResponseStudent responseStudent = new ResponseStudent();
+    responseStudent.setStudentId(testStudentId);
+    responseDetail.setResponseStudent(responseStudent);
+    responseDetail.setStudentsCourses(new ArrayList<>());
+
+    when(studentService.updateStudent(any(UpdateStudent.class), eq(testStudentId))).thenReturn(
+        responseDetail);
+
+    mockMvc.perform(put("/students/" + testStudentId).contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(updateStudent))).andExpect(status().isOk());
+
+    verify(studentService, times(1)).updateStudent(captorUpdate.capture(), eq(testStudentId));
+
+    assertThat(captorUpdate.getValue().getFullName()).isEqualTo(updateStudent.getFullName());
+    assertThat(responseDetail.getResponseStudent().getStudentId()).isEqualTo(testStudentId);
 
   }
 
