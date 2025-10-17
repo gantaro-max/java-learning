@@ -56,7 +56,10 @@ class StudentControllerTest {
 
   @Test
   void 受講生詳細一覧検索が動作し空のリストが返ってくること() throws Exception {
-    mockMvc.perform(get("/students")).andExpect(status().isOk());
+    List<StudentDetail> studentDetailList = new ArrayList<>();
+    when(studentService.getStudentDetailList()).thenReturn(studentDetailList);
+    mockMvc.perform(get("/students")).andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(0)));
     verify(studentService, times(1)).getStudentDetailList();
   }
 
@@ -84,7 +87,8 @@ class StudentControllerTest {
 
     mockMvc.perform(post("/students").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(registerStudent)))
-        .andExpect(status().isCreated());
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.responseStudent.studentId").value(responseId));
     verify(studentService, times(1)).setStudentNewCourse(captorRegister.capture());
 
     assertThat(captorRegister.getValue().getFullName()).isEqualTo(registerStudent.getFullName());
@@ -102,7 +106,8 @@ class StudentControllerTest {
 
     when(studentService.getStudentDetail(testStudentId)).thenReturn(opDetail);
 
-    mockMvc.perform(get("/students/" + testStudentId)).andExpect(status().isOk());
+    mockMvc.perform(get("/students/" + testStudentId)).andExpect(status().isOk())
+        .andExpect(jsonPath("$.responseStudent.studentId").value(testStudentId));
 
     verify(studentService, times(1)).getStudentDetail(testStudentId);
 
@@ -134,7 +139,8 @@ class StudentControllerTest {
         responseDetail);
 
     mockMvc.perform(put("/students/" + testStudentId).contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(updateStudent))).andExpect(status().isOk());
+            .content(objectMapper.writeValueAsString(updateStudent))).andExpect(status().isOk())
+        .andExpect(jsonPath("$.responseStudent.studentId").value(testStudentId));
 
     verify(studentService, times(1)).updateStudent(captorUpdate.capture(), eq(testStudentId));
 
