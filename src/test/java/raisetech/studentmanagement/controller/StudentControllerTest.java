@@ -19,9 +19,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -52,6 +54,11 @@ class StudentControllerTest {
 
   @Captor
   private ArgumentCaptor<UpdateStudent> captorUpdate;
+
+  @BeforeEach
+  void setCaptor() {
+    MockitoAnnotations.openMocks(this);
+  }
 
 
   @Test
