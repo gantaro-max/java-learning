@@ -2,6 +2,7 @@
 
 ### applicationPropertiesがstudentManagementとの表記になっていたのでstudentmanagementに修正し動作確認
 
+### CIを有効化しでpush時に自動でテストを行えるようになった
 
 
 
