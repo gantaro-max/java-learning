@@ -74,6 +74,17 @@ class StudentConverterTest {
   }
 
   @Test
+  void コースIDが存在しない場合該当なしと返ってくること() {
+    String testCourseId = "9999";
+    String testMsg = "該当なし";
+    StudentConverter converter = new StudentConverter();
+    String resultMsg = converter.getCourseNameById(testCourseId);
+
+    assertThat(resultMsg).isEqualTo(testMsg);
+
+  }
+
+  @Test
   void 受講生登録情報と受講生情報から受講生コース情報をつくれること() {
     RegisterStudent registerStudent = new RegisterStudent();
     registerStudent.setFullName("山田花子");
@@ -99,8 +110,17 @@ class StudentConverterTest {
 
     assertThat(resultStudentCourse.getCourseId()).isEqualTo(studentsCourses.getCourseId());
     assertThat(resultStudentCourse.getStudentId()).isEqualTo(studentsCourses.getStudentId());
+    assertThat(resultStudentCourse.getStartDate().getYear()).isEqualTo(
+        studentsCourses.getStartDate().getYear());
+    assertThat(resultStudentCourse.getStartDate().getMonth()).isEqualTo(
+        studentsCourses.getStartDate().getMonth());
+    assertThat(resultStudentCourse.getStartDate().getDayOfMonth()).isEqualTo(
+        studentsCourses.getStartDate().getDayOfMonth());
+    assertThat(resultStudentCourse.getStartDate().getHour()).isEqualTo(
+        studentsCourses.getStartDate().getHour());
     assertThat(resultStudentCourse.getStartDate().getMinute()).isEqualTo(
         studentsCourses.getStartDate().getMinute());
+
   }
 
   @Test
