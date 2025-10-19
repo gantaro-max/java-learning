@@ -169,7 +169,7 @@ class StudentConverterTest {
   }
 
   @Test
-  void 受講生更新情報から受講情報に変換できること() {
+  void 受講生更新情報から受講生情報に変換できること() {
     UpdateStudent updateStudent = new UpdateStudent();
     updateStudent.setFullName("山田花子");
     updateStudent.setKanaName("ヤマダハナコ");
