@@ -91,7 +91,6 @@ class StudentServiceTest {
 
   @Test
   void createStudentShouldSucceed() {
-    String studentId = "00000000-0000-0000-0000-000000000000";
     RegisterStudent registerStudent = new RegisterStudent();
     registerStudent.setFullName("山田太郎");
     registerStudent.setKanaName("ヤマダタロウ");
@@ -104,6 +103,7 @@ class StudentServiceTest {
     registerStudent.setCourseId("4001");
 
     Student student = new Student();
+    String studentId = "00000000-0000-0000-0000-000000000000";
     student.setStudentId(studentId);
     student.setFullName(registerStudent.getFullName());
     student.setKanaName(registerStudent.getKanaName());
