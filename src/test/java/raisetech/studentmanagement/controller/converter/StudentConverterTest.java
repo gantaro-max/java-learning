@@ -1,8 +1,10 @@
 package raisetech.studentmanagement.controller.converter;
 
+import static org.assertj.core.api.Assertions.within;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -59,7 +61,7 @@ class StudentConverterTest {
     List<StudentDetail> resultDetailList = converter.convertStudentDetailList(studentList,
         studentsCoursesList);
 
-    assertThat(resultDetailList.getFirst()).isEqualTo(studentDetail);
+    assertThat(resultDetailList.get(0)).isEqualTo(studentDetail);
   }
 
   @Test
@@ -98,6 +100,15 @@ class StudentConverterTest {
     registerStudent.setCourseId("4001");
     Student student = new Student();
     student.setStudentId("00000000-0000-0000-0000-000000000000");
+    student.setFullName(registerStudent.getFullName());
+    student.setKanaName(registerStudent.getKanaName());
+    student.setNickName(registerStudent.getNickName());
+    student.setEmail(registerStudent.getEmail());
+    student.setAddress(registerStudent.getAddress());
+    student.setAge(registerStudent.getAge());
+    student.setGender(registerStudent.getGender());
+    student.setRemark(registerStudent.getRemark());
+    student.setDeleted(false);
 
     StudentsCourses studentsCourses = new StudentsCourses();
     studentsCourses.setCourseId("4001");
@@ -110,16 +121,9 @@ class StudentConverterTest {
 
     assertThat(resultStudentCourse.getCourseId()).isEqualTo(studentsCourses.getCourseId());
     assertThat(resultStudentCourse.getStudentId()).isEqualTo(studentsCourses.getStudentId());
-    assertThat(resultStudentCourse.getStartDate().getYear()).isEqualTo(
-        studentsCourses.getStartDate().getYear());
-    assertThat(resultStudentCourse.getStartDate().getMonth()).isEqualTo(
-        studentsCourses.getStartDate().getMonth());
-    assertThat(resultStudentCourse.getStartDate().getDayOfMonth()).isEqualTo(
-        studentsCourses.getStartDate().getDayOfMonth());
-    assertThat(resultStudentCourse.getStartDate().getHour()).isEqualTo(
-        studentsCourses.getStartDate().getHour());
-    assertThat(resultStudentCourse.getStartDate().getMinute()).isEqualTo(
-        studentsCourses.getStartDate().getMinute());
+    assertThat(resultStudentCourse.getStartDate()).isCloseTo(studentsCourses.getStartDate(),
+        within(1, ChronoUnit.SECONDS));
+
 
   }
 
@@ -199,7 +203,7 @@ class StudentConverterTest {
 
     Student resultStudent = converter.convertUpdateToStudent(updateStudent, student);
 
-    assertThat(resultStudent).isEqualTo(student);
+    assertThat(resultStudent).usingRecursiveComparison().isEqualTo(student);
 
   }
 
@@ -232,7 +236,7 @@ class StudentConverterTest {
 
     ResponseStudent resultResponse = converter.convertStudentToResponse(student);
 
-    assertThat(resultResponse).isEqualTo(responseStudent);
+    assertThat(resultResponse).usingRecursiveComparison().isEqualTo(responseStudent);
 
   }
 
