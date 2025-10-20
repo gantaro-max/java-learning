@@ -7,7 +7,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
@@ -19,6 +21,14 @@ class StudentConverterTest {
 
   private static final String UUID_REGEXP =
       "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+
+  @Autowired
+  private StudentConverter sut;
+
+  @BeforeEach
+  void before() {
+    sut = new StudentConverter();
+  }
 
   @Test
   void 受講生一覧と受講生コース情報一覧から受講生詳細一覧に変換できること() {
@@ -56,9 +66,7 @@ class StudentConverterTest {
     studentDetail.setResponseStudent(responseStudent);
     studentDetail.setStudentsCourses(studentsCoursesList);
 
-    StudentConverter converter = new StudentConverter();
-
-    List<StudentDetail> resultDetailList = converter.convertStudentDetailList(studentList,
+    List<StudentDetail> resultDetailList = sut.convertStudentDetailList(studentList,
         studentsCoursesList);
 
     assertThat(resultDetailList.get(0)).isEqualTo(studentDetail);
@@ -68,8 +76,8 @@ class StudentConverterTest {
   void コースIDからコース名を取得できること() {
     String testCourseId = "1001";
     String testCourseName = "AWS";
-    StudentConverter converter = new StudentConverter();
-    String resultCourseName = converter.getCourseNameById(testCourseId);
+
+    String resultCourseName = sut.getCourseNameById(testCourseId);
 
     assertThat(resultCourseName).isEqualTo(testCourseName);
 
@@ -79,8 +87,8 @@ class StudentConverterTest {
   void コースIDが存在しない場合該当なしと返ってくること() {
     String testCourseId = "9999";
     String testMsg = "該当なし";
-    StudentConverter converter = new StudentConverter();
-    String resultMsg = converter.getCourseNameById(testCourseId);
+
+    String resultMsg = sut.getCourseNameById(testCourseId);
 
     assertThat(resultMsg).isEqualTo(testMsg);
 
@@ -116,8 +124,7 @@ class StudentConverterTest {
     studentsCourses.setCourseName("JAVA");
     studentsCourses.setStartDate(LocalDateTime.now());
 
-    StudentConverter converter = new StudentConverter();
-    StudentsCourses resultStudentCourse = converter.convertStudentCourse(registerStudent, student);
+    StudentsCourses resultStudentCourse = sut.convertStudentCourse(registerStudent, student);
 
     assertThat(resultStudentCourse.getCourseId()).isEqualTo(studentsCourses.getCourseId());
     assertThat(resultStudentCourse.getStudentId()).isEqualTo(studentsCourses.getStudentId());
@@ -154,9 +161,7 @@ class StudentConverterTest {
     student.setRemark(registerStudent.getRemark());
     student.setDeleted(false);
 
-    StudentConverter converter = new StudentConverter();
-
-    Student resultStudent = converter.convertRegisterToStudent(registerStudent);
+    Student resultStudent = sut.convertRegisterToStudent(registerStudent);
 
     assertThat(resultStudent.getStudentId()).isNotNull();
     assertThat(resultStudent.getStudentId()).isNotEmpty();
@@ -199,9 +204,7 @@ class StudentConverterTest {
     student.setRemark(updateStudent.getRemark());
     student.setDeleted(updateStudent.isDeleted());
 
-    StudentConverter converter = new StudentConverter();
-
-    Student resultStudent = converter.convertUpdateToStudent(updateStudent, student);
+    Student resultStudent = sut.convertUpdateToStudent(updateStudent, student);
 
     assertThat(resultStudent).usingRecursiveComparison().isEqualTo(student);
 
@@ -232,9 +235,7 @@ class StudentConverterTest {
     responseStudent.setGender(student.getGender());
     responseStudent.setRemark(student.getRemark());
 
-    StudentConverter converter = new StudentConverter();
-
-    ResponseStudent resultResponse = converter.convertStudentToResponse(student);
+    ResponseStudent resultResponse = sut.convertStudentToResponse(student);
 
     assertThat(resultResponse).usingRecursiveComparison().isEqualTo(responseStudent);
 

@@ -10,7 +10,7 @@ import lombok.Setter;
 @Schema(description = "Response用受講生情報")
 @Getter
 @Setter
-@EqualsAndHashCode(of = "studentId")
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResponseStudent {
