@@ -19,8 +19,25 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生の全件検索が行われること() {
+    String studentId = "11111111-1111-1111-1111-111111111111";
+    Student student = new Student();
+    student.setStudentId(studentId);
+    student.setFullName("山田太郎");
+    student.setKanaName("ヤマダタロウ");
+    student.setNickName("ドカベン");
+    student.setEmail("yamada@example.com");
+    student.setAddress("神奈川県横浜市");
+    student.setAge(49);
+    student.setGender("男");
+    student.setRemark("受け放題");
+    student.setDeleted(false);
     List<Student> actual = sut.getStudentList();
+
+    Optional<Student> result = actual.stream().filter(ob -> studentId.equals(ob.getStudentId()))
+        .findFirst();
+
     assertThat(actual.size()).isEqualTo(4);
+    assertThat(result).isPresent().get().usingRecursiveComparison().isEqualTo(student);
   }
 
   @Test
@@ -47,8 +64,20 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生コース情報全件検索が行えること() {
+    String studentId = "22222222-2222-2222-2222-222222222222";
+    StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setCourseId("2001");
+    studentsCourses.setStudentId(studentId);
+    studentsCourses.setCourseName("WP");
+    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 15, 12, 0, 0));
+    studentsCourses.setCompleteDate(null);
     List<StudentsCourses> actual = sut.getStudentCourseList();
+    Optional<StudentsCourses> result = actual.stream().filter(
+            ob -> studentId.equals(ob.getStudentId()) && studentsCourses.getCourseId()
+                .equals(ob.getCourseId()) && studentsCourses.getStartDate().equals(ob.getStartDate()))
+        .findFirst();
     assertThat(actual.size()).isEqualTo(6);
+    assertThat(result).isPresent().get().usingRecursiveComparison().isEqualTo(studentsCourses);
   }
 
   @Test
@@ -63,15 +92,12 @@ class StudentRepositoryTest {
 
     sut.setNewCourse(studentsCourses);
 
-    List<StudentsCourses> listActual = sut.getStudentCourse(studentId);
-    Optional<StudentsCourses> result = listActual.stream()
+    List<StudentsCourses> actual = sut.getStudentCourse(studentId);
+    Optional<StudentsCourses> result = actual.stream()
         .filter(ob -> studentsCourses.getCourseId().equals(ob.getCourseId())
             && studentsCourses.getStartDate().equals(ob.getStartDate())).findFirst();
 
-    assertThat(result).isNotEmpty();
-    StudentsCourses actual = result.get();
-
-    assertThat(actual).usingRecursiveComparison().isEqualTo(studentsCourses);
+    assertThat(result).isPresent().get().usingRecursiveComparison().isEqualTo(studentsCourses);
 
   }
 
@@ -115,8 +141,12 @@ class StudentRepositoryTest {
     studentsCourses.setCompleteDate(null);
 
     List<StudentsCourses> actual = sut.getStudentCourse(studentId);
+    Optional<StudentsCourses> result = actual.stream().filter(
+            ob -> studentId.equals(ob.getStudentId()) && studentsCourses.getCourseId()
+                .equals(ob.getCourseId()) && studentsCourses.getStartDate().equals(ob.getStartDate()))
+        .findFirst();
 
-    assertThat(actual.get(0)).usingRecursiveComparison().isEqualTo(studentsCourses);
+    assertThat(result).isPresent().get().usingRecursiveComparison().isEqualTo(studentsCourses);
   }
 
   @Test
