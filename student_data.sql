@@ -1,4 +1,4 @@
-INSERT students VALUES('1','山田太郎','ヤマダタロウ','ドカベン','yamada@example.com','神奈川県横浜市',49,'男');
-INSERT students VALUES('2','鈴木花子','スズキハナコ','','suzuki@example.com','東京都世田谷区',20,'女');
-INSERT students VALUES('3','佐藤健一','サトウケンイチ','さとけん','sato@example.com','兵庫県神戸市',34,'男');
-INSERT students VALUES('4','岩本昌男','イワモトマサオ','がんたろう','iwamoto@example.com','岡山県岡山市',58,'男');
+INSERT students VALUES('11111111-1111-1111-1111-111111111111','山田太郎','ヤマダタロウ','ドカベン','yamada@example.com','神奈川県横浜市',49,'男','受け放題');
+INSERT students VALUES('22222222-2222-2222-2222-222222222222','鈴木花子','スズキハナコ','','suzuki@example.com','東京都世田谷区',20,'女','特になし');
+INSERT students VALUES('33333333-3333-3333-3333-333333333333','佐藤健一','サトウケンイチ','さとけん','sato@example.com','兵庫県神戸市',34,'男','受け放題');
+INSERT students VALUES('44444444-4444-4444-4444-444444444444','岩本昌男','イワモトマサオ','がんたろう','iwamoto@example.com','岡山県岡山市',58,'男','特になし');
