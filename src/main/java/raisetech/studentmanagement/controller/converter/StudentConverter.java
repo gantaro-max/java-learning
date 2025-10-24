@@ -69,6 +69,7 @@ public class StudentConverter {
   public StudentsCourses convertStudentCourse(RegisterStudent registerStudent, Student student) {
     StudentsCourses studentsCourses = new StudentsCourses();
 
+    studentsCourses.setTakeCourseId(UUID.randomUUID().toString());
     studentsCourses.setCourseId(registerStudent.getCourseId());
     studentsCourses.setStudentId(student.getStudentId());
     studentsCourses.setCourseName(getCourseNameById(registerStudent.getCourseId()));

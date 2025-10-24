@@ -44,6 +44,7 @@ class StudentConverterTest {
     student.setRemark("なし");
     student.setDeleted(false);
     StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId("77777777-8888-9999-1111-222222222222");
     studentsCourses.setCourseId("4001");
     studentsCourses.setStudentId(student.getStudentId());
     studentsCourses.setCourseName("JAVA");
@@ -119,6 +120,7 @@ class StudentConverterTest {
     student.setDeleted(false);
 
     StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId("77777777-8888-9999-1111-222222222222");
     studentsCourses.setCourseId("4001");
     studentsCourses.setStudentId(student.getStudentId());
     studentsCourses.setCourseName("JAVA");
@@ -126,6 +128,9 @@ class StudentConverterTest {
 
     StudentsCourses resultStudentCourse = sut.convertStudentCourse(registerStudent, student);
 
+    assertThat(resultStudentCourse.getTakeCourseId()).matches(UUID_REGEXP);
+    assertThat(resultStudentCourse.getTakeCourseId()).isNotNull();
+    assertThat(resultStudentCourse.getTakeCourseId()).isNotEmpty();
     assertThat(resultStudentCourse.getCourseId()).isEqualTo(studentsCourses.getCourseId());
     assertThat(resultStudentCourse.getStudentId()).isEqualTo(studentsCourses.getStudentId());
     assertThat(resultStudentCourse.getStartDate()).isCloseTo(studentsCourses.getStartDate(),

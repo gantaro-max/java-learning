@@ -23,8 +23,8 @@
     VALUES(#{studentId},#{fullName},#{kanaName},#{nickName},#{email},#{address},#{age},#{gender},#{remark})
   </insert>
   <insert id="setNewCourse" parameterType="raisetech.studentmanagement.data.StudentsCourses">
-    INSERT INTO students_courses(course_id,student_id,course_name,start_date)
-    VALUES(#{courseId},#{studentId},#{courseName},#{startDate})
+    INSERT INTO students_courses(take_course_id,course_id,student_id,course_name,start_date)
+    VALUES(#{takeCourseId},#{courseId},#{studentId},#{courseName},#{startDate})
   </insert>
 
   <update id="updateStudent" parameterType="raisetech.studentmanagement.data.Student">

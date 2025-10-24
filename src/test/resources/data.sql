@@ -2,9 +2,9 @@ INSERT INTO students VALUES('11111111-1111-1111-1111-111111111111','山田太郎
 INSERT INTO students VALUES('22222222-2222-2222-2222-222222222222','鈴木花子','スズキハナコ','ハナコ','suzuki@example.com','東京都世田谷区',20,'女','特になし',false);
 INSERT INTO students VALUES('33333333-3333-3333-3333-333333333333','佐藤健一','サトウケンイチ','さとけん','sato@example.com','兵庫県神戸市',34,'男','受け放題',false);
 INSERT INTO students VALUES('44444444-4444-4444-4444-444444444444','岩本昌男','イワモトマサオ','がんたろう','iwamoto@example.com','岡山県岡山市',58,'男','特になし',false);
-INSERT INTO students_courses (course_id,student_id,course_name,start_date) VALUES('1001','11111111-1111-1111-1111-111111111111','AWS','2024-10-14 11:00:00');
-INSERT INTO students_courses (course_id,student_id,course_name,start_date) VALUES('2001','22222222-2222-2222-2222-222222222222','WP','2025-10-15 12:00:00');
-INSERT INTO students_courses (course_id,student_id,course_name,start_date) VALUES('3001','33333333-3333-3333-3333-333333333333','FE','2024-10-16 13:00:00');
-INSERT INTO students_courses (course_id,student_id,course_name,start_date) VALUES('4001','44444444-4444-4444-4444-444444444444','JAVA','2025-10-17 14:00:00');
-INSERT INTO students_courses (course_id,student_id,course_name,start_date) VALUES('4001','11111111-1111-1111-1111-111111111111','JAVA','2025-10-18 15:00:00');
-INSERT INTO students_courses (course_id,student_id,course_name,start_date) VALUES('4001','33333333-3333-3333-3333-333333333333','JAVA','2025-10-19 16:00:00');
+INSERT INTO students_courses (take_course_id,course_id,student_id,course_name,start_date) VALUES('11111111-2222-3333-4444-555555555555','1001','11111111-1111-1111-1111-111111111111','AWS','2024-10-14 11:00:00');
+INSERT INTO students_courses (take_course_id,course_id,student_id,course_name,start_date) VALUES('22222222-3333-4444-5555-666666666666','2001','22222222-2222-2222-2222-222222222222','WP','2025-10-15 12:00:00');
+INSERT INTO students_courses (take_course_id,course_id,student_id,course_name,start_date) VALUES('33333333-4444-5555-6666-777777777777','3001','33333333-3333-3333-3333-333333333333','FE','2024-10-16 13:00:00');
+INSERT INTO students_courses (take_course_id,course_id,student_id,course_name,start_date) VALUES('44444444-5555-6666-7777-888888888888','4001','44444444-4444-4444-4444-444444444444','JAVA','2025-10-17 14:00:00');
+INSERT INTO students_courses (take_course_id,course_id,student_id,course_name,start_date) VALUES('55555555-6666-7777-8888-999999999999','4001','11111111-1111-1111-1111-111111111111','JAVA','2025-10-18 15:00:00');
+INSERT INTO students_courses (take_course_id,course_id,student_id,course_name,start_date) VALUES('66666666-7777-8888-9999-111111111111','4001','33333333-3333-3333-3333-333333333333','JAVA','2025-10-19 16:00:00');
