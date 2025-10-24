@@ -4,8 +4,7 @@ CREATE TABLE students (student_id VARCHAR(36) PRIMARY KEY
     ,remark VARCHAR(255),is_deleted BOOLEAN NOT NULL DEFAULT false);
 
 
-CREATE TABLE students_courses(course_id VARCHAR(36) NOT NULL
+CREATE TABLE students_courses(take_course_id VARCHAR(36) PRIMARY KEY,course_id VARCHAR(36) NOT NULL
     ,student_id VARCHAR(36) NOT NULL,course_name VARCHAR(100) NOT NULL
     ,start_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,complete_date TIMESTAMP
-    ,PRIMARY KEY (course_id,student_id,start_date)
     ,FOREIGN KEY (student_id) REFERENCES students(student_id));

@@ -8,14 +8,16 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@EqualsAndHashCode(of = {"courseId", "studentId", "startDate"})
+@EqualsAndHashCode(of = {"takeCourseId", "courseId", "studentId", "startDate"})
 public class StudentsCourses {
 
-  @NotEmpty(message = "コースIDは空にできません。")
+  @NotEmpty(message = "受講コースIDは空にできません")
+  private String takeCourseId;
+  @NotEmpty(message = "コースIDは空にできません")
   private String courseId;
-  @NotEmpty(message = "IDは空にできません。")
+  @NotEmpty(message = "IDは空にできません")
   private String studentId;
-  @NotEmpty(message = "コース名は空にできません。")
+  @NotEmpty(message = "コース名は空にできません")
   private String courseName;
   private LocalDateTime startDate;
   private LocalDateTime completeDate;
