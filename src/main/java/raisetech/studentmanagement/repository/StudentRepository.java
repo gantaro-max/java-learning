@@ -2,6 +2,7 @@ package raisetech.studentmanagement.repository;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import raisetech.studentmanagement.data.Apply;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 
@@ -24,6 +25,13 @@ public interface StudentRepository {
    * @return 受講生コース情報（全件）
    */
   List<StudentsCourses> getStudentCourseList();
+
+  /**
+   * 受講生コース申込み状況の全件検索を行います。
+   *
+   * @return 受講生コース申込状況（全件）
+   */
+  List<Apply> getApplyList();
 
   /**
    * 受講生の検索を行います。
@@ -54,6 +62,13 @@ public interface StudentRepository {
    * @param newCourse 受講生コース情報
    */
   void setNewCourse(StudentsCourses newCourse);
+
+  /**
+   * 受講生コース申込状況の登録を行います。
+   *
+   * @param newApply 受講生コース申込状況
+   */
+  void setNewApply(Apply newApply);
 
   /**
    * 受講生情報の更新処理です。

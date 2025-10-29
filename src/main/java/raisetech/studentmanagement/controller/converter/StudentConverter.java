@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
+import raisetech.studentmanagement.data.Apply;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
@@ -76,6 +77,30 @@ public class StudentConverter {
     studentsCourses.setStartDate(LocalDateTime.now());
 
     return studentsCourses;
+  }
+
+  public List<Apply> convertApplyListByStudentCourses(List<Apply> applyList,
+      List<StudentsCourses> studentsCourses) {
+    List<Apply> studentApply = new ArrayList<>();
+    studentsCourses.forEach(course -> {
+      applyList.forEach(apply -> {
+        if (course.getTakeCourseId().equals(apply.getTakeCourseId())) {
+          studentApply.add(apply);
+        }
+      });
+    });
+
+    return studentApply;
+  }
+
+  public Apply convertApply(StudentsCourses studentsCourses) {
+    Apply apply = new Apply();
+
+    apply.setApplyId(UUID.randomUUID().toString());
+    apply.setTakeCourseId(studentsCourses.getTakeCourseId());
+    apply.setApplyStatus("仮申込");
+
+    return apply;
   }
 
   public Student convertRegisterToStudent(RegisterStudent registerStudent) {

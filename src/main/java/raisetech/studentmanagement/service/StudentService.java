@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.studentmanagement.controller.converter.StudentConverter;
+import raisetech.studentmanagement.data.Apply;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
@@ -55,8 +56,13 @@ public class StudentService {
     }
     Student foundStudent = opStudent.get();
     ResponseStudent responseStudent = converter.convertStudentToResponse(foundStudent);
-    StudentDetail studentDetail = new StudentDetail(responseStudent,
-        repository.getStudentCourse(studentId));
+    List<Apply> applyList = repository.getApplyList();
+    List<StudentsCourses> studentCourses = repository.getStudentCourse(studentId);
+    List<Apply> studentApply = converter.convertApplyListByStudentCourses(applyList,
+        studentCourses);
+
+    StudentDetail studentDetail = new StudentDetail(responseStudent, studentCourses,
+        studentApply);
     return Optional.of(studentDetail);
   }
 
@@ -70,11 +76,16 @@ public class StudentService {
   public StudentDetail setStudentNewCourse(RegisterStudent registerStudent) {
     Student student = converter.convertRegisterToStudent(registerStudent);
     StudentsCourses newStudentCourse = converter.convertStudentCourse(registerStudent, student);
+    Apply newApply = converter.convertApply(newStudentCourse);
     repository.setStudentData(student);
     repository.setNewCourse(newStudentCourse);
+    repository.setNewApply(newApply);
     ResponseStudent responseStudent = converter.convertStudentToResponse(student);
     List<StudentsCourses> newStudentsCourses = repository.getStudentCourse(student.getStudentId());
-    return new StudentDetail(responseStudent, newStudentsCourses);
+    List<Apply> allApplyList = repository.getApplyList();
+    List<Apply> applyList = converter.convertApplyListByStudentCourses(allApplyList,
+        newStudentsCourses);
+    return new StudentDetail(responseStudent, newStudentsCourses, applyList);
   }
 
   /**
@@ -93,7 +104,10 @@ public class StudentService {
     repository.updateStudent(newStudent);
     ResponseStudent responseStudent = converter.convertStudentToResponse(newStudent);
     List<StudentsCourses> studentsCourses = repository.getStudentCourse(newStudent.getStudentId());
-    return new StudentDetail(responseStudent, studentsCourses);
+    List<Apply> allApplyList = repository.getApplyList();
+    List<Apply> studentApplyList = converter.convertApplyListByStudentCourses(allApplyList,
+        studentsCourses);
+    return new StudentDetail(responseStudent, studentsCourses, studentApplyList);
   }
 
 }
