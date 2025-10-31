@@ -15,6 +15,7 @@ import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.ResponseStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
+import raisetech.studentmanagement.domain.UpCourseApply;
 import raisetech.studentmanagement.domain.UpdateStudent;
 
 /**
@@ -33,7 +34,7 @@ public class StudentConverter {
    * @return 受講生詳細情報のリスト
    */
   public List<StudentDetail> convertStudentDetailList(List<Student> students,
-      List<StudentsCourses> studentCourses) {
+      List<StudentsCourses> studentCourses, List<Apply> applyList) {
     List<StudentDetail> studentDetails = new ArrayList<>();
     students.forEach(student -> {
       StudentDetail studentDetail = new StudentDetail();
@@ -42,7 +43,16 @@ public class StudentConverter {
       List<StudentsCourses> convertStudentCourses = studentCourses.stream()
           .filter(studentCourse -> student.getStudentId().equals(studentCourse.getStudentId()))
           .collect(Collectors.toList());
+      List<Apply> studentApply = new ArrayList<>();
+      convertStudentCourses.forEach(course -> {
+        applyList.forEach(apply -> {
+          if (course.getTakeCourseId().equals(apply.getTakeCourseId())) {
+            studentApply.add(apply);
+          }
+        });
+      });
       studentDetail.setStudentsCourses(convertStudentCourses);
+      studentDetail.setApplyList(studentApply);
       studentDetails.add(studentDetail);
     });
     return studentDetails.stream()
@@ -122,6 +132,36 @@ public class StudentConverter {
     student.setDeleted(updateStudent.isDeleted());
 
     return student;
+  }
+
+  public List<StudentsCourses> convertUpdateToCourses(List<UpCourseApply> upCourseApplyList,
+      List<StudentsCourses> studentsCourses) {
+    for (StudentsCourses course : studentsCourses) {
+      for (UpCourseApply upCourseApply : upCourseApplyList) {
+        if (course.getTakeCourseId().equals(upCourseApply.getTakeCourseId())) {
+          course.setCourseId(upCourseApply.getCourseId());
+          course.setCourseName(getCourseNameById(course.getCourseId()));
+          if (course.getCompleteDate() == null && upCourseApply.getApplyStatus()
+              .equals("受講終了")) {
+            course.setCompleteDate(LocalDateTime.now());
+          }
+        }
+      }
+    }
+
+    return studentsCourses;
+  }
+
+  public List<Apply> convertUpdateToApply(List<UpCourseApply> upCourseApplyList,
+      List<Apply> applyList) {
+    for (Apply apply : applyList) {
+      for (UpCourseApply upCourseApply : upCourseApplyList) {
+        if (apply.getApplyId().equals(upCourseApply.getApplyId())) {
+          apply.setApplyStatus(upCourseApply.getApplyStatus());
+        }
+      }
+    }
+    return applyList;
   }
 
   public ResponseStudent convertStudentToResponse(Student student) {

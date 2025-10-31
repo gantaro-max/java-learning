@@ -12,7 +12,7 @@ import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.ResponseStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
-import raisetech.studentmanagement.domain.UpdateStudent;
+import raisetech.studentmanagement.domain.UpdateDetail;
 import raisetech.studentmanagement.exception.ResourceNotFoundException;
 import raisetech.studentmanagement.repository.StudentRepository;
 
@@ -39,7 +39,8 @@ public class StudentService {
   public List<StudentDetail> getStudentDetailList() {
     List<Student> students = repository.getStudentList();
     List<StudentsCourses> studentsCourses = repository.getStudentCourseList();
-    return converter.convertStudentDetailList(students, studentsCourses);
+    List<Apply> applyList = repository.getApplyList();
+    return converter.convertStudentDetailList(students, studentsCourses, applyList);
   }
 
   /**
@@ -91,23 +92,37 @@ public class StudentService {
   /**
    * 受講生の更新処理を行います。
    *
-   * @param updateStudent 受講生更新情報
+   * @param updateDetail 更新用受講生詳細情報
    * @return 受講生詳細
    */
   @Transactional
-  public StudentDetail updateStudent(UpdateStudent updateStudent, String studentId) {
+  public StudentDetail updateStudent(UpdateDetail updateDetail, String studentId) {
     Student searchStudent = repository.getStudentById(studentId);
     if (searchStudent == null) {
       throw new ResourceNotFoundException("該当の受講生が見つかりません");
     }
-    Student newStudent = converter.convertUpdateToStudent(updateStudent, searchStudent);
-    repository.updateStudent(newStudent);
-    ResponseStudent responseStudent = converter.convertStudentToResponse(newStudent);
-    List<StudentsCourses> studentsCourses = repository.getStudentCourse(newStudent.getStudentId());
+    List<StudentsCourses> searchCourses = repository.getStudentCourse(studentId);
+
     List<Apply> allApplyList = repository.getApplyList();
-    List<Apply> studentApplyList = converter.convertApplyListByStudentCourses(allApplyList,
-        studentsCourses);
-    return new StudentDetail(responseStudent, studentsCourses, studentApplyList);
+    List<Apply> searchApply = converter.convertApplyListByStudentCourses(allApplyList,
+        searchCourses);
+
+    Student newStudent = converter.convertUpdateToStudent(updateDetail.getUpdateStudent(),
+        searchStudent);
+    List<StudentsCourses> newStudentsCourses = converter.convertUpdateToCourses(
+        updateDetail.getUpCourseApplyList(), searchCourses);
+    List<Apply> newApplyList = converter.convertUpdateToApply(updateDetail.getUpCourseApplyList(),
+        searchApply);
+    repository.updateStudent(newStudent);
+    for (StudentsCourses course : newStudentsCourses) {
+      repository.updateStudentsCourses(course);
+    }
+    for (Apply apply : newApplyList) {
+      repository.updateApply(apply);
+    }
+    ResponseStudent responseStudent = converter.convertStudentToResponse(newStudent);
+
+    return new StudentDetail(responseStudent, newStudentsCourses, newApplyList);
   }
 
 }

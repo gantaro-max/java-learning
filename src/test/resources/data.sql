@@ -8,3 +8,9 @@ INSERT INTO students_courses (take_course_id,course_id,student_id,course_name,st
 INSERT INTO students_courses (take_course_id,course_id,student_id,course_name,start_date) VALUES('44444444-5555-6666-7777-888888888888','4001','44444444-4444-4444-4444-444444444444','JAVA','2025-10-17 14:00:00');
 INSERT INTO students_courses (take_course_id,course_id,student_id,course_name,start_date) VALUES('55555555-6666-7777-8888-999999999999','4001','11111111-1111-1111-1111-111111111111','JAVA','2025-10-18 15:00:00');
 INSERT INTO students_courses (take_course_id,course_id,student_id,course_name,start_date) VALUES('66666666-7777-8888-9999-111111111111','4001','33333333-3333-3333-3333-333333333333','JAVA','2025-10-19 16:00:00');
+INSERT INTO apply (apply_id,take_course_id,apply_status) VALUES('11111111-9999-2222-8888-333333333333','11111111-2222-3333-4444-555555555555','受講終了');
+INSERT INTO apply (apply_id,take_course_id,apply_status) VALUES('22222222-8888-3333-7777-444444444444','22222222-3333-4444-5555-666666666666','本申込');
+INSERT INTO apply (apply_id,take_course_id,apply_status) VALUES('33333333-7777-4444-6666-555555555555','33333333-4444-5555-6666-777777777777','受講終了');
+INSERT INTO apply (apply_id,take_course_id,apply_status) VALUES('44444444-6666-5555-5555-666666666666','44444444-5555-6666-7777-888888888888','仮申込');
+INSERT INTO apply (apply_id,take_course_id,apply_status) VALUES('55555555-5555-6666-4444-777777777777','55555555-6666-7777-8888-999999999999','受講中');
+INSERT INTO apply (apply_id,take_course_id,apply_status) VALUES('66666666-4444-7777-3333-888888888888','66666666-7777-8888-9999-111111111111','受講中');

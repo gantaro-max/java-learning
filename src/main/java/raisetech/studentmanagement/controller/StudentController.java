@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
-import raisetech.studentmanagement.domain.UpdateStudent;
+import raisetech.studentmanagement.domain.UpdateDetail;
 import raisetech.studentmanagement.exception.ResourceNotFoundException;
 import raisetech.studentmanagement.service.StudentService;
 
@@ -59,7 +59,7 @@ public class StudentController {
    * @param registerStudent 受講生登録情報
    * @return 登録処理の結果
    */
-  @Operation(summary = "受講生登録", description = "受講生と受講生コース情報を登録します")
+  @Operation(summary = "受講生登録", description = "受講生と受講生コース情報と申込状況を登録します")
   @PostMapping("/students")
   public ResponseEntity<StudentDetail> registerStudent(
       @Valid @RequestBody RegisterStudent registerStudent) {
@@ -90,7 +90,7 @@ public class StudentController {
   /**
    * 受講生情報の更新処理です。 受講生の更新を行いその結果を返します。
    *
-   * @param updateStudent 受講生更新情報
+   * @param updateDetail 更新用受講生詳細情報
    * @return 更新処理の結果
    */
   @Operation(summary = "受講生情報更新", description = "受講生情報の更新を行います")
@@ -98,9 +98,9 @@ public class StudentController {
   public ResponseEntity<StudentDetail> updateStudent(
       @Pattern(regexp = UUID_REGEXP,
           message = "IDの形式が不正です") @PathVariable("studentId") String studentId,
-      @Valid @RequestBody UpdateStudent updateStudent) {
-    StudentDetail updateDetail = service.updateStudent(updateStudent, studentId);
-    return new ResponseEntity<>(updateDetail, HttpStatus.OK);
+      @Valid @RequestBody UpdateDetail updateDetail) {
+    StudentDetail updatedDetail = service.updateStudent(updateDetail, studentId);
+    return new ResponseEntity<>(updatedDetail, HttpStatus.OK);
   }
 
 

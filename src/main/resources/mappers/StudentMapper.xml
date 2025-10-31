@@ -40,4 +40,15 @@
     #{age},gender = #{gender},remark = #{remark},is_deleted = #{deleted} WHERE student_id =
     #{studentId}
   </update>
+
+  <update id="updateStudentsCourses"
+    parameterType="raisetech.studentmanagement.data.StudentsCourses">
+    UPDATE students_courses SET course_id = #{courseId},course_name = #{courseName},complete_date =
+    #{completeDate} WHERE take_course_id = #{takeCourseId}
+  </update>
+
+  <update id="updateApply" parameterType="raisetech.studentmanagement.data.Apply">
+    UPDATE apply SET apply_status = #{applyStatus} WHERE apply_id = #{applyId}
+  </update>
+
 </mapper>

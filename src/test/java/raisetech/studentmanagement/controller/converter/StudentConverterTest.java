@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import raisetech.studentmanagement.data.Apply;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
@@ -43,16 +44,28 @@ class StudentConverterTest {
     student.setGender("女");
     student.setRemark("なし");
     student.setDeleted(false);
+
     StudentsCourses studentsCourses = new StudentsCourses();
     studentsCourses.setTakeCourseId("77777777-8888-9999-1111-222222222222");
     studentsCourses.setCourseId("4001");
     studentsCourses.setStudentId(student.getStudentId());
     studentsCourses.setCourseName("JAVA");
     studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
+
+    Apply apply = new Apply();
+    apply.setApplyId("99999999-9999-9999-9999-999999999999");
+    apply.setTakeCourseId(studentsCourses.getTakeCourseId());
+    apply.setApplyStatus("受講中");
+
     List<Student> studentList = new ArrayList<>();
     studentList.add(student);
+
     List<StudentsCourses> studentsCoursesList = new ArrayList<>();
     studentsCoursesList.add(studentsCourses);
+
+    List<Apply> applyList = new ArrayList<>();
+    applyList.add(apply);
+
     ResponseStudent responseStudent = new ResponseStudent();
     responseStudent.setStudentId(student.getStudentId());
     responseStudent.setFullName(student.getFullName());
@@ -63,12 +76,14 @@ class StudentConverterTest {
     responseStudent.setAge(student.getAge());
     responseStudent.setGender(student.getGender());
     responseStudent.setRemark(student.getRemark());
+
     StudentDetail studentDetail = new StudentDetail();
     studentDetail.setResponseStudent(responseStudent);
     studentDetail.setStudentsCourses(studentsCoursesList);
+    studentDetail.setApplyList(applyList);
 
     List<StudentDetail> resultDetailList = sut.convertStudentDetailList(studentList,
-        studentsCoursesList);
+        studentsCoursesList, applyList);
 
     assertThat(resultDetailList.get(0)).isEqualTo(studentDetail);
   }

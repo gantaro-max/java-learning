@@ -23,5 +23,5 @@ public class StudentDetail {
   @Schema(description = "受講生コース情報")
   private List<StudentsCourses> studentsCourses;
   @Schema(description = "受講生コース申込状況")
-  private List<Apply> entryList;
+  private List<Apply> applyList;
 }
