@@ -2,7 +2,6 @@ package raisetech.studentmanagement.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +17,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import raisetech.studentmanagement.controller.converter.StudentConverter;
+import raisetech.studentmanagement.data.Apply;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
@@ -50,17 +50,20 @@ class StudentServiceTest {
   void getStudentAllDataShouldSucceed() {
     List<Student> studentList = new ArrayList<>();
     List<StudentsCourses> studentsCourses = new ArrayList<>();
+    List<Apply> applyList = new ArrayList<>();
     List<StudentDetail> checkDetailList = new ArrayList<>();
     when(repository.getStudentList()).thenReturn(studentList);
     when(repository.getStudentCourseList()).thenReturn(studentsCourses);
-    when(converter.convertStudentDetailList(studentList, studentsCourses)).thenReturn(
+    when(repository.getApplyList()).thenReturn((applyList));
+    when(converter.convertStudentDetailList(studentList, studentsCourses, applyList)).thenReturn(
         checkDetailList);
 
     List<StudentDetail> studentDetailList = sut.getStudentDetailList();
 
     verify(repository, times(1)).getStudentList();
     verify(repository, times(1)).getStudentCourseList();
-    verify(converter, times(1)).convertStudentDetailList(studentList, studentsCourses);
+    verify(repository, times(1)).getApplyList();
+    verify(converter, times(1)).convertStudentDetailList(studentList, studentsCourses, applyList);
 
     assertThat(studentDetailList).isEqualTo(checkDetailList);
   }
@@ -70,23 +73,32 @@ class StudentServiceTest {
     String studentId = "00000000-0000-0000-0000-000000000000";
     Student student = new Student();
     List<StudentsCourses> studentsCourses = new ArrayList<>();
+    List<Apply> applyList = new ArrayList<>();
+    List<Apply> responseApplyList = new ArrayList<>();
     ResponseStudent responseStudent = new ResponseStudent();
+    StudentDetail responseDetail = new StudentDetail();
+    responseDetail.setResponseStudent(responseStudent);
+    responseDetail.setStudentsCourses(studentsCourses);
+    responseDetail.setApplyList(responseApplyList);
 
     when(repository.getStudentById(studentId)).thenReturn(student);
     when(repository.getStudentCourse(studentId)).thenReturn(studentsCourses);
+    when(repository.getApplyList()).thenReturn(applyList);
     when(converter.convertStudentToResponse(student)).thenReturn(responseStudent);
+    when(converter.convertApplyListByStudentCourses(applyList, studentsCourses)).thenReturn(
+        responseApplyList);
 
     Optional<StudentDetail> opStudentDetail = sut.getStudentDetail(studentId);
 
     verify(repository, times(1)).getStudentById(studentId);
     verify(repository, times(1)).getStudentCourse(studentId);
+    verify(repository, times(1)).getApplyList();
     verify(converter, times(1)).convertStudentToResponse(student);
+    verify(converter, times(1)).convertApplyListByStudentCourses(applyList, studentsCourses);
 
-    assertTrue(opStudentDetail.isPresent());
-    StudentDetail studentDetail = opStudentDetail.get();
+    assertThat(opStudentDetail).isPresent().get().usingRecursiveComparison()
+        .isEqualTo(responseDetail);
 
-    assertThat(studentDetail.getResponseStudent()).isEqualTo(responseStudent);
-    assertThat(studentDetail.getStudentsCourses()).isEqualTo(studentsCourses);
   }
 
   @Test

@@ -11,6 +11,10 @@
   <select id="getStudentCourseList" resultType="raisetech.studentmanagement.data.StudentsCourses">
     SELECT * FROM students_courses
   </select>
+  <select id="getApplyList" resultType="raisetech.studentmanagement.data.Apply">
+    SELECT * FROM apply
+  </select>
+
   <select id="getStudentById" resultMap="studentResultMap">
     SELECT * FROM students WHERE is_deleted = false AND student_id = #{studentId}
   </select>
@@ -23,8 +27,12 @@
     VALUES(#{studentId},#{fullName},#{kanaName},#{nickName},#{email},#{address},#{age},#{gender},#{remark})
   </insert>
   <insert id="setNewCourse" parameterType="raisetech.studentmanagement.data.StudentsCourses">
-    INSERT INTO students_courses(course_id,student_id,course_name,start_date)
-    VALUES(#{courseId},#{studentId},#{courseName},#{startDate})
+    INSERT INTO students_courses(take_course_id,course_id,student_id,course_name,start_date)
+    VALUES(#{takeCourseId},#{courseId},#{studentId},#{courseName},#{startDate})
+  </insert>
+  <insert id="setNewApply" parameterType="raisetech.studentmanagement.data.Apply">
+    INSERT INTO apply(apply_id,take_course_id,apply_status)
+    VALUES(#{applyId},#{takeCourseId},#{applyStatus})
   </insert>
 
   <update id="updateStudent" parameterType="raisetech.studentmanagement.data.Student">
@@ -32,4 +40,15 @@
     #{age},gender = #{gender},remark = #{remark},is_deleted = #{deleted} WHERE student_id =
     #{studentId}
   </update>
+
+  <update id="updateStudentsCourses"
+    parameterType="raisetech.studentmanagement.data.StudentsCourses">
+    UPDATE students_courses SET course_id = #{courseId},course_name = #{courseName},complete_date =
+    #{completeDate} WHERE take_course_id = #{takeCourseId}
+  </update>
+
+  <update id="updateApply" parameterType="raisetech.studentmanagement.data.Apply">
+    UPDATE apply SET apply_status = #{applyStatus} WHERE apply_id = #{applyId}
+  </update>
+
 </mapper>

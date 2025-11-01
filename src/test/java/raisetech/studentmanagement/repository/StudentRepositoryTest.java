@@ -66,6 +66,7 @@ class StudentRepositoryTest {
   void 受講生コース情報全件検索が行えること() {
     String studentId = "22222222-2222-2222-2222-222222222222";
     StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId("22222222-3333-4444-5555-666666666666");
     studentsCourses.setCourseId("2001");
     studentsCourses.setStudentId(studentId);
     studentsCourses.setCourseName("WP");
@@ -84,6 +85,7 @@ class StudentRepositoryTest {
   void 受講生コース情報の登録が行えること() {
     String studentId = "22222222-2222-2222-2222-222222222222";
     StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId("77777777-8888-9999-1111-222222222222");
     studentsCourses.setCourseId("5001");
     studentsCourses.setStudentId(studentId);
     studentsCourses.setCourseName("DE");
@@ -134,6 +136,7 @@ class StudentRepositoryTest {
   void 受講生IDによる受講生コース情報が検索できること() {
     String studentId = "22222222-2222-2222-2222-222222222222";
     StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId("22222222-3333-4444-5555-666666666666");
     studentsCourses.setCourseId("2001");
     studentsCourses.setStudentId(studentId);
     studentsCourses.setCourseName("WP");
