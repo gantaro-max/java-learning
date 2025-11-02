@@ -239,24 +239,34 @@ class StudentControllerTest {
 
   @Test
   void 更新処理バリデーションエラーの際に400を返す() throws Exception {
-    UpdateStudent invalidUpdate = new UpdateStudent();
-    invalidUpdate.setFullName("");
-    invalidUpdate.setKanaName("");
-    invalidUpdate.setEmail("345678");
-    invalidUpdate.setAge(5);
+    UpdateStudent invalidUpStudent = new UpdateStudent();
+    invalidUpStudent.setFullName("");
+    invalidUpStudent.setKanaName("");
+    invalidUpStudent.setEmail("345678");
+    invalidUpStudent.setAge(5);
+    UpCourseApply invalidCourseApply = new UpCourseApply();
+    invalidCourseApply.setTakeCourseId("");
+    invalidCourseApply.setCourseId("");
+    invalidCourseApply.setApplyId("");
+    invalidCourseApply.setApplyStatus("");
+    List<UpCourseApply> invalidCourseApplyList = new ArrayList<>(List.of(invalidCourseApply));
+    UpdateDetail invalidUpDetail = new UpdateDetail(invalidUpStudent, invalidCourseApplyList);
 
     mockMvc
-        .perform(put("/students/1").contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(invalidUpdate)))
+        .perform(put("/students/12345678-1234-1234-1234-123456789123").contentType(
+                MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(invalidUpDetail)))
         .andExpect(status().isBadRequest()).andExpect(jsonPath("$.timestamp").isNotEmpty())
         .andExpect(jsonPath("$.status").value(400))
         .andExpect(jsonPath("$.error").value("Bad Request"))
         .andExpect(jsonPath("$.message").value("入力にバリデーションエラーがあります"))
-        .andExpect(jsonPath("$.path").value("/students/1"))
-        .andExpect(jsonPath("$.errors", hasSize(4)))
+        .andExpect(jsonPath("$.path").value("/students/12345678-1234-1234-1234-123456789123"))
+        .andExpect(jsonPath("$.errors", hasSize(8)))
         .andExpect(jsonPath("$.errors[*].message",
             containsInAnyOrder("名前は空にできません", "カナ名は空にできません",
-                "有効なメールアドレス形式で入力して下さい", "登録は18以上になります")));
+                "有効なメールアドレス形式で入力して下さい", "登録は18以上になります",
+                "受講IDは空にできません", "コースIDは空にできません", "申込IDは空にできません",
+                "申込状況は空にできません")));
   }
 
   @Test
