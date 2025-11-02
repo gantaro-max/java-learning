@@ -6,12 +6,14 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Schema(description = "更新用受講生情報")
 @Getter
 @Setter
+@EqualsAndHashCode
 public class UpdateStudent {
 
   @Schema(description = "受講生名", requiredMode = RequiredMode.REQUIRED)

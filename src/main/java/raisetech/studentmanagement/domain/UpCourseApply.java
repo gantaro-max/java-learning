@@ -3,11 +3,13 @@ package raisetech.studentmanagement.domain;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import jakarta.validation.constraints.NotBlank;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@EqualsAndHashCode
 public class UpCourseApply {
 
   @Schema(description = "受講ID", requiredMode = RequiredMode.REQUIRED)
