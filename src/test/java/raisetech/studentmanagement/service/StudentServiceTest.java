@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,8 @@ import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.ResponseStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
+import raisetech.studentmanagement.domain.UpCourseApply;
+import raisetech.studentmanagement.domain.UpdateDetail;
 import raisetech.studentmanagement.domain.UpdateStudent;
 import raisetech.studentmanagement.exception.ResourceNotFoundException;
 import raisetech.studentmanagement.repository.StudentRepository;
@@ -40,6 +43,8 @@ class StudentServiceTest {
   private ArgumentCaptor<Student> captorStudent;
   @Captor
   private ArgumentCaptor<StudentsCourses> captorStudentCourse;
+  @Captor
+  private ArgumentCaptor<Apply> captorApply;
 
   @BeforeEach
   void before() {
@@ -126,34 +131,55 @@ class StudentServiceTest {
     student.setGender(registerStudent.getGender());
     student.setRemark(registerStudent.getRemark());
 
+    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
     StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId(testTakeCourseId);
     studentsCourses.setCourseId(registerStudent.getCourseId());
+    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
+
+    String testApplyId = "99999999-9999-9999-9999-999999999999";
+    Apply apply = new Apply();
+    apply.setApplyId(testApplyId);
+    apply.setTakeCourseId(testTakeCourseId);
+    apply.setApplyStatus("仮申込");
 
     ResponseStudent responseStudent = new ResponseStudent();
-    List<StudentsCourses> studentsCoursesList = new ArrayList<>();
+    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
+    List<Apply> applyList = new ArrayList<>(List.of(apply));
 
     when(converter.convertRegisterToStudent(registerStudent)).thenReturn(student);
     when(converter.convertStudentCourse(registerStudent, student)).thenReturn(studentsCourses);
+    when(converter.convertApply(studentsCourses)).thenReturn(apply);
     when(converter.convertStudentToResponse(student)).thenReturn(responseStudent);
     when(repository.getStudentCourse(student.getStudentId())).thenReturn(studentsCoursesList);
+    when(repository.getApplyList()).thenReturn(applyList);
+    when(converter.convertApplyListByStudentCourses(applyList, studentsCoursesList)).thenReturn(
+        applyList);
 
     StudentDetail studentDetail = sut.setStudentNewCourse(registerStudent);
 
     verify(converter, times(1)).convertRegisterToStudent(registerStudent);
     verify(converter, times(1)).convertStudentCourse(registerStudent, student);
+    verify(converter, times(1)).convertApply(studentsCourses);
     verify(converter, times(1)).convertStudentToResponse(student);
     verify(repository, times(1)).getStudentCourse(student.getStudentId());
+    verify(repository, times(1)).getApplyList();
+    verify(converter, times(1)).convertApplyListByStudentCourses(applyList, studentsCoursesList);
     verify(repository, times(1)).setStudentData(captorStudent.capture());
     verify(repository, times(1)).setNewCourse(captorStudentCourse.capture());
+    verify(repository, times(1)).setNewApply(captorApply.capture());
 
     Student capturedStudent = captorStudent.getValue();
     StudentsCourses capturedStudentCourse = captorStudentCourse.getValue();
+    Apply capturedApply = captorApply.getValue();
 
     assertThat(capturedStudent).isEqualTo(student);
     assertThat(capturedStudentCourse).isEqualTo(studentsCourses);
+    assertThat(capturedApply).isEqualTo(apply);
 
     assertThat(studentDetail.getResponseStudent()).isEqualTo(responseStudent);
     assertThat(studentDetail.getStudentsCourses()).isEqualTo(studentsCoursesList);
+    assertThat(studentDetail.getApplyList()).isEqualTo(applyList);
 
   }
 
@@ -171,6 +197,17 @@ class StudentServiceTest {
     updateStudent.setRemark("受け放題");
     updateStudent.setDeleted(false);
 
+    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
+    String testApplyId = "99999999-9999-9999-9999-999999999999";
+    UpCourseApply upCourseApply = new UpCourseApply();
+    upCourseApply.setTakeCourseId(testTakeCourseId);
+    upCourseApply.setCourseId("4001");
+    upCourseApply.setApplyId(testApplyId);
+    upCourseApply.setApplyStatus("受講中");
+    List<UpCourseApply> upCourseApplyList = new ArrayList<>(List.of(upCourseApply));
+
+    UpdateDetail updateDetail = new UpdateDetail(updateStudent, upCourseApplyList);
+
     Student student = new Student();
     student.setStudentId(studentId);
     Student newStudent = new Student();
@@ -185,27 +222,57 @@ class StudentServiceTest {
     newStudent.setRemark(updateStudent.getRemark());
     newStudent.setDeleted(updateStudent.isDeleted());
 
+    StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId(testTakeCourseId);
+    studentsCourses.setCourseId(upCourseApply.getCourseId());
+    studentsCourses.setStudentId(studentId);
+    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
+
+    Apply apply = new Apply();
+    apply.setApplyId(testApplyId);
+    apply.setTakeCourseId(testTakeCourseId);
+    apply.setApplyStatus(upCourseApply.getApplyStatus());
+
     ResponseStudent responseStudent = new ResponseStudent();
-    List<StudentsCourses> studentsCoursesList = new ArrayList<>();
+    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
+    List<Apply> applyList = new ArrayList<>(List.of(apply));
 
     when(repository.getStudentById(studentId)).thenReturn(student);
-    when(converter.convertUpdateToStudent(updateStudent, student)).thenReturn(newStudent);
-    when(converter.convertStudentToResponse(newStudent)).thenReturn(responseStudent);
     when(repository.getStudentCourse(newStudent.getStudentId())).thenReturn(studentsCoursesList);
+    when(repository.getApplyList()).thenReturn(applyList);
+    when(converter.convertApplyListByStudentCourses(applyList, studentsCoursesList)).thenReturn(
+        applyList);
+    when(converter.convertUpdateToStudent(updateStudent, student)).thenReturn(newStudent);
+    when(converter.convertUpdateToCourses(upCourseApplyList, studentsCoursesList)).thenReturn(
+        studentsCoursesList);
+    when(converter.convertUpdateToApply(upCourseApplyList, applyList)).thenReturn(applyList);
+    when(converter.convertStudentToResponse(newStudent)).thenReturn(responseStudent);
 
-    StudentDetail studentDetail = sut.updateStudent(updateStudent, studentId);
+    StudentDetail studentDetail = sut.updateStudent(updateDetail, studentId);
 
     verify(repository, times(1)).getStudentById(studentId);
-    verify(converter, times(1)).convertUpdateToStudent(updateStudent, student);
-    verify(converter, times(1)).convertStudentToResponse(newStudent);
     verify(repository, times(1)).getStudentCourse(newStudent.getStudentId());
+    verify(repository, times(1)).getApplyList();
+    verify(converter, times(1)).convertApplyListByStudentCourses(applyList, studentsCoursesList);
+    verify(converter, times(1)).convertUpdateToStudent(updateStudent, student);
+    verify(converter, times(1)).convertUpdateToCourses(upCourseApplyList, studentsCoursesList);
+    verify(converter, times(1)).convertUpdateToApply(upCourseApplyList, applyList);
+    verify(converter, times(1)).convertStudentToResponse(newStudent);
     verify(repository, times(1)).updateStudent(captorStudent.capture());
+    verify(repository, times(1)).updateStudentsCourses(captorStudentCourse.capture());
+    verify(repository, times(1)).updateApply(captorApply.capture());
 
     Student capturedStudent = captorStudent.getValue();
+    StudentsCourses capturedStudentsCourses = captorStudentCourse.getValue();
+    Apply capturedApply = captorApply.getValue();
 
     assertThat(capturedStudent).isEqualTo(newStudent);
+    assertThat(capturedStudentsCourses).isEqualTo(studentsCourses);
+    assertThat(capturedApply).isEqualTo(apply);
+
     assertThat(studentDetail.getResponseStudent()).isEqualTo(responseStudent);
     assertThat(studentDetail.getStudentsCourses()).isEqualTo(studentsCoursesList);
+    assertThat(studentDetail.getApplyList()).isEqualTo(applyList);
 
   }
 
@@ -213,9 +280,12 @@ class StudentServiceTest {
   void updateNotFoundStudentShouldThrowException() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     UpdateStudent updateStudent = new UpdateStudent();
+    UpCourseApply upCourseApply = new UpCourseApply();
+    List<UpCourseApply> upCourseApplyList = new ArrayList<>(List.of(upCourseApply));
+    UpdateDetail updateDetail = new UpdateDetail(updateStudent, upCourseApplyList);
     when(repository.getStudentById(studentId)).thenReturn(null);
     assertThrows(ResourceNotFoundException.class,
-        () -> sut.updateStudent(updateStudent, studentId));
+        () -> sut.updateStudent(updateDetail, studentId));
   }
 
 }

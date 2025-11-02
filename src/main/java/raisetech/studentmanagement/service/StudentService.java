@@ -68,7 +68,7 @@ public class StudentService {
   }
 
   /**
-   * 受講生と受講生コース情報の登録を行います。
+   * 受講生と受講生コース情報と申込状況の登録を行います。
    *
    * @param registerStudent 受講生登録情報
    * @return 受講生詳細
