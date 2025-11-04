@@ -161,11 +161,11 @@ public class StudentConverter {
   }
 
   /**
-   * 更新用受講生コース情報申込状況と既存の受講生コース情報から更新後の受講生コース情報を作成
+   * 更新用受講生コース申込状況と既存の受講生コース情報から更新用の受講生コース情報を作成
    *
    * @param upCourseApplyList 更新用受講生コース情報申込状況
    * @param studentsCourses   既存の受講生コース情報
-   * @return 更新後の受講生コース情報
+   * @return 更新用の受講生コース情報
    */
   public List<StudentsCourses> convertUpdateToCourses(List<UpCourseApply> upCourseApplyList,
       List<StudentsCourses> studentsCourses) {
@@ -186,11 +186,11 @@ public class StudentConverter {
   }
 
   /**
-   * 更新用受講生コース情報申込状況と既存の申込状況から更新後の申込状況を作成
+   * 更新用受講生コース情報申込状況と既存の申込状況から更新用の申込状況を作成
    *
    * @param upCourseApplyList 更新用受講生コース情報申込状況
    * @param applyList         既存の申込み状況
-   * @return 更新後の申込状況
+   * @return 更新用の申込状況
    */
   public List<Apply> convertUpdateToApply(List<UpCourseApply> upCourseApplyList,
       List<Apply> applyList) {
