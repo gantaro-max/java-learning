@@ -125,4 +125,16 @@ public class StudentService {
     return new StudentDetail(responseStudent, newStudentsCourses, newApplyList);
   }
 
+  public List<StudentDetail> searchStudentsByFullName(String fullName) {
+    List<Student> studentList = repository.searchStudentsByFullName(fullName);
+    List<StudentsCourses> studentsCoursesList = studentList.stream()
+        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
+    List<Apply> applyList = studentsCoursesList.stream()
+        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+        .toList();
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
 }

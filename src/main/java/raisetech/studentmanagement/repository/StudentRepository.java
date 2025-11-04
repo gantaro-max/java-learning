@@ -91,4 +91,14 @@ public interface StudentRepository {
    */
   void updateApply(Apply apply);
 
+  List<Apply> searchApplyByTakeCourseId(String takeCourseId);
+
+  /**
+   * 受講生の検索です。
+   *
+   * @param fullName 受講生名
+   * @return 受講生一覧
+   */
+  List<Student> searchStudentsByFullName(String fullName);
+
 }

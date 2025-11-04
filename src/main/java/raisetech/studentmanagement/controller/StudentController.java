@@ -4,10 +4,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -84,7 +84,7 @@ public class StudentController {
       throw new ResourceNotFoundException("該当が見つかりませんでした ID:" + studentId);
     }
     StudentDetail studentDetail = detail.get();
-    return new ResponseEntity<>(studentDetail, HttpStatus.OK);
+    return ResponseEntity.ok().body(studentDetail);
   }
 
   /**
@@ -100,7 +100,21 @@ public class StudentController {
           message = "IDの形式が不正です") @PathVariable("studentId") String studentId,
       @Valid @RequestBody UpdateDetail updateDetail) {
     StudentDetail updatedDetail = service.updateStudent(updateDetail, studentId);
-    return new ResponseEntity<>(updatedDetail, HttpStatus.OK);
+    return ResponseEntity.ok().body(updatedDetail);
+  }
+
+  /**
+   * 受講生検索です。受講生名から任意の受講生の情報を取得します
+   *
+   * @param fullName 受講生名
+   * @return 検索処理の結果
+   */
+  @GetMapping("/students/{fullName}")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByFullName(
+      @PathVariable("fullName") String fullName) {
+    List<StudentDetail> studentDetailList = new ArrayList<>();
+
+    return ResponseEntity.ok().body(studentDetailList);
   }
 
 
