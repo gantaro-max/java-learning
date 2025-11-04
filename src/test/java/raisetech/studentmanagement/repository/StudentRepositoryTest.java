@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import raisetech.studentmanagement.data.Apply;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 
@@ -181,5 +182,95 @@ class StudentRepositoryTest {
     assertThat(actual).usingRecursiveComparison().isEqualTo(student);
 
   }
+
+  @Test
+  void 受講生コース情報の更新ができること() {
+    String studentId = "22222222-2222-2222-2222-222222222222";
+    String testTakeCourseId = "22222222-3333-4444-5555-666666666666";
+    StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId(testTakeCourseId);
+    studentsCourses.setCourseId("5001");
+    studentsCourses.setStudentId(studentId);
+    studentsCourses.setCourseName("DE");
+    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 15, 12, 0, 0));
+    studentsCourses.setCompleteDate(LocalDateTime.of(2025, 11, 4, 12, 0, 0));
+
+    sut.updateStudentsCourses(studentsCourses);
+    List<StudentsCourses> actualStudentsCourses = sut.getStudentCourse(studentId);
+
+    Optional<StudentsCourses> actual = actualStudentsCourses.stream()
+        .filter(sc -> sc.getTakeCourseId().equals(testTakeCourseId)).findFirst();
+
+    assertThat(actual).isPresent().get().usingRecursiveComparison().isEqualTo(studentsCourses);
+  }
+
+  @Test
+  void 受講生コース申込状況の全件検索できること() {
+    String testApplyId = "11111111-9999-2222-8888-333333333333";
+    Apply apply = new Apply();
+    apply.setApplyId(testApplyId);
+    apply.setTakeCourseId("11111111-2222-3333-4444-555555555555");
+    apply.setApplyStatus("受講終了");
+
+    List<Apply> allApplyList = sut.getApplyList();
+    Optional<Apply> actualApply = allApplyList.stream()
+        .filter(ap -> ap.getApplyId().equals(apply.getApplyId())).findFirst();
+
+    assertThat(allApplyList.size()).isEqualTo(6);
+    assertThat(actualApply).isPresent().get().usingRecursiveComparison().isEqualTo(apply);
+
+  }
+
+  @Test
+  void 受講生コース申込み状況を登録できること() {
+    String studentId = "22222222-2222-2222-2222-222222222222";
+    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
+    StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId(testTakeCourseId);
+    studentsCourses.setCourseId("5001");
+    studentsCourses.setStudentId(studentId);
+    studentsCourses.setCourseName("DE");
+    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 20, 15, 0, 0));
+    studentsCourses.setCompleteDate(null);
+
+    String testApplyId = "77777777-3333-8888-2222-999999999999";
+    Apply apply = new Apply();
+    apply.setApplyId(testApplyId);
+    apply.setTakeCourseId(testTakeCourseId);
+    apply.setApplyStatus("仮申込");
+
+    sut.setNewCourse(studentsCourses);
+    sut.setNewApply(apply);
+
+    List<Apply> applyList = sut.getApplyList();
+
+    Optional<Apply> actualApply = applyList.stream()
+        .filter(ap -> ap.getApplyId().equals(apply.getApplyId())).findFirst();
+
+    assertThat(applyList.size()).isEqualTo(7);
+    assertThat(actualApply).isPresent().get().usingRecursiveComparison().isEqualTo(apply);
+
+  }
+
+  @Test
+  void 受講生コース申込状況を更新できること() {
+    String testApplyId = "22222222-8888-3333-7777-444444444444";
+    String testTakeCourseId = "22222222-3333-4444-5555-666666666666";
+    Apply apply = new Apply();
+    apply.setApplyId(testApplyId);
+    apply.setTakeCourseId(testTakeCourseId);
+    apply.setApplyStatus("受講中");
+
+    sut.updateApply(apply);
+
+    List<Apply> applyList = sut.getApplyList();
+
+    Optional<Apply> actualApply = applyList.stream()
+        .filter(ap -> ap.getApplyId().equals(apply.getApplyId())).findFirst();
+
+    assertThat(actualApply).isPresent().get().usingRecursiveComparison().isEqualTo(apply);
+
+  }
+
 
 }
