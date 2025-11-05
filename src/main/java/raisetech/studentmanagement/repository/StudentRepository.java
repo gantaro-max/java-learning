@@ -101,4 +101,24 @@ public interface StudentRepository {
    */
   List<Student> searchStudentsByFullName(String fullName);
 
+  List<Student> searchStudentsByKanaName(String kanaName);
+
+  List<Student> searchStudentsByNickName(String nickName);
+
+  List<Student> searchStudentsByEmail(String email);
+
+  List<Student> searchStudentsByAddress(String address);
+
+  List<Student> searchStudentsByAge(Integer age);
+
+  List<Student> searchStudentsByGender(String gender);
+
+  List<Student> searchStudentByRemark(String remark);
+
+  List<Student> searchStudentsByDeleted(boolean deleted);
+
+  List<StudentsCourses> searchCoursesByCourseName(String courseName);
+
+  List<Apply> searchApplyByApplyStatus(String applyStatus);
+
 }
