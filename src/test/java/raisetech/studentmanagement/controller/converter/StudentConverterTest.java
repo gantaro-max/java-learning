@@ -156,35 +156,7 @@ class StudentConverterTest {
 
 
   }
-
-  @Test
-  void 全申込状況一覧と受講生コース情報から受講生申込状況が作れること() {
-    String testApplyId = "99999999-9999-9999-9999-999999999999";
-    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
-
-    Apply apply = new Apply();
-    apply.setApplyId(testApplyId);
-    apply.setTakeCourseId(testTakeCourseId);
-    apply.setApplyStatus("受講中");
-    List<Apply> allApplyList = new ArrayList<>(List.of(apply));
-
-    String studentId = "00000000-0000-0000-0000-000000000000";
-
-    StudentsCourses studentsCourses = new StudentsCourses();
-    studentsCourses.setTakeCourseId(testTakeCourseId);
-    studentsCourses.setCourseId("4001");
-    studentsCourses.setStudentId(studentId);
-    studentsCourses.setCourseName("JAVA");
-    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
-    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
-
-    List<Apply> actualApplyList = sut.convertApplyListByStudentCourses(allApplyList,
-        studentsCoursesList);
-    Optional<Apply> actualApply = actualApplyList.stream()
-        .filter(ap -> ap.getApplyId().equals(testApplyId)).findFirst();
-    assertThat(actualApply).isPresent().get().usingRecursiveComparison().isEqualTo(apply);
-  }
-
+  
   @Test
   void 受講生コース情報から新しい申込状況を作成できること() {
     String testTakeCourseId = "77777777-8888-9999-1111-222222222222";

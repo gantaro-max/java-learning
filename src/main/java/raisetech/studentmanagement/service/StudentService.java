@@ -57,10 +57,11 @@ public class StudentService {
     }
     Student foundStudent = opStudent.get();
     ResponseStudent responseStudent = converter.convertStudentToResponse(foundStudent);
-    List<Apply> applyList = repository.getApplyList();
+
     List<StudentsCourses> studentCourses = repository.getStudentCourse(studentId);
-    List<Apply> studentApply = converter.convertApplyListByStudentCourses(applyList,
-        studentCourses);
+    List<Apply> studentApply = studentCourses.stream()
+        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+        .toList();
 
     StudentDetail studentDetail = new StudentDetail(responseStudent, studentCourses,
         studentApply);
@@ -83,9 +84,10 @@ public class StudentService {
     repository.setNewApply(newApply);
     ResponseStudent responseStudent = converter.convertStudentToResponse(student);
     List<StudentsCourses> newStudentsCourses = repository.getStudentCourse(student.getStudentId());
-    List<Apply> allApplyList = repository.getApplyList();
-    List<Apply> applyList = converter.convertApplyListByStudentCourses(allApplyList,
-        newStudentsCourses);
+
+    List<Apply> applyList = newStudentsCourses.stream()
+        .flatMap(nsc -> repository.searchApplyByTakeCourseId(nsc.getTakeCourseId()).stream())
+        .toList();
     return new StudentDetail(responseStudent, newStudentsCourses, applyList);
   }
 
@@ -103,9 +105,9 @@ public class StudentService {
     }
     List<StudentsCourses> searchCourses = repository.getStudentCourse(studentId);
 
-    List<Apply> allApplyList = repository.getApplyList();
-    List<Apply> searchApply = converter.convertApplyListByStudentCourses(allApplyList,
-        searchCourses);
+    List<Apply> searchApply = searchCourses.stream()
+        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+        .toList();
 
     Student newStudent = converter.convertUpdateToStudent(updateDetail.getUpdateStudent(),
         searchStudent);

@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,10 +108,10 @@ public class StudentController {
    * @param fullName 受講生名
    * @return 検索処理の結果
    */
-  @GetMapping("/students/{fullName}")
+  @GetMapping("/students/full-name/{fullName}")
   public ResponseEntity<List<StudentDetail>> searchStudentsByFullName(
       @PathVariable("fullName") String fullName) {
-    List<StudentDetail> studentDetailList = new ArrayList<>();
+    List<StudentDetail> studentDetailList = service.searchStudentsByFullName(fullName);
 
     return ResponseEntity.ok().body(studentDetailList);
   }

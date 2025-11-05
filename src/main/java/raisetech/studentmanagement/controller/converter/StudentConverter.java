@@ -43,7 +43,9 @@ public class StudentConverter {
       List<StudentsCourses> convertStudentCourses = studentCourses.stream()
           .filter(studentCourse -> student.getStudentId().equals(studentCourse.getStudentId()))
           .collect(Collectors.toList());
+
       List<Apply> studentApply = new ArrayList<>();
+
       convertStudentCourses.forEach(course -> {
         applyList.forEach(apply -> {
           if (course.getTakeCourseId().equals(apply.getTakeCourseId())) {
@@ -87,27 +89,6 @@ public class StudentConverter {
     studentsCourses.setStartDate(LocalDateTime.now());
 
     return studentsCourses;
-  }
-
-  /**
-   * 全申込み状況一覧と特定の受講生コース情報から受講生コース情報と対になる申込み状況一覧を取得
-   *
-   * @param applyList       全申込み状況一覧
-   * @param studentsCourses 特定の受講生コース情報
-   * @return 受講生コース情報と対になる申込み状況一覧
-   */
-  public List<Apply> convertApplyListByStudentCourses(List<Apply> applyList,
-      List<StudentsCourses> studentsCourses) {
-    List<Apply> studentApply = new ArrayList<>();
-    studentsCourses.forEach(course -> {
-      applyList.forEach(apply -> {
-        if (course.getTakeCourseId().equals(apply.getTakeCourseId())) {
-          studentApply.add(apply);
-        }
-      });
-    });
-
-    return studentApply;
   }
 
   /**

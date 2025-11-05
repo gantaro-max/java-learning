@@ -77,29 +77,60 @@ class StudentServiceTest {
   void getStudentByIdShouldSucceed() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     Student student = new Student();
-    List<StudentsCourses> studentsCourses = new ArrayList<>();
-    List<Apply> applyList = new ArrayList<>();
-    List<Apply> responseApplyList = new ArrayList<>();
+    student.setStudentId(studentId);
+    student.setFullName("山田太郎");
+    student.setKanaName("ヤマダタロウ");
+    student.setNickName("ドカベン");
+    student.setEmail("yamada@example.com");
+    student.setAddress("神奈川県横浜市");
+    student.setAge(20);
+    student.setGender("男");
+    student.setRemark("受け放題");
+    student.setDeleted(false);
+
+    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
+    StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId(testTakeCourseId);
+    studentsCourses.setCourseId("4001");
+    studentsCourses.setCourseName("JAVA");
+    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
+    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
+
+    String testApplyId = "99999999-9999-9999-9999-999999999999";
+    Apply apply = new Apply();
+    apply.setApplyId(testApplyId);
+    apply.setTakeCourseId(testTakeCourseId);
+    apply.setApplyStatus("受講中");
+
+    List<Apply> applyList = new ArrayList<>(List.of(apply));
+
     ResponseStudent responseStudent = new ResponseStudent();
+    responseStudent.setStudentId(student.getStudentId());
+    responseStudent.setFullName(student.getFullName());
+    responseStudent.setKanaName(student.getKanaName());
+    responseStudent.setNickName(student.getNickName());
+    responseStudent.setEmail(student.getEmail());
+    responseStudent.setAddress(student.getAddress());
+    responseStudent.setAge(student.getAge());
+    responseStudent.setGender(student.getGender());
+    responseStudent.setRemark(student.getRemark());
+
     StudentDetail responseDetail = new StudentDetail();
     responseDetail.setResponseStudent(responseStudent);
-    responseDetail.setStudentsCourses(studentsCourses);
-    responseDetail.setApplyList(responseApplyList);
+    responseDetail.setStudentsCourses(studentsCoursesList);
+    responseDetail.setApplyList(applyList);
 
     when(repository.getStudentById(studentId)).thenReturn(student);
-    when(repository.getStudentCourse(studentId)).thenReturn(studentsCourses);
-    when(repository.getApplyList()).thenReturn(applyList);
+    when(repository.getStudentCourse(studentId)).thenReturn(studentsCoursesList);
+    when(repository.searchApplyByTakeCourseId(testTakeCourseId)).thenReturn(applyList);
     when(converter.convertStudentToResponse(student)).thenReturn(responseStudent);
-    when(converter.convertApplyListByStudentCourses(applyList, studentsCourses)).thenReturn(
-        responseApplyList);
 
     Optional<StudentDetail> opStudentDetail = sut.getStudentDetail(studentId);
 
     verify(repository, times(1)).getStudentById(studentId);
     verify(repository, times(1)).getStudentCourse(studentId);
-    verify(repository, times(1)).getApplyList();
+    verify(repository, times(1)).searchApplyByTakeCourseId(testTakeCourseId);
     verify(converter, times(1)).convertStudentToResponse(student);
-    verify(converter, times(1)).convertApplyListByStudentCourses(applyList, studentsCourses);
 
     assertThat(opStudentDetail).isPresent().get().usingRecursiveComparison()
         .isEqualTo(responseDetail);
@@ -152,8 +183,7 @@ class StudentServiceTest {
     when(converter.convertApply(studentsCourses)).thenReturn(apply);
     when(converter.convertStudentToResponse(student)).thenReturn(responseStudent);
     when(repository.getStudentCourse(student.getStudentId())).thenReturn(studentsCoursesList);
-    when(repository.getApplyList()).thenReturn(applyList);
-    when(converter.convertApplyListByStudentCourses(applyList, studentsCoursesList)).thenReturn(
+    when(repository.searchApplyByTakeCourseId(studentsCourses.getTakeCourseId())).thenReturn(
         applyList);
 
     StudentDetail studentDetail = sut.setStudentNewCourse(registerStudent);
@@ -162,12 +192,11 @@ class StudentServiceTest {
     verify(converter, times(1)).convertStudentCourse(registerStudent, student);
     verify(converter, times(1)).convertApply(studentsCourses);
     verify(converter, times(1)).convertStudentToResponse(student);
-    verify(repository, times(1)).getStudentCourse(student.getStudentId());
-    verify(repository, times(1)).getApplyList();
-    verify(converter, times(1)).convertApplyListByStudentCourses(applyList, studentsCoursesList);
     verify(repository, times(1)).setStudentData(captorStudent.capture());
     verify(repository, times(1)).setNewCourse(captorStudentCourse.capture());
     verify(repository, times(1)).setNewApply(captorApply.capture());
+    verify(repository, times(1)).getStudentCourse(student.getStudentId());
+    verify(repository, times(1)).searchApplyByTakeCourseId(studentsCourses.getTakeCourseId());
 
     Student capturedStudent = captorStudent.getValue();
     StudentsCourses capturedStudentCourse = captorStudentCourse.getValue();
@@ -239,8 +268,7 @@ class StudentServiceTest {
 
     when(repository.getStudentById(studentId)).thenReturn(student);
     when(repository.getStudentCourse(newStudent.getStudentId())).thenReturn(studentsCoursesList);
-    when(repository.getApplyList()).thenReturn(applyList);
-    when(converter.convertApplyListByStudentCourses(applyList, studentsCoursesList)).thenReturn(
+    when(repository.searchApplyByTakeCourseId(studentsCourses.getTakeCourseId())).thenReturn(
         applyList);
     when(converter.convertUpdateToStudent(updateStudent, student)).thenReturn(newStudent);
     when(converter.convertUpdateToCourses(upCourseApplyList, studentsCoursesList)).thenReturn(
@@ -252,8 +280,7 @@ class StudentServiceTest {
 
     verify(repository, times(1)).getStudentById(studentId);
     verify(repository, times(1)).getStudentCourse(newStudent.getStudentId());
-    verify(repository, times(1)).getApplyList();
-    verify(converter, times(1)).convertApplyListByStudentCourses(applyList, studentsCoursesList);
+    verify(repository, times(1)).searchApplyByTakeCourseId(studentsCourses.getTakeCourseId());
     verify(converter, times(1)).convertUpdateToStudent(updateStudent, student);
     verify(converter, times(1)).convertUpdateToCourses(upCourseApplyList, studentsCoursesList);
     verify(converter, times(1)).convertUpdateToApply(upCourseApplyList, applyList);
