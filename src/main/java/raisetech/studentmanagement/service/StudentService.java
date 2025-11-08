@@ -2,6 +2,8 @@ package raisetech.studentmanagement.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -127,6 +129,12 @@ public class StudentService {
     return new StudentDetail(responseStudent, newStudentsCourses, newApplyList);
   }
 
+  /**
+   * 受講生検索です。 受講生名で検索された受講生の情報を取得したあと、その受講生に紐づく受講生コース情報を取得して設定します。
+   *
+   * @param fullName 受講生名
+   * @return 受講生詳細
+   */
   public List<StudentDetail> searchStudentsByFullName(String fullName) {
     List<Student> studentList = repository.searchStudentsByFullName(fullName);
     List<StudentsCourses> studentsCoursesList = studentList.stream()
@@ -138,5 +146,129 @@ public class StudentService {
     return converter.convertStudentDetailList(studentList,
         studentsCoursesList, applyList);
   }
+
+  public List<StudentDetail> searchStudentsByKanaName(String kanaName) {
+    List<Student> studentList = repository.searchStudentsByKanaName(kanaName);
+    List<StudentsCourses> studentsCoursesList = studentList.stream()
+        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
+    List<Apply> applyList = studentsCoursesList.stream()
+        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+        .toList();
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
+  public List<StudentDetail> searchStudentsByNickName(String nickName) {
+    List<Student> studentList = repository.searchStudentsByNickName(nickName);
+    List<StudentsCourses> studentsCoursesList = studentList.stream()
+        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
+    List<Apply> applyList = studentsCoursesList.stream()
+        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+        .toList();
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
+  public List<StudentDetail> searchStudentsByEmail(String email) {
+    List<Student> studentList = repository.searchStudentsByEmail(email);
+    List<StudentsCourses> studentsCoursesList = studentList.stream()
+        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
+    List<Apply> applyList = studentsCoursesList.stream()
+        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+        .toList();
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
+  public List<StudentDetail> searchStudentsByAddress(String address) {
+    List<Student> studentList = repository.searchStudentsByAddress(address);
+    List<StudentsCourses> studentsCoursesList = studentList.stream()
+        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
+    List<Apply> applyList = studentsCoursesList.stream()
+        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+        .toList();
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
+  public List<StudentDetail> searchStudentsByAge(Integer age) {
+    List<Student> studentList = repository.searchStudentsByAge(age);
+    List<StudentsCourses> studentsCoursesList = studentList.stream()
+        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
+    List<Apply> applyList = studentsCoursesList.stream()
+        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+        .toList();
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
+  public List<StudentDetail> searchStudentsByGender(String gender) {
+    List<Student> studentList = repository.searchStudentsByGender(gender);
+    List<StudentsCourses> studentsCoursesList = studentList.stream()
+        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
+    List<Apply> applyList = studentsCoursesList.stream()
+        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+        .toList();
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
+  public List<StudentDetail> searchStudentsByRemark(String remark) {
+    List<Student> studentList = repository.searchStudentsByRemark(remark);
+    List<StudentsCourses> studentsCoursesList = studentList.stream()
+        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
+    List<Apply> applyList = studentsCoursesList.stream()
+        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+        .toList();
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
+  public List<StudentDetail> searchStudentsByDeleted(boolean deleted) {
+    List<Student> studentList = repository.searchStudentsByDeleted(deleted);
+    List<StudentsCourses> studentsCoursesList = studentList.stream()
+        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
+    List<Apply> applyList = studentsCoursesList.stream()
+        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+        .toList();
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
+  public List<StudentDetail> searchCoursesByCourseName(String courseName) {
+    List<StudentsCourses> studentsCoursesList = repository.searchCoursesByCourseName(courseName);
+    Set<String> studentIdList = studentsCoursesList.stream().map(StudentsCourses::getStudentId)
+        .collect(Collectors.toSet());
+
+    List<Student> studentList = repository.searchStudentsByStudentIdList(studentIdList);
+
+    List<Apply> applyList = repository.searchApplyByTakeCourseIdList(
+        studentsCoursesList.stream().map(StudentsCourses::getTakeCourseId)
+            .collect(Collectors.toList()));
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
+  public List<StudentDetail> searchApplyByApplyStatus(String applyStatus) {
+    List<Apply> applyList = repository.searchApplyByApplyStatus(applyStatus);
+    List<StudentsCourses> studentsCoursesList = repository.searchCoursesByTakeCourseIdList(
+        applyList.stream().map(Apply::getTakeCourseId).collect(Collectors.toList()));
+    Set<String> studentIdList = studentsCoursesList.stream().map(StudentsCourses::getStudentId)
+        .collect(Collectors.toSet());
+    List<Student> studentList = repository.searchStudentsByStudentIdList(studentIdList);
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
 
 }

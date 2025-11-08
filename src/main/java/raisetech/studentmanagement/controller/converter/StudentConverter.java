@@ -175,13 +175,13 @@ public class StudentConverter {
    */
   public List<Apply> convertUpdateToApply(List<UpCourseApply> upCourseApplyList,
       List<Apply> applyList) {
-    for (Apply apply : applyList) {
-      for (UpCourseApply upCourseApply : upCourseApplyList) {
-        if (apply.getApplyId().equals(upCourseApply.getApplyId())) {
-          apply.setApplyStatus(upCourseApply.getApplyStatus());
-        }
-      }
-    }
+    Map<String, String> mapAppLyIdStatus = upCourseApplyList.stream()
+        .collect(Collectors.toMap(UpCourseApply::getApplyId, UpCourseApply::getApplyStatus));
+
+    applyList.forEach(apply -> {
+      apply.setApplyStatus(mapAppLyIdStatus.get(apply.getApplyId()));
+    });
+
     return applyList;
   }
 

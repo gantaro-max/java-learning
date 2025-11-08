@@ -1,7 +1,9 @@
 package raisetech.studentmanagement.repository;
 
 import java.util.List;
+import java.util.Set;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import raisetech.studentmanagement.data.Apply;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
@@ -113,12 +115,20 @@ public interface StudentRepository {
 
   List<Student> searchStudentsByGender(String gender);
 
-  List<Student> searchStudentByRemark(String remark);
+  List<Student> searchStudentsByRemark(String remark);
 
   List<Student> searchStudentsByDeleted(boolean deleted);
 
   List<StudentsCourses> searchCoursesByCourseName(String courseName);
 
   List<Apply> searchApplyByApplyStatus(String applyStatus);
+
+  List<Student> searchStudentsByStudentIdList(@Param("studentIdList") Set<String> studentIdList);
+
+  List<StudentsCourses> searchCoursesByTakeCourseIdList(
+      @Param("takeCourseIdList") List<String> takeCourseIdList);
+
+  List<Apply> searchApplyByTakeCourseIdList(
+      @Param("takeCourseIdList") List<String> takeCourseIdList);
 
 }
