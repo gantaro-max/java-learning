@@ -315,5 +315,10 @@ class StudentServiceTest {
         () -> sut.updateStudent(updateDetail, studentId));
   }
 
+  @Test
+  void 受講生名から検索した受講生詳細情報を作成できること() {
+
+  }
+
 }
 
