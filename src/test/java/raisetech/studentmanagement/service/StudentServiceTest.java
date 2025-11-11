@@ -392,6 +392,18 @@ class StudentServiceTest {
   }
 
   @Test
+  void 受講生名で検索した受講生がいない場合に例外を投げる() {
+    String testFullName = "名無";
+
+    List<Student> studentList = new ArrayList<>();
+
+    when(repository.searchStudentsByFullName(testFullName)).thenReturn(studentList);
+
+    assertThrows(ResourceNotFoundException.class, () -> sut.searchStudentsByFullName(testFullName));
+
+  }
+
+  @Test
   void 受講生カナ名から検索した受講生詳細情報を作成できること() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     String testName = "ヤマダ";
@@ -464,6 +476,17 @@ class StudentServiceTest {
   }
 
   @Test
+  void 受講生カナ名で検索した受講生がいない場合に例外を投げる() {
+    String testKanaName = "ナナシ";
+
+    List<Student> studentList = new ArrayList<>();
+
+    when(repository.searchStudentsByKanaName(testKanaName)).thenReturn(studentList);
+
+    assertThrows(ResourceNotFoundException.class, () -> sut.searchStudentsByKanaName(testKanaName));
+  }
+
+  @Test
   void 受講生ニックネームから検索した受講生詳細情報を作成できること() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     String testName = "ドカベン";
@@ -532,6 +555,18 @@ class StudentServiceTest {
         applyList);
 
     assertThat(studentDetailList).usingRecursiveComparison().isEqualTo(responseDetailList);
+
+  }
+
+  @Test
+  void 受講生ニックネームで検索した受講生がいない場合に例外を投げる() {
+    String testNickName = "ナナッシ";
+
+    List<Student> studentList = new ArrayList<>();
+
+    when(repository.searchStudentsByNickName(testNickName)).thenReturn(studentList);
+
+    assertThrows(ResourceNotFoundException.class, () -> sut.searchStudentsByNickName(testNickName));
 
   }
 
@@ -608,6 +643,18 @@ class StudentServiceTest {
   }
 
   @Test
+  void 受講生メールアドレスで検索した受講生がいない場合に例外を投げる() {
+    String testEmail = "nanashi@ex";
+
+    List<Student> studentList = new ArrayList<>();
+
+    when(repository.searchStudentsByEmail(testEmail)).thenReturn(studentList);
+
+    assertThrows(ResourceNotFoundException.class, () -> sut.searchStudentsByEmail(testEmail));
+
+  }
+
+  @Test
   void 受講生地域から検索した受講生詳細情報を作成できること() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     String testAddress = "横浜市";
@@ -680,6 +727,17 @@ class StudentServiceTest {
   }
 
   @Test
+  void 受講生地域で検索した受講生がいない場合に例外を投げる() {
+    String testAddress = "日本";
+
+    List<Student> studentList = new ArrayList<>();
+
+    when(repository.searchStudentsByAddress(testAddress)).thenReturn(studentList);
+
+    assertThrows(ResourceNotFoundException.class, () -> sut.searchStudentsByAddress(testAddress));
+  }
+
+  @Test
   void 受講生年齢から検索した受講生詳細情報を作成できること() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     Integer testAge = 20;
@@ -748,6 +806,18 @@ class StudentServiceTest {
         applyList);
 
     assertThat(studentDetailList).usingRecursiveComparison().isEqualTo(responseDetailList);
+
+  }
+
+  @Test
+  void 受講生年齢で検索した受講生がいない場合に例外を投げる() {
+    Integer testAge = 99;
+
+    List<Student> studentList = new ArrayList<>();
+
+    when(repository.searchStudentsByAge(testAge)).thenReturn(studentList);
+
+    assertThrows(ResourceNotFoundException.class, () -> sut.searchStudentsByAge(testAge));
 
   }
 
@@ -824,6 +894,17 @@ class StudentServiceTest {
   }
 
   @Test
+  void 受講生性別で検索した受講生がいない場合に例外を投げる() {
+    String testGender = "性別";
+
+    List<Student> studentList = new ArrayList<>();
+
+    when(repository.searchStudentsByGender(testGender)).thenReturn(studentList);
+
+    assertThrows(ResourceNotFoundException.class, () -> sut.searchStudentsByGender(testGender));
+  }
+
+  @Test
   void 受講生備考から検索した受講生詳細情報を作成できること() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     String testRemark = "受け放題";
@@ -896,6 +977,17 @@ class StudentServiceTest {
   }
 
   @Test
+  void 受講生備考で検索した受講生がいない場合に例外を投げる() {
+    String testRemark = "備考";
+
+    List<Student> studentList = new ArrayList<>();
+
+    when(repository.searchStudentsByRemark(testRemark)).thenReturn(studentList);
+
+    assertThrows(ResourceNotFoundException.class, () -> sut.searchStudentsByRemark(testRemark));
+  }
+
+  @Test
   void 受講生削除フラグから検索した受講生詳細情報を作成できること() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     boolean testDeleted = false;
@@ -965,6 +1057,17 @@ class StudentServiceTest {
 
     assertThat(studentDetailList).usingRecursiveComparison().isEqualTo(responseDetailList);
 
+  }
+
+  @Test
+  void 受講生削除フラグで検索した受講生がいない場合に例外を投げる() {
+    boolean testDeleted = false;
+
+    List<Student> studentList = new ArrayList<>();
+
+    when(repository.searchStudentsByDeleted(testDeleted)).thenReturn(studentList);
+
+    assertThrows(ResourceNotFoundException.class, () -> sut.searchStudentsByDeleted(testDeleted));
   }
 
   @Test
@@ -1043,6 +1146,18 @@ class StudentServiceTest {
   }
 
   @Test
+  void 受講生コース名で検索した受講生コース情報がない場合に例外を投げる() {
+    String testCourseName = "コース名";
+
+    List<StudentsCourses> studentsCoursesList = new ArrayList<>();
+
+    when(repository.searchCoursesByCourseName(testCourseName)).thenReturn(studentsCoursesList);
+
+    assertThrows(ResourceNotFoundException.class,
+        () -> sut.searchCoursesByCourseName(testCourseName));
+  }
+
+  @Test
   void 受講生申込み状況から検索した受講生詳細情報を作成できること() {
     String studentId = "00000000-0000-0000-0000-000000000000";
     Set<String> studentIdList = new HashSet<>(List.of(studentId));
@@ -1115,6 +1230,19 @@ class StudentServiceTest {
         applyList);
 
     assertThat(studentDetailList).usingRecursiveComparison().isEqualTo(responseDetailList);
+
+  }
+
+  @Test
+  void 申込み状況で検索した受講生申込状況がない場合に例外を投げる() {
+    String testApplyStatus = "申込状況";
+
+    List<Apply> applyList = new ArrayList<>();
+
+    when(repository.searchApplyByApplyStatus(testApplyStatus)).thenReturn(applyList);
+
+    assertThrows(ResourceNotFoundException.class,
+        () -> sut.searchApplyByApplyStatus(testApplyStatus));
 
   }
 

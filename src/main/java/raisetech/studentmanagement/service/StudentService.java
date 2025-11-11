@@ -137,6 +137,9 @@ public class StudentService {
    */
   public List<StudentDetail> searchStudentsByFullName(String fullName) {
     List<Student> studentList = repository.searchStudentsByFullName(fullName);
+    if (studentList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の受講生が見つかりません");
+    }
     List<StudentsCourses> studentsCoursesList = studentList.stream()
         .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
     List<Apply> applyList = studentsCoursesList.stream()
@@ -149,6 +152,9 @@ public class StudentService {
 
   public List<StudentDetail> searchStudentsByKanaName(String kanaName) {
     List<Student> studentList = repository.searchStudentsByKanaName(kanaName);
+    if (studentList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の受講生が見つかりません");
+    }
     List<StudentsCourses> studentsCoursesList = studentList.stream()
         .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
     List<Apply> applyList = studentsCoursesList.stream()
@@ -161,6 +167,9 @@ public class StudentService {
 
   public List<StudentDetail> searchStudentsByNickName(String nickName) {
     List<Student> studentList = repository.searchStudentsByNickName(nickName);
+    if (studentList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の受講生が見つかりません");
+    }
     List<StudentsCourses> studentsCoursesList = studentList.stream()
         .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
     List<Apply> applyList = studentsCoursesList.stream()
@@ -173,6 +182,9 @@ public class StudentService {
 
   public List<StudentDetail> searchStudentsByEmail(String email) {
     List<Student> studentList = repository.searchStudentsByEmail(email);
+    if (studentList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の受講生が見つかりません");
+    }
     List<StudentsCourses> studentsCoursesList = studentList.stream()
         .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
     List<Apply> applyList = studentsCoursesList.stream()
@@ -185,6 +197,9 @@ public class StudentService {
 
   public List<StudentDetail> searchStudentsByAddress(String address) {
     List<Student> studentList = repository.searchStudentsByAddress(address);
+    if (studentList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の受講生が見つかりません");
+    }
     List<StudentsCourses> studentsCoursesList = studentList.stream()
         .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
     List<Apply> applyList = studentsCoursesList.stream()
@@ -197,6 +212,9 @@ public class StudentService {
 
   public List<StudentDetail> searchStudentsByAge(Integer age) {
     List<Student> studentList = repository.searchStudentsByAge(age);
+    if (studentList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の受講生が見つかりません");
+    }
     List<StudentsCourses> studentsCoursesList = studentList.stream()
         .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
     List<Apply> applyList = studentsCoursesList.stream()
@@ -209,6 +227,9 @@ public class StudentService {
 
   public List<StudentDetail> searchStudentsByGender(String gender) {
     List<Student> studentList = repository.searchStudentsByGender(gender);
+    if (studentList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の受講生が見つかりません");
+    }
     List<StudentsCourses> studentsCoursesList = studentList.stream()
         .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
     List<Apply> applyList = studentsCoursesList.stream()
@@ -221,6 +242,9 @@ public class StudentService {
 
   public List<StudentDetail> searchStudentsByRemark(String remark) {
     List<Student> studentList = repository.searchStudentsByRemark(remark);
+    if (studentList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の受講生が見つかりません");
+    }
     List<StudentsCourses> studentsCoursesList = studentList.stream()
         .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
     List<Apply> applyList = studentsCoursesList.stream()
@@ -233,6 +257,9 @@ public class StudentService {
 
   public List<StudentDetail> searchStudentsByDeleted(boolean deleted) {
     List<Student> studentList = repository.searchStudentsByDeleted(deleted);
+    if (studentList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の受講生が見つかりません");
+    }
     List<StudentsCourses> studentsCoursesList = studentList.stream()
         .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
     List<Apply> applyList = studentsCoursesList.stream()
@@ -245,6 +272,9 @@ public class StudentService {
 
   public List<StudentDetail> searchCoursesByCourseName(String courseName) {
     List<StudentsCourses> studentsCoursesList = repository.searchCoursesByCourseName(courseName);
+    if (studentsCoursesList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の受講生コースが見つかりません");
+    }
     Set<String> studentIdList = studentsCoursesList.stream().map(StudentsCourses::getStudentId)
         .collect(Collectors.toSet());
 
@@ -260,14 +290,16 @@ public class StudentService {
 
   public List<StudentDetail> searchApplyByApplyStatus(String applyStatus) {
     List<Apply> applyList = repository.searchApplyByApplyStatus(applyStatus);
+    if (applyList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の申込状況が見つかりません");
+    }
     List<StudentsCourses> studentsCoursesList = repository.searchCoursesByTakeCourseIdList(
         applyList.stream().map(Apply::getTakeCourseId).collect(Collectors.toList()));
     Set<String> studentIdList = studentsCoursesList.stream().map(StudentsCourses::getStudentId)
         .collect(Collectors.toSet());
     List<Student> studentList = repository.searchStudentsByStudentIdList(studentIdList);
 
-    return converter.convertStudentDetailList(studentList,
-        studentsCoursesList, applyList);
+    return converter.convertStudentDetailList(studentList, studentsCoursesList, applyList);
   }
 
 
