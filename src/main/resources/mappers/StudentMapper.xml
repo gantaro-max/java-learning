@@ -5,26 +5,119 @@
   <resultMap id="studentResultMap" type="raisetech.studentmanagement.data.Student">
     <result property="deleted" column="is_deleted"/>
   </resultMap>
+
   <select id="getStudentList" resultMap="studentResultMap">
     SELECT * FROM students WHERE is_deleted = false
   </select>
+
   <select id="getStudentCourseList" resultType="raisetech.studentmanagement.data.StudentsCourses">
     SELECT * FROM students_courses
   </select>
+
+  <select id="getApplyList" resultType="raisetech.studentmanagement.data.Apply">
+    SELECT * FROM apply
+  </select>
+
+  <select id="searchApplyByTakeCourseId" resultType="raisetech.studentmanagement.data.Apply">
+    SELECT * FROM apply WHERE take_course_id = #{takeCourseId}
+  </select>
+
   <select id="getStudentById" resultMap="studentResultMap">
     SELECT * FROM students WHERE is_deleted = false AND student_id = #{studentId}
   </select>
+
   <select id="getStudentCourse" resultType="raisetech.studentmanagement.data.StudentsCourses">
     SELECT * FROM students_courses WHERE student_id = #{studentId}
+  </select>
+
+  <select id="searchStudentsByFullName" resultType="raisetech.studentmanagement.data.Student">
+    SELECT * FROM students WHERE is_deleted = false AND full_name LIKE CONCAT('%',#{fullName},'%')
+  </select>
+
+  <select id="searchStudentsByKanaName" resultType="raisetech.studentmanagement.data.Student">
+    SELECT * FROM students WHERE is_deleted = false AND kana_name LIKE CONCAT('%',#{kanaName},'%')
+  </select>
+
+  <select id="searchStudentsByNickName" resultType="raisetech.studentmanagement.data.Student">
+    SELECT * FROM students WHERE is_deleted = false AND nick_name LIKE CONCAT('%',#{nickName},'%')
+  </select>
+
+  <select id="searchStudentsByEmail" resultType="raisetech.studentmanagement.data.Student">
+    SELECT * FROM students WHERE is_deleted = false AND email LIKE CONCAT('%',#{email},'%')
+  </select>
+
+  <select id="searchStudentsByAddress" resultType="raisetech.studentmanagement.data.Student">
+    SELECT * FROM students WHERE is_deleted = false AND address LIKE CONCAT('%',#{address},'%')
+  </select>
+
+  <select id="searchStudentsByAge" resultType="raisetech.studentmanagement.data.Student">
+    SELECT * FROM students WHERE is_deleted = false AND age = #{age}
+  </select>
+
+  <select id="searchStudentsByGender" resultType="raisetech.studentmanagement.data.Student">
+    SELECT * FROM students WHERE is_deleted = false AND gender LIKE CONCAT('%',#{gender},'%')
+  </select>
+
+  <select id="searchStudentsByRemark" resultType="raisetech.studentmanagement.data.Student">
+    SELECT * FROM students WHERE is_deleted = false AND remark LIKE CONCAT('%',#{remark},'%')
+  </select>
+
+  <select id="searchStudentsByDeleted" resultType="raisetech.studentmanagement.data.Student">
+    SELECT * FROM students WHERE is_deleted = #{deleted}
+  </select>
+
+  <select id="searchCoursesByCourseName"
+    resultType="raisetech.studentmanagement.data.StudentsCourses">
+    SELECT * FROM students_courses WHERE course_name = #{courseName}
+  </select>
+
+  <select id="searchApplyByApplyStatus" resultType="raisetech.studentmanagement.data.Apply">
+    SELECT * FROM apply WHERE apply_status = #{applyStatus}
+  </select>
+
+  <select id="searchStudentsByStudentIdList" resultType="raisetech.studentmanagement.data.Student">
+    SELECT * FROM students WHERE student_id IN
+    <foreach collection="studentIdList" item="studentId" open="(" close=")" separator=",">
+      #{studentId}
+    </foreach>
+  </select>
+
+  <select id="searchCoursesByTakeCourseIdList"
+    resultType="raisetech.studentmanagement.data.StudentsCourses">
+    SELECT * FROM students_courses WHERE take_course_id IN
+    <foreach collection="takeCourseIdList" item="takeCourseId" open="(" close=")" separator=",">
+      #{takeCourseId}
+    </foreach>
+  </select>
+
+  <select id="searchCoursesByStudentIdList"
+    resultType="raisetech.studentmanagement.data.StudentsCourses">
+    SELECT * FROM students_courses WHERE student_id IN
+    <foreach collection="studentIdList" item="studentId" open="(" close=")" separator=",">
+      #{studentId}
+    </foreach>
+  </select>
+
+  <select id="searchApplyByTakeCourseIdList" resultType="raisetech.studentmanagement.data.Apply">
+    SELECT * FROM apply WHERE take_course_id IN
+    <foreach collection="takeCourseIdList" item="takeCourseId" open="(" close=")" separator=",">
+      #{takeCourseId}
+    </foreach>
   </select>
 
   <insert id="setStudentData" parameterType="raisetech.studentmanagement.data.Student">
     INSERT INTO students(student_id,full_name,kana_name,nick_name,email,address,age,gender,remark)
     VALUES(#{studentId},#{fullName},#{kanaName},#{nickName},#{email},#{address},#{age},#{gender},#{remark})
   </insert>
+
   <insert id="setNewCourse" parameterType="raisetech.studentmanagement.data.StudentsCourses">
-    INSERT INTO students_courses(course_id,student_id,course_name,start_date)
-    VALUES(#{courseId},#{studentId},#{courseName},#{startDate})
+    INSERT INTO students_courses(take_course_id,course_id,student_id,course_name,start_date)
+    VALUES(#{takeCourseId},#{courseId},#{studentId},#{courseName},#{startDate})
+  </insert>
+
+  <insert id="setNewApply" parameterType="raisetech.studentmanagement.data.Apply">
+    INSERT INTO apply(apply_id,take_course_id,apply_status)
+    VALUES(#{applyId},#{takeCourseId},#{applyStatus})
   </insert>
 
   <update id="updateStudent" parameterType="raisetech.studentmanagement.data.Student">
@@ -32,4 +125,15 @@
     #{age},gender = #{gender},remark = #{remark},is_deleted = #{deleted} WHERE student_id =
     #{studentId}
   </update>
+
+  <update id="updateStudentsCourses"
+    parameterType="raisetech.studentmanagement.data.StudentsCourses">
+    UPDATE students_courses SET course_id = #{courseId},course_name = #{courseName},complete_date =
+    #{completeDate} WHERE take_course_id = #{takeCourseId}
+  </update>
+
+  <update id="updateApply" parameterType="raisetech.studentmanagement.data.Apply">
+    UPDATE apply SET apply_status = #{applyStatus} WHERE apply_id = #{applyId}
+  </update>
+
 </mapper>

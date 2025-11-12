@@ -9,11 +9,13 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
+import raisetech.studentmanagement.data.Apply;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.ResponseStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
+import raisetech.studentmanagement.domain.UpCourseApply;
 import raisetech.studentmanagement.domain.UpdateStudent;
 
 /**
@@ -32,7 +34,7 @@ public class StudentConverter {
    * @return 受講生詳細情報のリスト
    */
   public List<StudentDetail> convertStudentDetailList(List<Student> students,
-      List<StudentsCourses> studentCourses) {
+      List<StudentsCourses> studentCourses, List<Apply> applyList) {
     List<StudentDetail> studentDetails = new ArrayList<>();
     students.forEach(student -> {
       StudentDetail studentDetail = new StudentDetail();
@@ -41,7 +43,18 @@ public class StudentConverter {
       List<StudentsCourses> convertStudentCourses = studentCourses.stream()
           .filter(studentCourse -> student.getStudentId().equals(studentCourse.getStudentId()))
           .collect(Collectors.toList());
+
+      List<Apply> studentApply = new ArrayList<>();
+
+      convertStudentCourses.forEach(course -> {
+        applyList.forEach(apply -> {
+          if (course.getTakeCourseId().equals(apply.getTakeCourseId())) {
+            studentApply.add(apply);
+          }
+        });
+      });
       studentDetail.setStudentsCourses(convertStudentCourses);
+      studentDetail.setApplyList(studentApply);
       studentDetails.add(studentDetail);
     });
     return studentDetails.stream()
@@ -69,6 +82,7 @@ public class StudentConverter {
   public StudentsCourses convertStudentCourse(RegisterStudent registerStudent, Student student) {
     StudentsCourses studentsCourses = new StudentsCourses();
 
+    studentsCourses.setTakeCourseId(UUID.randomUUID().toString());
     studentsCourses.setCourseId(registerStudent.getCourseId());
     studentsCourses.setStudentId(student.getStudentId());
     studentsCourses.setCourseName(getCourseNameById(registerStudent.getCourseId()));
@@ -77,6 +91,28 @@ public class StudentConverter {
     return studentsCourses;
   }
 
+  /**
+   * 受講生コース情報から新しい申し込み状況を作成
+   *
+   * @param studentsCourses 受講生コース情報
+   * @return 申込み状況
+   */
+  public Apply convertApply(StudentsCourses studentsCourses) {
+    Apply apply = new Apply();
+
+    apply.setApplyId(UUID.randomUUID().toString());
+    apply.setTakeCourseId(studentsCourses.getTakeCourseId());
+    apply.setApplyStatus("仮申込");
+
+    return apply;
+  }
+
+  /**
+   * 登録用受講生情報から受講生情報に変換処理
+   *
+   * @param registerStudent 登録用受講生情報
+   * @return 受講生情報
+   */
   public Student convertRegisterToStudent(RegisterStudent registerStudent) {
     return new Student(UUID.randomUUID().toString(), registerStudent.getFullName(),
         registerStudent.getKanaName(), registerStudent.getNickName(), registerStudent.getEmail(),
@@ -84,6 +120,13 @@ public class StudentConverter {
         registerStudent.getRemark(), false);
   }
 
+  /**
+   * 更新用受講生情報と既存の受講生情報から更新後の受講生情報を作成
+   *
+   * @param updateStudent 更新用受講生情報
+   * @param student       既存の受講生情報
+   * @return 更新後の受講生情報
+   */
   public Student convertUpdateToStudent(UpdateStudent updateStudent, Student student) {
     student.setFullName(updateStudent.getFullName());
     student.setKanaName(updateStudent.getKanaName());
@@ -98,6 +141,57 @@ public class StudentConverter {
     return student;
   }
 
+  /**
+   * 更新用受講生コース申込状況と既存の受講生コース情報から更新用の受講生コース情報を作成
+   *
+   * @param upCourseApplyList 更新用受講生コース情報申込状況
+   * @param studentsCourses   既存の受講生コース情報
+   * @return 更新用の受講生コース情報
+   */
+  public List<StudentsCourses> convertUpdateToCourses(List<UpCourseApply> upCourseApplyList,
+      List<StudentsCourses> studentsCourses) {
+
+    Map<String, StudentsCourses> mapStudentsCourses = studentsCourses.stream()
+        .collect(Collectors.toMap(StudentsCourses::getTakeCourseId, course -> course));
+
+    upCourseApplyList.forEach(uca -> {
+      StudentsCourses targetStudentsCourses = mapStudentsCourses.get(uca.getTakeCourseId());
+      targetStudentsCourses.setCourseId(uca.getCourseId());
+      targetStudentsCourses.setCourseName(getCourseNameById(uca.getCourseId()));
+      if (targetStudentsCourses.getCompleteDate() == null && uca.getApplyStatus()
+          .equals("受講終了")) {
+        targetStudentsCourses.setCompleteDate(LocalDateTime.now());
+      }
+    });
+
+    return studentsCourses;
+  }
+
+  /**
+   * 更新用受講生コース情報申込状況と既存の申込状況から更新用の申込状況を作成
+   *
+   * @param upCourseApplyList 更新用受講生コース情報申込状況
+   * @param applyList         既存の申込み状況
+   * @return 更新用の申込状況
+   */
+  public List<Apply> convertUpdateToApply(List<UpCourseApply> upCourseApplyList,
+      List<Apply> applyList) {
+    Map<String, String> mapAppLyIdStatus = upCourseApplyList.stream()
+        .collect(Collectors.toMap(UpCourseApply::getApplyId, UpCourseApply::getApplyStatus));
+
+    applyList.forEach(apply -> {
+      apply.setApplyStatus(mapAppLyIdStatus.get(apply.getApplyId()));
+    });
+
+    return applyList;
+  }
+
+  /**
+   * 受講生情報からResponse用受講生情報に変換し取得
+   *
+   * @param student 受講生情報
+   * @return Response用受講生情報
+   */
   public ResponseStudent convertStudentToResponse(Student student) {
     return new ResponseStudent(student.getStudentId(), student.getFullName(), student.getKanaName(),
         student.getNickName(), student.getEmail(), student.getAddress(), student.getAge(),

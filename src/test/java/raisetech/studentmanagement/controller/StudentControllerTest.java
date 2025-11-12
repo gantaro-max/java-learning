@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,10 +30,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import raisetech.studentmanagement.data.Apply;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.ResponseStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
+import raisetech.studentmanagement.domain.UpCourseApply;
+import raisetech.studentmanagement.domain.UpdateDetail;
 import raisetech.studentmanagement.domain.UpdateStudent;
 import raisetech.studentmanagement.exception.ResourceNotFoundException;
 import raisetech.studentmanagement.service.StudentService;
@@ -53,7 +57,7 @@ class StudentControllerTest {
   private ArgumentCaptor<RegisterStudent> captorRegister;
 
   @Captor
-  private ArgumentCaptor<UpdateStudent> captorUpdate;
+  private ArgumentCaptor<UpdateDetail> captorUpdateDetail;
 
   @BeforeEach
   void setCaptor() {
@@ -89,6 +93,7 @@ class StudentControllerTest {
     responseStudent.setStudentId(responseId);
     registerDetail.setResponseStudent(responseStudent);
     registerDetail.setStudentsCourses(new ArrayList<>(List.of(new StudentsCourses())));
+    registerDetail.setApplyList(new ArrayList<>(List.of(new Apply())));
 
     when(studentService.setStudentNewCourse(any(RegisterStudent.class))).thenReturn(registerDetail);
 
@@ -121,7 +126,7 @@ class StudentControllerTest {
   }
 
   @Test
-  void 受講生の更新が正常に行われること() throws Exception {
+  void 受講生_受講生コース情報_申込状況の更新が正常に行われること() throws Exception {
     String testStudentId = "00000000-0000-0000-0000-000000000000";
     UpdateStudent updateStudent = new UpdateStudent();
     updateStudent.setFullName("山田花子");
@@ -134,22 +139,52 @@ class StudentControllerTest {
     updateStudent.setRemark("なし");
     updateStudent.setDeleted(false);
 
+    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
+    String testApplyId = "99999999-9999-9999-9999-999999999999";
+    UpCourseApply upCourseApply = new UpCourseApply();
+    upCourseApply.setTakeCourseId(testTakeCourseId);
+    upCourseApply.setCourseId("4001");
+    upCourseApply.setApplyId(testApplyId);
+    upCourseApply.setApplyStatus("受講中");
+    List<UpCourseApply> upCourseApplyList = new ArrayList<>(List.of(upCourseApply));
+    UpdateDetail updateDetail = new UpdateDetail(updateStudent, upCourseApplyList);
+
     StudentDetail responseDetail = new StudentDetail();
     ResponseStudent responseStudent = new ResponseStudent();
     responseStudent.setStudentId(testStudentId);
+    responseStudent.setFullName(updateStudent.getFullName());
+    responseStudent.setKanaName(updateStudent.getKanaName());
+    responseStudent.setNickName(updateStudent.getNickName());
+    responseStudent.setEmail(updateStudent.getEmail());
+    responseStudent.setAddress(updateStudent.getAddress());
+    responseStudent.setAge(updateStudent.getAge());
+    responseStudent.setGender(updateStudent.getGender());
+    responseStudent.setRemark(updateStudent.getRemark());
     responseDetail.setResponseStudent(responseStudent);
-    responseDetail.setStudentsCourses(new ArrayList<>());
 
-    when(studentService.updateStudent(any(UpdateStudent.class), eq(testStudentId))).thenReturn(
+    StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId(testTakeCourseId);
+    studentsCourses.setStudentId(testStudentId);
+    studentsCourses.setCourseName("JAVA");
+    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
+    responseDetail.setStudentsCourses(new ArrayList<>(List.of(studentsCourses)));
+
+    Apply apply = new Apply();
+    apply.setApplyId(testApplyId);
+    apply.setTakeCourseId(testTakeCourseId);
+    apply.setApplyStatus(upCourseApply.getApplyStatus());
+    responseDetail.setApplyList(new ArrayList<>(List.of(apply)));
+
+    when(studentService.updateStudent(any(UpdateDetail.class), eq(testStudentId))).thenReturn(
         responseDetail);
 
     mockMvc.perform(put("/students/" + testStudentId).contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(updateStudent))).andExpect(status().isOk())
+            .content(objectMapper.writeValueAsString(updateDetail))).andExpect(status().isOk())
         .andExpect(jsonPath("$.responseStudent.studentId").value(testStudentId));
 
-    verify(studentService, times(1)).updateStudent(captorUpdate.capture(), eq(testStudentId));
+    verify(studentService, times(1)).updateStudent(captorUpdateDetail.capture(), eq(testStudentId));
 
-    assertThat(captorUpdate.getValue().getFullName()).isEqualTo(updateStudent.getFullName());
+    assertThat(captorUpdateDetail.getValue()).isEqualTo(updateDetail);
 
 
   }
@@ -204,24 +239,34 @@ class StudentControllerTest {
 
   @Test
   void 更新処理バリデーションエラーの際に400を返す() throws Exception {
-    UpdateStudent invalidUpdate = new UpdateStudent();
-    invalidUpdate.setFullName("");
-    invalidUpdate.setKanaName("");
-    invalidUpdate.setEmail("345678");
-    invalidUpdate.setAge(5);
+    UpdateStudent invalidUpStudent = new UpdateStudent();
+    invalidUpStudent.setFullName("");
+    invalidUpStudent.setKanaName("");
+    invalidUpStudent.setEmail("345678");
+    invalidUpStudent.setAge(5);
+    UpCourseApply invalidCourseApply = new UpCourseApply();
+    invalidCourseApply.setTakeCourseId("");
+    invalidCourseApply.setCourseId("");
+    invalidCourseApply.setApplyId("");
+    invalidCourseApply.setApplyStatus("");
+    List<UpCourseApply> invalidCourseApplyList = new ArrayList<>(List.of(invalidCourseApply));
+    UpdateDetail invalidUpDetail = new UpdateDetail(invalidUpStudent, invalidCourseApplyList);
 
     mockMvc
-        .perform(put("/students/1").contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(invalidUpdate)))
+        .perform(put("/students/12345678-1234-1234-1234-123456789123").contentType(
+                MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(invalidUpDetail)))
         .andExpect(status().isBadRequest()).andExpect(jsonPath("$.timestamp").isNotEmpty())
         .andExpect(jsonPath("$.status").value(400))
         .andExpect(jsonPath("$.error").value("Bad Request"))
         .andExpect(jsonPath("$.message").value("入力にバリデーションエラーがあります"))
-        .andExpect(jsonPath("$.path").value("/students/1"))
-        .andExpect(jsonPath("$.errors", hasSize(4)))
+        .andExpect(jsonPath("$.path").value("/students/12345678-1234-1234-1234-123456789123"))
+        .andExpect(jsonPath("$.errors", hasSize(8)))
         .andExpect(jsonPath("$.errors[*].message",
             containsInAnyOrder("名前は空にできません", "カナ名は空にできません",
-                "有効なメールアドレス形式で入力して下さい", "登録は18以上になります")));
+                "有効なメールアドレス形式で入力して下さい", "登録は18以上になります",
+                "受講IDは空にできません", "コースIDは空にできません", "申込IDは空にできません",
+                "申込状況は空にできません")));
   }
 
   @Test
