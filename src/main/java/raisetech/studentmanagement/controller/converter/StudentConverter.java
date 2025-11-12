@@ -150,18 +150,19 @@ public class StudentConverter {
    */
   public List<StudentsCourses> convertUpdateToCourses(List<UpCourseApply> upCourseApplyList,
       List<StudentsCourses> studentsCourses) {
-    for (StudentsCourses course : studentsCourses) {
-      for (UpCourseApply upCourseApply : upCourseApplyList) {
-        if (course.getTakeCourseId().equals(upCourseApply.getTakeCourseId())) {
-          course.setCourseId(upCourseApply.getCourseId());
-          course.setCourseName(getCourseNameById(course.getCourseId()));
-          if (course.getCompleteDate() == null && upCourseApply.getApplyStatus()
-              .equals("受講終了")) {
-            course.setCompleteDate(LocalDateTime.now());
-          }
-        }
+
+    Map<String, StudentsCourses> mapStudentsCourses = studentsCourses.stream()
+        .collect(Collectors.toMap(StudentsCourses::getTakeCourseId, course -> course));
+
+    upCourseApplyList.forEach(uca -> {
+      StudentsCourses targetStudentsCourses = mapStudentsCourses.get(uca.getTakeCourseId());
+      targetStudentsCourses.setCourseId(uca.getCourseId());
+      targetStudentsCourses.setCourseName(getCourseNameById(uca.getCourseId()));
+      if (targetStudentsCourses.getCompleteDate() == null && uca.getApplyStatus()
+          .equals("受講終了")) {
+        targetStudentsCourses.setCompleteDate(LocalDateTime.now());
       }
-    }
+    });
 
     return studentsCourses;
   }
