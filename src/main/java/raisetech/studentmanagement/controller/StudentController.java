@@ -116,5 +116,68 @@ public class StudentController {
     return ResponseEntity.ok().body(studentDetailList);
   }
 
+  @GetMapping("/students/kana-name/{kanaName}")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByKanaName(
+      @PathVariable("kanaName") String kanaName) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByKanaName(kanaName);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/nick-name/{nickName}")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByNickName(
+      @PathVariable("nickName") String nickName) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByNickName(nickName);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/email/{email}")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByEmail(
+      @PathVariable("email") String email) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByEmail(email);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/address/{address}")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByAddress(
+      @PathVariable("address") String address) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByAddress(address);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/age/{age}")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByAge(@PathVariable("age") Integer age) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByAge(age);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/gender/{gender}")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByGender(
+      @PathVariable("gender") String gender) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByGender(gender);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/remark/{remark}")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByRemark(
+      @PathVariable("remark") String remark) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByRemark(remark);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/deleted/{deleted}")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByDeleted(
+      @PathVariable("deleted") boolean deleted) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByDeleted(deleted);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
 
 }
