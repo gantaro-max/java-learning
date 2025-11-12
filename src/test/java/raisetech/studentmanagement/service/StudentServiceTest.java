@@ -335,6 +335,7 @@ class StudentServiceTest {
     student.setRemark("受け放題");
     student.setDeleted(false);
 
+    Set<String> studentIdList = new HashSet<>(List.of(studentId));
     List<Student> studentList = new ArrayList<>(List.of(student));
 
     String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
@@ -344,6 +345,8 @@ class StudentServiceTest {
     studentsCourses.setStudentId(studentId);
     studentsCourses.setCourseName("JAVA");
     studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
+
+    List<String> takeCourseIdList = new ArrayList<>(List.of(testTakeCourseId));
     List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
 
     String testApplyId = "99999999-9999-9999-9999-999999999999";
@@ -373,8 +376,8 @@ class StudentServiceTest {
     List<StudentDetail> responseDetailList = new ArrayList<>(List.of(responseDetail));
 
     when(repository.searchStudentsByFullName(testName)).thenReturn(studentList);
-    when(repository.getStudentCourse(studentId)).thenReturn(studentsCoursesList);
-    when(repository.searchApplyByTakeCourseId(testTakeCourseId)).thenReturn(applyList);
+    when(repository.searchCoursesByStudentIdList(studentIdList)).thenReturn(studentsCoursesList);
+    when(repository.searchApplyByTakeCourseIdList(takeCourseIdList)).thenReturn(applyList);
     when(
         converter.convertStudentDetailList(studentList, studentsCoursesList, applyList)).thenReturn(
         responseDetailList);
@@ -382,8 +385,8 @@ class StudentServiceTest {
     List<StudentDetail> studentDetailList = sut.searchStudentsByFullName(testName);
 
     verify(repository, times(1)).searchStudentsByFullName(testName);
-    verify(repository, times(1)).getStudentCourse(studentId);
-    verify(repository, times(1)).searchApplyByTakeCourseId(testTakeCourseId);
+    verify(repository, times(1)).searchCoursesByStudentIdList(studentIdList);
+    verify(repository, times(1)).searchApplyByTakeCourseIdList(takeCourseIdList);
     verify(converter, times(1)).convertStudentDetailList(studentList, studentsCoursesList,
         applyList);
 
@@ -404,78 +407,6 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生カナ名から検索した受講生詳細情報を作成できること() {
-    String studentId = "00000000-0000-0000-0000-000000000000";
-    String testName = "ヤマダ";
-    Student student = new Student();
-    student.setStudentId(studentId);
-    student.setFullName("山田太郎");
-    student.setKanaName("ヤマダタロウ");
-    student.setNickName("ドカベン");
-    student.setEmail("yamada@example.com");
-    student.setAddress("神奈川県横浜市");
-    student.setAge(20);
-    student.setGender("男");
-    student.setRemark("受け放題");
-    student.setDeleted(false);
-
-    List<Student> studentList = new ArrayList<>(List.of(student));
-
-    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
-    StudentsCourses studentsCourses = new StudentsCourses();
-    studentsCourses.setTakeCourseId(testTakeCourseId);
-    studentsCourses.setCourseId("4001");
-    studentsCourses.setStudentId(studentId);
-    studentsCourses.setCourseName("JAVA");
-    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
-    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
-
-    String testApplyId = "99999999-9999-9999-9999-999999999999";
-    Apply apply = new Apply();
-    apply.setApplyId(testApplyId);
-    apply.setTakeCourseId(testTakeCourseId);
-    apply.setApplyStatus("受講中");
-
-    List<Apply> applyList = new ArrayList<>(List.of(apply));
-
-    ResponseStudent responseStudent = new ResponseStudent();
-    responseStudent.setStudentId(student.getStudentId());
-    responseStudent.setFullName(student.getFullName());
-    responseStudent.setKanaName(student.getKanaName());
-    responseStudent.setNickName(student.getNickName());
-    responseStudent.setEmail(student.getEmail());
-    responseStudent.setAddress(student.getAddress());
-    responseStudent.setAge(student.getAge());
-    responseStudent.setGender(student.getGender());
-    responseStudent.setRemark(student.getRemark());
-
-    StudentDetail responseDetail = new StudentDetail();
-    responseDetail.setResponseStudent(responseStudent);
-    responseDetail.setStudentsCourses(studentsCoursesList);
-    responseDetail.setApplyList(applyList);
-
-    List<StudentDetail> responseDetailList = new ArrayList<>(List.of(responseDetail));
-
-    when(repository.searchStudentsByKanaName(testName)).thenReturn(studentList);
-    when(repository.getStudentCourse(studentId)).thenReturn(studentsCoursesList);
-    when(repository.searchApplyByTakeCourseId(testTakeCourseId)).thenReturn(applyList);
-    when(
-        converter.convertStudentDetailList(studentList, studentsCoursesList, applyList)).thenReturn(
-        responseDetailList);
-
-    List<StudentDetail> studentDetailList = sut.searchStudentsByKanaName(testName);
-
-    verify(repository, times(1)).searchStudentsByKanaName(testName);
-    verify(repository, times(1)).getStudentCourse(studentId);
-    verify(repository, times(1)).searchApplyByTakeCourseId(testTakeCourseId);
-    verify(converter, times(1)).convertStudentDetailList(studentList, studentsCoursesList,
-        applyList);
-
-    assertThat(studentDetailList).usingRecursiveComparison().isEqualTo(responseDetailList);
-
-  }
-
-  @Test
   void 受講生カナ名で検索した受講生がいない場合に例外を投げる() {
     String testKanaName = "ナナシ";
 
@@ -487,78 +418,6 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生ニックネームから検索した受講生詳細情報を作成できること() {
-    String studentId = "00000000-0000-0000-0000-000000000000";
-    String testName = "ドカベン";
-    Student student = new Student();
-    student.setStudentId(studentId);
-    student.setFullName("山田太郎");
-    student.setKanaName("ヤマダタロウ");
-    student.setNickName("ドカベン");
-    student.setEmail("yamada@example.com");
-    student.setAddress("神奈川県横浜市");
-    student.setAge(20);
-    student.setGender("男");
-    student.setRemark("受け放題");
-    student.setDeleted(false);
-
-    List<Student> studentList = new ArrayList<>(List.of(student));
-
-    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
-    StudentsCourses studentsCourses = new StudentsCourses();
-    studentsCourses.setTakeCourseId(testTakeCourseId);
-    studentsCourses.setCourseId("4001");
-    studentsCourses.setStudentId(studentId);
-    studentsCourses.setCourseName("JAVA");
-    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
-    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
-
-    String testApplyId = "99999999-9999-9999-9999-999999999999";
-    Apply apply = new Apply();
-    apply.setApplyId(testApplyId);
-    apply.setTakeCourseId(testTakeCourseId);
-    apply.setApplyStatus("受講中");
-
-    List<Apply> applyList = new ArrayList<>(List.of(apply));
-
-    ResponseStudent responseStudent = new ResponseStudent();
-    responseStudent.setStudentId(student.getStudentId());
-    responseStudent.setFullName(student.getFullName());
-    responseStudent.setKanaName(student.getKanaName());
-    responseStudent.setNickName(student.getNickName());
-    responseStudent.setEmail(student.getEmail());
-    responseStudent.setAddress(student.getAddress());
-    responseStudent.setAge(student.getAge());
-    responseStudent.setGender(student.getGender());
-    responseStudent.setRemark(student.getRemark());
-
-    StudentDetail responseDetail = new StudentDetail();
-    responseDetail.setResponseStudent(responseStudent);
-    responseDetail.setStudentsCourses(studentsCoursesList);
-    responseDetail.setApplyList(applyList);
-
-    List<StudentDetail> responseDetailList = new ArrayList<>(List.of(responseDetail));
-
-    when(repository.searchStudentsByNickName(testName)).thenReturn(studentList);
-    when(repository.getStudentCourse(studentId)).thenReturn(studentsCoursesList);
-    when(repository.searchApplyByTakeCourseId(testTakeCourseId)).thenReturn(applyList);
-    when(
-        converter.convertStudentDetailList(studentList, studentsCoursesList, applyList)).thenReturn(
-        responseDetailList);
-
-    List<StudentDetail> studentDetailList = sut.searchStudentsByNickName(testName);
-
-    verify(repository, times(1)).searchStudentsByNickName(testName);
-    verify(repository, times(1)).getStudentCourse(studentId);
-    verify(repository, times(1)).searchApplyByTakeCourseId(testTakeCourseId);
-    verify(converter, times(1)).convertStudentDetailList(studentList, studentsCoursesList,
-        applyList);
-
-    assertThat(studentDetailList).usingRecursiveComparison().isEqualTo(responseDetailList);
-
-  }
-
-  @Test
   void 受講生ニックネームで検索した受講生がいない場合に例外を投げる() {
     String testNickName = "ナナッシ";
 
@@ -567,78 +426,6 @@ class StudentServiceTest {
     when(repository.searchStudentsByNickName(testNickName)).thenReturn(studentList);
 
     assertThrows(ResourceNotFoundException.class, () -> sut.searchStudentsByNickName(testNickName));
-
-  }
-
-  @Test
-  void 受講生メールアドレスから検索した受講生詳細情報を作成できること() {
-    String studentId = "00000000-0000-0000-0000-000000000000";
-    String testEmail = "yamada@example.com";
-    Student student = new Student();
-    student.setStudentId(studentId);
-    student.setFullName("山田太郎");
-    student.setKanaName("ヤマダタロウ");
-    student.setNickName("ドカベン");
-    student.setEmail("yamada@example.com");
-    student.setAddress("神奈川県横浜市");
-    student.setAge(20);
-    student.setGender("男");
-    student.setRemark("受け放題");
-    student.setDeleted(false);
-
-    List<Student> studentList = new ArrayList<>(List.of(student));
-
-    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
-    StudentsCourses studentsCourses = new StudentsCourses();
-    studentsCourses.setTakeCourseId(testTakeCourseId);
-    studentsCourses.setCourseId("4001");
-    studentsCourses.setStudentId(studentId);
-    studentsCourses.setCourseName("JAVA");
-    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
-    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
-
-    String testApplyId = "99999999-9999-9999-9999-999999999999";
-    Apply apply = new Apply();
-    apply.setApplyId(testApplyId);
-    apply.setTakeCourseId(testTakeCourseId);
-    apply.setApplyStatus("受講中");
-
-    List<Apply> applyList = new ArrayList<>(List.of(apply));
-
-    ResponseStudent responseStudent = new ResponseStudent();
-    responseStudent.setStudentId(student.getStudentId());
-    responseStudent.setFullName(student.getFullName());
-    responseStudent.setKanaName(student.getKanaName());
-    responseStudent.setNickName(student.getNickName());
-    responseStudent.setEmail(student.getEmail());
-    responseStudent.setAddress(student.getAddress());
-    responseStudent.setAge(student.getAge());
-    responseStudent.setGender(student.getGender());
-    responseStudent.setRemark(student.getRemark());
-
-    StudentDetail responseDetail = new StudentDetail();
-    responseDetail.setResponseStudent(responseStudent);
-    responseDetail.setStudentsCourses(studentsCoursesList);
-    responseDetail.setApplyList(applyList);
-
-    List<StudentDetail> responseDetailList = new ArrayList<>(List.of(responseDetail));
-
-    when(repository.searchStudentsByEmail(testEmail)).thenReturn(studentList);
-    when(repository.getStudentCourse(studentId)).thenReturn(studentsCoursesList);
-    when(repository.searchApplyByTakeCourseId(testTakeCourseId)).thenReturn(applyList);
-    when(
-        converter.convertStudentDetailList(studentList, studentsCoursesList, applyList)).thenReturn(
-        responseDetailList);
-
-    List<StudentDetail> studentDetailList = sut.searchStudentsByEmail(testEmail);
-
-    verify(repository, times(1)).searchStudentsByEmail(testEmail);
-    verify(repository, times(1)).getStudentCourse(studentId);
-    verify(repository, times(1)).searchApplyByTakeCourseId(testTakeCourseId);
-    verify(converter, times(1)).convertStudentDetailList(studentList, studentsCoursesList,
-        applyList);
-
-    assertThat(studentDetailList).usingRecursiveComparison().isEqualTo(responseDetailList);
 
   }
 
@@ -655,78 +442,6 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生地域から検索した受講生詳細情報を作成できること() {
-    String studentId = "00000000-0000-0000-0000-000000000000";
-    String testAddress = "横浜市";
-    Student student = new Student();
-    student.setStudentId(studentId);
-    student.setFullName("山田太郎");
-    student.setKanaName("ヤマダタロウ");
-    student.setNickName("ドカベン");
-    student.setEmail("yamada@example.com");
-    student.setAddress("神奈川県横浜市");
-    student.setAge(20);
-    student.setGender("男");
-    student.setRemark("受け放題");
-    student.setDeleted(false);
-
-    List<Student> studentList = new ArrayList<>(List.of(student));
-
-    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
-    StudentsCourses studentsCourses = new StudentsCourses();
-    studentsCourses.setTakeCourseId(testTakeCourseId);
-    studentsCourses.setCourseId("4001");
-    studentsCourses.setStudentId(studentId);
-    studentsCourses.setCourseName("JAVA");
-    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
-    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
-
-    String testApplyId = "99999999-9999-9999-9999-999999999999";
-    Apply apply = new Apply();
-    apply.setApplyId(testApplyId);
-    apply.setTakeCourseId(testTakeCourseId);
-    apply.setApplyStatus("受講中");
-
-    List<Apply> applyList = new ArrayList<>(List.of(apply));
-
-    ResponseStudent responseStudent = new ResponseStudent();
-    responseStudent.setStudentId(student.getStudentId());
-    responseStudent.setFullName(student.getFullName());
-    responseStudent.setKanaName(student.getKanaName());
-    responseStudent.setNickName(student.getNickName());
-    responseStudent.setEmail(student.getEmail());
-    responseStudent.setAddress(student.getAddress());
-    responseStudent.setAge(student.getAge());
-    responseStudent.setGender(student.getGender());
-    responseStudent.setRemark(student.getRemark());
-
-    StudentDetail responseDetail = new StudentDetail();
-    responseDetail.setResponseStudent(responseStudent);
-    responseDetail.setStudentsCourses(studentsCoursesList);
-    responseDetail.setApplyList(applyList);
-
-    List<StudentDetail> responseDetailList = new ArrayList<>(List.of(responseDetail));
-
-    when(repository.searchStudentsByAddress(testAddress)).thenReturn(studentList);
-    when(repository.getStudentCourse(studentId)).thenReturn(studentsCoursesList);
-    when(repository.searchApplyByTakeCourseId(testTakeCourseId)).thenReturn(applyList);
-    when(
-        converter.convertStudentDetailList(studentList, studentsCoursesList, applyList)).thenReturn(
-        responseDetailList);
-
-    List<StudentDetail> studentDetailList = sut.searchStudentsByAddress(testAddress);
-
-    verify(repository, times(1)).searchStudentsByAddress(testAddress);
-    verify(repository, times(1)).getStudentCourse(studentId);
-    verify(repository, times(1)).searchApplyByTakeCourseId(testTakeCourseId);
-    verify(converter, times(1)).convertStudentDetailList(studentList, studentsCoursesList,
-        applyList);
-
-    assertThat(studentDetailList).usingRecursiveComparison().isEqualTo(responseDetailList);
-
-  }
-
-  @Test
   void 受講生地域で検索した受講生がいない場合に例外を投げる() {
     String testAddress = "日本";
 
@@ -735,78 +450,6 @@ class StudentServiceTest {
     when(repository.searchStudentsByAddress(testAddress)).thenReturn(studentList);
 
     assertThrows(ResourceNotFoundException.class, () -> sut.searchStudentsByAddress(testAddress));
-  }
-
-  @Test
-  void 受講生年齢から検索した受講生詳細情報を作成できること() {
-    String studentId = "00000000-0000-0000-0000-000000000000";
-    Integer testAge = 20;
-    Student student = new Student();
-    student.setStudentId(studentId);
-    student.setFullName("山田太郎");
-    student.setKanaName("ヤマダタロウ");
-    student.setNickName("ドカベン");
-    student.setEmail("yamada@example.com");
-    student.setAddress("神奈川県横浜市");
-    student.setAge(20);
-    student.setGender("男");
-    student.setRemark("受け放題");
-    student.setDeleted(false);
-
-    List<Student> studentList = new ArrayList<>(List.of(student));
-
-    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
-    StudentsCourses studentsCourses = new StudentsCourses();
-    studentsCourses.setTakeCourseId(testTakeCourseId);
-    studentsCourses.setCourseId("4001");
-    studentsCourses.setStudentId(studentId);
-    studentsCourses.setCourseName("JAVA");
-    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
-    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
-
-    String testApplyId = "99999999-9999-9999-9999-999999999999";
-    Apply apply = new Apply();
-    apply.setApplyId(testApplyId);
-    apply.setTakeCourseId(testTakeCourseId);
-    apply.setApplyStatus("受講中");
-
-    List<Apply> applyList = new ArrayList<>(List.of(apply));
-
-    ResponseStudent responseStudent = new ResponseStudent();
-    responseStudent.setStudentId(student.getStudentId());
-    responseStudent.setFullName(student.getFullName());
-    responseStudent.setKanaName(student.getKanaName());
-    responseStudent.setNickName(student.getNickName());
-    responseStudent.setEmail(student.getEmail());
-    responseStudent.setAddress(student.getAddress());
-    responseStudent.setAge(student.getAge());
-    responseStudent.setGender(student.getGender());
-    responseStudent.setRemark(student.getRemark());
-
-    StudentDetail responseDetail = new StudentDetail();
-    responseDetail.setResponseStudent(responseStudent);
-    responseDetail.setStudentsCourses(studentsCoursesList);
-    responseDetail.setApplyList(applyList);
-
-    List<StudentDetail> responseDetailList = new ArrayList<>(List.of(responseDetail));
-
-    when(repository.searchStudentsByAge(testAge)).thenReturn(studentList);
-    when(repository.getStudentCourse(studentId)).thenReturn(studentsCoursesList);
-    when(repository.searchApplyByTakeCourseId(testTakeCourseId)).thenReturn(applyList);
-    when(
-        converter.convertStudentDetailList(studentList, studentsCoursesList, applyList)).thenReturn(
-        responseDetailList);
-
-    List<StudentDetail> studentDetailList = sut.searchStudentsByAge(testAge);
-
-    verify(repository, times(1)).searchStudentsByAge(testAge);
-    verify(repository, times(1)).getStudentCourse(studentId);
-    verify(repository, times(1)).searchApplyByTakeCourseId(testTakeCourseId);
-    verify(converter, times(1)).convertStudentDetailList(studentList, studentsCoursesList,
-        applyList);
-
-    assertThat(studentDetailList).usingRecursiveComparison().isEqualTo(responseDetailList);
-
   }
 
   @Test
@@ -822,78 +465,6 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生性別から検索した受講生詳細情報を作成できること() {
-    String studentId = "00000000-0000-0000-0000-000000000000";
-    String testGender = "男";
-    Student student = new Student();
-    student.setStudentId(studentId);
-    student.setFullName("山田太郎");
-    student.setKanaName("ヤマダタロウ");
-    student.setNickName("ドカベン");
-    student.setEmail("yamada@example.com");
-    student.setAddress("神奈川県横浜市");
-    student.setAge(20);
-    student.setGender("男");
-    student.setRemark("受け放題");
-    student.setDeleted(false);
-
-    List<Student> studentList = new ArrayList<>(List.of(student));
-
-    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
-    StudentsCourses studentsCourses = new StudentsCourses();
-    studentsCourses.setTakeCourseId(testTakeCourseId);
-    studentsCourses.setCourseId("4001");
-    studentsCourses.setStudentId(studentId);
-    studentsCourses.setCourseName("JAVA");
-    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
-    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
-
-    String testApplyId = "99999999-9999-9999-9999-999999999999";
-    Apply apply = new Apply();
-    apply.setApplyId(testApplyId);
-    apply.setTakeCourseId(testTakeCourseId);
-    apply.setApplyStatus("受講中");
-
-    List<Apply> applyList = new ArrayList<>(List.of(apply));
-
-    ResponseStudent responseStudent = new ResponseStudent();
-    responseStudent.setStudentId(student.getStudentId());
-    responseStudent.setFullName(student.getFullName());
-    responseStudent.setKanaName(student.getKanaName());
-    responseStudent.setNickName(student.getNickName());
-    responseStudent.setEmail(student.getEmail());
-    responseStudent.setAddress(student.getAddress());
-    responseStudent.setAge(student.getAge());
-    responseStudent.setGender(student.getGender());
-    responseStudent.setRemark(student.getRemark());
-
-    StudentDetail responseDetail = new StudentDetail();
-    responseDetail.setResponseStudent(responseStudent);
-    responseDetail.setStudentsCourses(studentsCoursesList);
-    responseDetail.setApplyList(applyList);
-
-    List<StudentDetail> responseDetailList = new ArrayList<>(List.of(responseDetail));
-
-    when(repository.searchStudentsByGender(testGender)).thenReturn(studentList);
-    when(repository.getStudentCourse(studentId)).thenReturn(studentsCoursesList);
-    when(repository.searchApplyByTakeCourseId(testTakeCourseId)).thenReturn(applyList);
-    when(
-        converter.convertStudentDetailList(studentList, studentsCoursesList, applyList)).thenReturn(
-        responseDetailList);
-
-    List<StudentDetail> studentDetailList = sut.searchStudentsByGender(testGender);
-
-    verify(repository, times(1)).searchStudentsByGender(testGender);
-    verify(repository, times(1)).getStudentCourse(studentId);
-    verify(repository, times(1)).searchApplyByTakeCourseId(testTakeCourseId);
-    verify(converter, times(1)).convertStudentDetailList(studentList, studentsCoursesList,
-        applyList);
-
-    assertThat(studentDetailList).usingRecursiveComparison().isEqualTo(responseDetailList);
-
-  }
-
-  @Test
   void 受講生性別で検索した受講生がいない場合に例外を投げる() {
     String testGender = "性別";
 
@@ -905,78 +476,6 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生備考から検索した受講生詳細情報を作成できること() {
-    String studentId = "00000000-0000-0000-0000-000000000000";
-    String testRemark = "受け放題";
-    Student student = new Student();
-    student.setStudentId(studentId);
-    student.setFullName("山田太郎");
-    student.setKanaName("ヤマダタロウ");
-    student.setNickName("ドカベン");
-    student.setEmail("yamada@example.com");
-    student.setAddress("神奈川県横浜市");
-    student.setAge(20);
-    student.setGender("男");
-    student.setRemark("受け放題");
-    student.setDeleted(false);
-
-    List<Student> studentList = new ArrayList<>(List.of(student));
-
-    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
-    StudentsCourses studentsCourses = new StudentsCourses();
-    studentsCourses.setTakeCourseId(testTakeCourseId);
-    studentsCourses.setCourseId("4001");
-    studentsCourses.setStudentId(studentId);
-    studentsCourses.setCourseName("JAVA");
-    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
-    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
-
-    String testApplyId = "99999999-9999-9999-9999-999999999999";
-    Apply apply = new Apply();
-    apply.setApplyId(testApplyId);
-    apply.setTakeCourseId(testTakeCourseId);
-    apply.setApplyStatus("受講中");
-
-    List<Apply> applyList = new ArrayList<>(List.of(apply));
-
-    ResponseStudent responseStudent = new ResponseStudent();
-    responseStudent.setStudentId(student.getStudentId());
-    responseStudent.setFullName(student.getFullName());
-    responseStudent.setKanaName(student.getKanaName());
-    responseStudent.setNickName(student.getNickName());
-    responseStudent.setEmail(student.getEmail());
-    responseStudent.setAddress(student.getAddress());
-    responseStudent.setAge(student.getAge());
-    responseStudent.setGender(student.getGender());
-    responseStudent.setRemark(student.getRemark());
-
-    StudentDetail responseDetail = new StudentDetail();
-    responseDetail.setResponseStudent(responseStudent);
-    responseDetail.setStudentsCourses(studentsCoursesList);
-    responseDetail.setApplyList(applyList);
-
-    List<StudentDetail> responseDetailList = new ArrayList<>(List.of(responseDetail));
-
-    when(repository.searchStudentsByRemark(testRemark)).thenReturn(studentList);
-    when(repository.getStudentCourse(studentId)).thenReturn(studentsCoursesList);
-    when(repository.searchApplyByTakeCourseId(testTakeCourseId)).thenReturn(applyList);
-    when(
-        converter.convertStudentDetailList(studentList, studentsCoursesList, applyList)).thenReturn(
-        responseDetailList);
-
-    List<StudentDetail> studentDetailList = sut.searchStudentsByRemark(testRemark);
-
-    verify(repository, times(1)).searchStudentsByRemark(testRemark);
-    verify(repository, times(1)).getStudentCourse(studentId);
-    verify(repository, times(1)).searchApplyByTakeCourseId(testTakeCourseId);
-    verify(converter, times(1)).convertStudentDetailList(studentList, studentsCoursesList,
-        applyList);
-
-    assertThat(studentDetailList).usingRecursiveComparison().isEqualTo(responseDetailList);
-
-  }
-
-  @Test
   void 受講生備考で検索した受講生がいない場合に例外を投げる() {
     String testRemark = "備考";
 
@@ -985,78 +484,6 @@ class StudentServiceTest {
     when(repository.searchStudentsByRemark(testRemark)).thenReturn(studentList);
 
     assertThrows(ResourceNotFoundException.class, () -> sut.searchStudentsByRemark(testRemark));
-  }
-
-  @Test
-  void 受講生削除フラグから検索した受講生詳細情報を作成できること() {
-    String studentId = "00000000-0000-0000-0000-000000000000";
-    boolean testDeleted = false;
-    Student student = new Student();
-    student.setStudentId(studentId);
-    student.setFullName("山田太郎");
-    student.setKanaName("ヤマダタロウ");
-    student.setNickName("ドカベン");
-    student.setEmail("yamada@example.com");
-    student.setAddress("神奈川県横浜市");
-    student.setAge(20);
-    student.setGender("男");
-    student.setRemark("受け放題");
-    student.setDeleted(false);
-
-    List<Student> studentList = new ArrayList<>(List.of(student));
-
-    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
-    StudentsCourses studentsCourses = new StudentsCourses();
-    studentsCourses.setTakeCourseId(testTakeCourseId);
-    studentsCourses.setCourseId("4001");
-    studentsCourses.setStudentId(studentId);
-    studentsCourses.setCourseName("JAVA");
-    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
-    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
-
-    String testApplyId = "99999999-9999-9999-9999-999999999999";
-    Apply apply = new Apply();
-    apply.setApplyId(testApplyId);
-    apply.setTakeCourseId(testTakeCourseId);
-    apply.setApplyStatus("受講中");
-
-    List<Apply> applyList = new ArrayList<>(List.of(apply));
-
-    ResponseStudent responseStudent = new ResponseStudent();
-    responseStudent.setStudentId(student.getStudentId());
-    responseStudent.setFullName(student.getFullName());
-    responseStudent.setKanaName(student.getKanaName());
-    responseStudent.setNickName(student.getNickName());
-    responseStudent.setEmail(student.getEmail());
-    responseStudent.setAddress(student.getAddress());
-    responseStudent.setAge(student.getAge());
-    responseStudent.setGender(student.getGender());
-    responseStudent.setRemark(student.getRemark());
-
-    StudentDetail responseDetail = new StudentDetail();
-    responseDetail.setResponseStudent(responseStudent);
-    responseDetail.setStudentsCourses(studentsCoursesList);
-    responseDetail.setApplyList(applyList);
-
-    List<StudentDetail> responseDetailList = new ArrayList<>(List.of(responseDetail));
-
-    when(repository.searchStudentsByDeleted(testDeleted)).thenReturn(studentList);
-    when(repository.getStudentCourse(studentId)).thenReturn(studentsCoursesList);
-    when(repository.searchApplyByTakeCourseId(testTakeCourseId)).thenReturn(applyList);
-    when(
-        converter.convertStudentDetailList(studentList, studentsCoursesList, applyList)).thenReturn(
-        responseDetailList);
-
-    List<StudentDetail> studentDetailList = sut.searchStudentsByDeleted(testDeleted);
-
-    verify(repository, times(1)).searchStudentsByDeleted(testDeleted);
-    verify(repository, times(1)).getStudentCourse(studentId);
-    verify(repository, times(1)).searchApplyByTakeCourseId(testTakeCourseId);
-    verify(converter, times(1)).convertStudentDetailList(studentList, studentsCoursesList,
-        applyList);
-
-    assertThat(studentDetailList).usingRecursiveComparison().isEqualTo(responseDetailList);
-
   }
 
   @Test

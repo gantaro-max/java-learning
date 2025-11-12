@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -583,6 +584,37 @@ class StudentRepositoryTest {
 
     List<StudentsCourses> actualStudentsCoursesList = sut.searchCoursesByTakeCourseIdList(
         List.of(testTakeCourseId1, testTakeCourseId2));
+
+    assertThat(actualStudentsCoursesList).usingRecursiveComparison().ignoringCollectionOrder()
+        .isEqualTo(studentsCoursesList);
+  }
+
+  @Test
+  void 受講生IDリストによる受講生コース一覧検索ができること() {
+    String studentId1 = "44444444-4444-4444-4444-444444444444";
+    StudentsCourses studentsCourses1 = new StudentsCourses();
+    studentsCourses1.setTakeCourseId("44444444-5555-6666-7777-888888888888");
+    studentsCourses1.setCourseId("4001");
+    studentsCourses1.setStudentId(studentId1);
+    studentsCourses1.setCourseName("JAVA");
+    studentsCourses1.setStartDate(LocalDateTime.of(2025, 10, 17, 14, 0, 0));
+    studentsCourses1.setCompleteDate(null);
+
+    String studentId2 = "22222222-2222-2222-2222-222222222222";
+    StudentsCourses studentsCourses2 = new StudentsCourses();
+    studentsCourses2.setTakeCourseId("22222222-3333-4444-5555-666666666666");
+    studentsCourses2.setCourseId("2001");
+    studentsCourses2.setStudentId(studentId2);
+    studentsCourses2.setCourseName("WP");
+    studentsCourses2.setStartDate(LocalDateTime.of(2025, 10, 15, 12, 0, 0));
+    studentsCourses2.setCompleteDate(null);
+
+    List<StudentsCourses> studentsCoursesList = new ArrayList<>(
+        List.of(studentsCourses1, studentsCourses2));
+    Set<String> setStudentList = new HashSet<>(List.of(studentId1, studentId2));
+
+    List<StudentsCourses> actualStudentsCoursesList = sut.searchCoursesByStudentIdList(
+        setStudentList);
 
     assertThat(actualStudentsCoursesList).usingRecursiveComparison().ignoringCollectionOrder()
         .isEqualTo(studentsCoursesList);

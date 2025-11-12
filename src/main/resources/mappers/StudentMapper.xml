@@ -90,6 +90,14 @@
     </foreach>
   </select>
 
+  <select id="searchCoursesByStudentIdList"
+    resultType="raisetech.studentmanagement.data.StudentsCourses">
+    SELECT * FROM students_courses WHERE student_id IN
+    <foreach collection="studentIdList" item="studentId" open="(" close=")" separator=",">
+      #{studentId}
+    </foreach>
+  </select>
+
   <select id="searchApplyByTakeCourseIdList" resultType="raisetech.studentmanagement.data.Apply">
     SELECT * FROM apply WHERE take_course_id IN
     <foreach collection="takeCourseIdList" item="takeCourseId" open="(" close=")" separator=",">

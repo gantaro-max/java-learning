@@ -137,14 +137,24 @@ public class StudentService {
    */
   public List<StudentDetail> searchStudentsByFullName(String fullName) {
     List<Student> studentList = repository.searchStudentsByFullName(fullName);
+    return getStudentDetailList(studentList);
+  }
+
+  private List<StudentDetail> getStudentDetailList(List<Student> studentList) {
     if (studentList.isEmpty()) {
       throw new ResourceNotFoundException("該当の受講生が見つかりません");
     }
-    List<StudentsCourses> studentsCoursesList = studentList.stream()
-        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
-    List<Apply> applyList = studentsCoursesList.stream()
-        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
-        .toList();
+
+    Set<String> studentIdList = studentList.stream().map(Student::getStudentId)
+        .collect(Collectors.toSet());
+
+    List<StudentsCourses> studentsCoursesList = repository.searchCoursesByStudentIdList(
+        studentIdList);
+
+    List<String> takeCourseIdList = studentsCoursesList.stream()
+        .map(StudentsCourses::getTakeCourseId).toList();
+
+    List<Apply> applyList = repository.searchApplyByTakeCourseIdList(takeCourseIdList);
 
     return converter.convertStudentDetailList(studentList,
         studentsCoursesList, applyList);
@@ -152,122 +162,42 @@ public class StudentService {
 
   public List<StudentDetail> searchStudentsByKanaName(String kanaName) {
     List<Student> studentList = repository.searchStudentsByKanaName(kanaName);
-    if (studentList.isEmpty()) {
-      throw new ResourceNotFoundException("該当の受講生が見つかりません");
-    }
-    List<StudentsCourses> studentsCoursesList = studentList.stream()
-        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
-    List<Apply> applyList = studentsCoursesList.stream()
-        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
-        .toList();
-
-    return converter.convertStudentDetailList(studentList,
-        studentsCoursesList, applyList);
+    return getStudentDetailList(studentList);
   }
 
   public List<StudentDetail> searchStudentsByNickName(String nickName) {
     List<Student> studentList = repository.searchStudentsByNickName(nickName);
-    if (studentList.isEmpty()) {
-      throw new ResourceNotFoundException("該当の受講生が見つかりません");
-    }
-    List<StudentsCourses> studentsCoursesList = studentList.stream()
-        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
-    List<Apply> applyList = studentsCoursesList.stream()
-        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
-        .toList();
-
-    return converter.convertStudentDetailList(studentList,
-        studentsCoursesList, applyList);
+    return getStudentDetailList(studentList);
   }
 
   public List<StudentDetail> searchStudentsByEmail(String email) {
     List<Student> studentList = repository.searchStudentsByEmail(email);
-    if (studentList.isEmpty()) {
-      throw new ResourceNotFoundException("該当の受講生が見つかりません");
-    }
-    List<StudentsCourses> studentsCoursesList = studentList.stream()
-        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
-    List<Apply> applyList = studentsCoursesList.stream()
-        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
-        .toList();
-
-    return converter.convertStudentDetailList(studentList,
-        studentsCoursesList, applyList);
+    return getStudentDetailList(studentList);
   }
 
   public List<StudentDetail> searchStudentsByAddress(String address) {
     List<Student> studentList = repository.searchStudentsByAddress(address);
-    if (studentList.isEmpty()) {
-      throw new ResourceNotFoundException("該当の受講生が見つかりません");
-    }
-    List<StudentsCourses> studentsCoursesList = studentList.stream()
-        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
-    List<Apply> applyList = studentsCoursesList.stream()
-        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
-        .toList();
-
-    return converter.convertStudentDetailList(studentList,
-        studentsCoursesList, applyList);
+    return getStudentDetailList(studentList);
   }
 
   public List<StudentDetail> searchStudentsByAge(Integer age) {
     List<Student> studentList = repository.searchStudentsByAge(age);
-    if (studentList.isEmpty()) {
-      throw new ResourceNotFoundException("該当の受講生が見つかりません");
-    }
-    List<StudentsCourses> studentsCoursesList = studentList.stream()
-        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
-    List<Apply> applyList = studentsCoursesList.stream()
-        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
-        .toList();
-
-    return converter.convertStudentDetailList(studentList,
-        studentsCoursesList, applyList);
+    return getStudentDetailList(studentList);
   }
 
   public List<StudentDetail> searchStudentsByGender(String gender) {
     List<Student> studentList = repository.searchStudentsByGender(gender);
-    if (studentList.isEmpty()) {
-      throw new ResourceNotFoundException("該当の受講生が見つかりません");
-    }
-    List<StudentsCourses> studentsCoursesList = studentList.stream()
-        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
-    List<Apply> applyList = studentsCoursesList.stream()
-        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
-        .toList();
-
-    return converter.convertStudentDetailList(studentList,
-        studentsCoursesList, applyList);
+    return getStudentDetailList(studentList);
   }
 
   public List<StudentDetail> searchStudentsByRemark(String remark) {
     List<Student> studentList = repository.searchStudentsByRemark(remark);
-    if (studentList.isEmpty()) {
-      throw new ResourceNotFoundException("該当の受講生が見つかりません");
-    }
-    List<StudentsCourses> studentsCoursesList = studentList.stream()
-        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
-    List<Apply> applyList = studentsCoursesList.stream()
-        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
-        .toList();
-
-    return converter.convertStudentDetailList(studentList,
-        studentsCoursesList, applyList);
+    return getStudentDetailList(studentList);
   }
 
   public List<StudentDetail> searchStudentsByDeleted(boolean deleted) {
     List<Student> studentList = repository.searchStudentsByDeleted(deleted);
-    if (studentList.isEmpty()) {
-      throw new ResourceNotFoundException("該当の受講生が見つかりません");
-    }
-    List<StudentsCourses> studentsCoursesList = studentList.stream()
-        .flatMap(sc -> repository.getStudentCourse(sc.getStudentId()).stream()).toList();
-    List<Apply> applyList = studentsCoursesList.stream()
-        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
-        .toList();
-
-    return converter.convertStudentDetailList(studentList,
-        studentsCoursesList, applyList);
+    return getStudentDetailList(studentList);
   }
 
   public List<StudentDetail> searchCoursesByCourseName(String courseName) {

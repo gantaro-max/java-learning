@@ -128,6 +128,9 @@ public interface StudentRepository {
   List<StudentsCourses> searchCoursesByTakeCourseIdList(
       @Param("takeCourseIdList") List<String> takeCourseIdList);
 
+  List<StudentsCourses> searchCoursesByStudentIdList(
+      @Param("studentIdList") Set<String> studentIdList);
+
   List<Apply> searchApplyByTakeCourseIdList(
       @Param("takeCourseIdList") List<String> takeCourseIdList);
 
