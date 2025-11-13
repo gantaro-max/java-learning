@@ -179,5 +179,21 @@ public class StudentController {
     return ResponseEntity.ok().body(studentDetailList);
   }
 
+  @GetMapping("/students/course-name/{courseName}")
+  public ResponseEntity<List<StudentDetail>> searchCoursesByCourseName(
+      @PathVariable("courseName") String courseName) {
+    List<StudentDetail> studentDetailList = service.searchCoursesByCourseName(courseName);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/apply-status/{applyStatus}")
+  public ResponseEntity<List<StudentDetail>> searchApplyByApplyStatus(
+      @PathVariable("applyStatus") String applyStatus) {
+    List<StudentDetail> studentDetailList = service.searchApplyByApplyStatus(applyStatus);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
 
 }
