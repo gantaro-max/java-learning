@@ -282,5 +282,10 @@ class StudentControllerTest {
         .andExpect(jsonPath("$.errors").doesNotExist());
   }
 
+  @Test
+  void 受講生名で検索して該当の受講生が存在しない場合404を返す() {
+    String testFullName = "";
+  }
+
 
 }

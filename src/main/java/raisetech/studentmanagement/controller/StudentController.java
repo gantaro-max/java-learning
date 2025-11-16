@@ -2,6 +2,9 @@ package raisetech.studentmanagement.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import java.net.URI;
 import java.util.List;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import raisetech.studentmanagement.domain.RegisterStudent;
@@ -108,92 +112,104 @@ public class StudentController {
    * @param fullName 受講生名
    * @return 検索処理の結果
    */
-  @GetMapping("/students/full-name/{fullName}")
+  @GetMapping("/students/full-name")
   public ResponseEntity<List<StudentDetail>> searchStudentsByFullName(
-      @PathVariable("fullName") String fullName) {
+      @Pattern(regexp = "^[\\u3040-\\u309F\\u30A0-\\u30FF\\u4E00-\\u9FFF]+$",
+          message = "入力内容が不正です")
+      @RequestParam("fullName") String fullName) {
     List<StudentDetail> studentDetailList = service.searchStudentsByFullName(fullName);
 
     return ResponseEntity.ok().body(studentDetailList);
   }
 
-  @GetMapping("/students/kana-name/{kanaName}")
+  @GetMapping("/students/kana-name")
   public ResponseEntity<List<StudentDetail>> searchStudentsByKanaName(
-      @PathVariable("kanaName") String kanaName) {
+      @Pattern(regexp = "^[\\u30A0-\\u30FF]+$", message = "入力内容が不正です")
+      @RequestParam("kanaName") String kanaName) {
     List<StudentDetail> studentDetailList = service.searchStudentsByKanaName(kanaName);
 
     return ResponseEntity.ok().body(studentDetailList);
   }
 
-  @GetMapping("/students/nick-name/{nickName}")
+  @GetMapping("/students/nick-name")
   public ResponseEntity<List<StudentDetail>> searchStudentsByNickName(
-      @PathVariable("nickName") String nickName) {
+      @NotBlank(message = "空にできません")
+      @RequestParam("nickName") String nickName) {
     List<StudentDetail> studentDetailList = service.searchStudentsByNickName(nickName);
 
     return ResponseEntity.ok().body(studentDetailList);
   }
 
-  @GetMapping("/students/email/{email}")
+  @GetMapping("/students/email")
   public ResponseEntity<List<StudentDetail>> searchStudentsByEmail(
-      @PathVariable("email") String email) {
+      @Pattern(regexp = "^[a-zA-Z0-9._%+-]+$", message = "入力内容が不正です")
+      @RequestParam("email") String email) {
     List<StudentDetail> studentDetailList = service.searchStudentsByEmail(email);
 
     return ResponseEntity.ok().body(studentDetailList);
   }
 
-  @GetMapping("/students/address/{address}")
+  @GetMapping("/students/address")
   public ResponseEntity<List<StudentDetail>> searchStudentsByAddress(
-      @PathVariable("address") String address) {
+      @NotBlank(message = "空にできません")
+      @RequestParam("address") String address) {
     List<StudentDetail> studentDetailList = service.searchStudentsByAddress(address);
 
     return ResponseEntity.ok().body(studentDetailList);
   }
 
-  @GetMapping("/students/age/{age}")
-  public ResponseEntity<List<StudentDetail>> searchStudentsByAge(@PathVariable("age") Integer age) {
+  @GetMapping("/students/age")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByAge(
+      @Min(value = 18, message = "18以上を入力してください")
+      @Max(value = 100, message = "100以下を入力してください")
+      @RequestParam("age") Integer age) {
     List<StudentDetail> studentDetailList = service.searchStudentsByAge(age);
 
     return ResponseEntity.ok().body(studentDetailList);
   }
 
-  @GetMapping("/students/gender/{gender}")
+  @GetMapping("/students/gender")
   public ResponseEntity<List<StudentDetail>> searchStudentsByGender(
-      @PathVariable("gender") String gender) {
+      @NotBlank(message = "空にできません")
+      @RequestParam("gender") String gender) {
     List<StudentDetail> studentDetailList = service.searchStudentsByGender(gender);
 
     return ResponseEntity.ok().body(studentDetailList);
   }
 
-  @GetMapping("/students/remark/{remark}")
+  @GetMapping("/students/remark")
   public ResponseEntity<List<StudentDetail>> searchStudentsByRemark(
-      @PathVariable("remark") String remark) {
+      @NotBlank(message = "空にできません")
+      @RequestParam("remark") String remark) {
     List<StudentDetail> studentDetailList = service.searchStudentsByRemark(remark);
 
     return ResponseEntity.ok().body(studentDetailList);
   }
 
-  @GetMapping("/students/deleted/{deleted}")
+  @GetMapping("/students/deleted")
   public ResponseEntity<List<StudentDetail>> searchStudentsByDeleted(
-      @PathVariable("deleted") boolean deleted) {
+      @RequestParam("deleted") boolean deleted) {
     List<StudentDetail> studentDetailList = service.searchStudentsByDeleted(deleted);
 
     return ResponseEntity.ok().body(studentDetailList);
   }
 
-  @GetMapping("/students/course-name/{courseName}")
+  @GetMapping("/students/course-name")
   public ResponseEntity<List<StudentDetail>> searchCoursesByCourseName(
-      @PathVariable("courseName") String courseName) {
+      @Pattern(regexp = "^[A-Z]+$", message = "入力内容が不正です")
+      @RequestParam("courseName") String courseName) {
     List<StudentDetail> studentDetailList = service.searchCoursesByCourseName(courseName);
 
     return ResponseEntity.ok().body(studentDetailList);
   }
 
-  @GetMapping("/students/apply-status/{applyStatus}")
+  @GetMapping("/students/apply-status")
   public ResponseEntity<List<StudentDetail>> searchApplyByApplyStatus(
-      @PathVariable("applyStatus") String applyStatus) {
+      @Pattern(regexp = "^(仮申込|本申込|受講中|受講終了)$", message = "入力内容が不正です")
+      @RequestParam("applyStatus") String applyStatus) {
     List<StudentDetail> studentDetailList = service.searchApplyByApplyStatus(applyStatus);
 
     return ResponseEntity.ok().body(studentDetailList);
   }
-
 
 }
