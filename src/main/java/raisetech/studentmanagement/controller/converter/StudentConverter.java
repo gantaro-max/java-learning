@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import raisetech.studentmanagement.domain.ResponseStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
 import raisetech.studentmanagement.domain.UpCourseApply;
 import raisetech.studentmanagement.domain.UpdateStudent;
+import raisetech.studentmanagement.exception.ResourceNotFoundException;
 
 /**
  * 受講生詳細を受講性や受講生コース情報、もしくはその逆に変換するコンバーターです。
@@ -36,23 +38,23 @@ public class StudentConverter {
   public List<StudentDetail> convertStudentDetailList(List<Student> students,
       List<StudentsCourses> studentCourses, List<Apply> applyList) {
     List<StudentDetail> studentDetails = new ArrayList<>();
+
+    Map<String, List<StudentsCourses>> mapStudentsCourses = studentCourses.stream()
+        .collect(Collectors.groupingBy(StudentsCourses::getStudentId));
+
+    Map<String, Apply> mapApplyList = applyList.stream()
+        .collect(Collectors.toMap(Apply::getTakeCourseId, ap -> ap));
+
     students.forEach(student -> {
       StudentDetail studentDetail = new StudentDetail();
       ResponseStudent responseStudent = convertStudentToResponse(student);
       studentDetail.setResponseStudent(responseStudent);
-      List<StudentsCourses> convertStudentCourses = studentCourses.stream()
-          .filter(studentCourse -> student.getStudentId().equals(studentCourse.getStudentId()))
-          .collect(Collectors.toList());
 
-      List<Apply> studentApply = new ArrayList<>();
+      List<StudentsCourses> convertStudentCourses = mapStudentsCourses.getOrDefault(
+          student.getStudentId(), new ArrayList<>());
+      List<Apply> studentApply = convertStudentCourses.stream()
+          .map(sc -> mapApplyList.get(sc.getTakeCourseId())).filter(Objects::nonNull).toList();
 
-      convertStudentCourses.forEach(course -> {
-        applyList.forEach(apply -> {
-          if (course.getTakeCourseId().equals(apply.getTakeCourseId())) {
-            studentApply.add(apply);
-          }
-        });
-      });
       studentDetail.setStudentsCourses(convertStudentCourses);
       studentDetail.setApplyList(studentApply);
       studentDetails.add(studentDetail);
@@ -156,12 +158,18 @@ public class StudentConverter {
 
     upCourseApplyList.forEach(uca -> {
       StudentsCourses targetStudentsCourses = mapStudentsCourses.get(uca.getTakeCourseId());
-      targetStudentsCourses.setCourseId(uca.getCourseId());
-      targetStudentsCourses.setCourseName(getCourseNameById(uca.getCourseId()));
-      if (targetStudentsCourses.getCompleteDate() == null && uca.getApplyStatus()
-          .equals("受講終了")) {
-        targetStudentsCourses.setCompleteDate(LocalDateTime.now());
+
+      if (targetStudentsCourses != null) {
+        targetStudentsCourses.setCourseId(uca.getCourseId());
+        targetStudentsCourses.setCourseName(getCourseNameById(uca.getCourseId()));
+        if (targetStudentsCourses.getCompleteDate() == null && uca.getApplyStatus()
+            .equals("受講終了")) {
+          targetStudentsCourses.setCompleteDate(LocalDateTime.now());
+        }
+      } else {
+        throw new ResourceNotFoundException("不正な受講コースIDが含まれています");
       }
+
     });
 
     return studentsCourses;
@@ -176,11 +184,15 @@ public class StudentConverter {
    */
   public List<Apply> convertUpdateToApply(List<UpCourseApply> upCourseApplyList,
       List<Apply> applyList) {
+
     Map<String, String> mapAppLyIdStatus = upCourseApplyList.stream()
         .collect(Collectors.toMap(UpCourseApply::getApplyId, UpCourseApply::getApplyStatus));
 
     applyList.forEach(apply -> {
-      apply.setApplyStatus(mapAppLyIdStatus.get(apply.getApplyId()));
+      String upStatus = mapAppLyIdStatus.get(apply.getApplyId());
+      if (upStatus != null) {
+        apply.setApplyStatus(upStatus);
+      }
     });
 
     return applyList;

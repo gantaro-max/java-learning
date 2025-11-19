@@ -61,9 +61,11 @@ public class StudentService {
     ResponseStudent responseStudent = converter.convertStudentToResponse(foundStudent);
 
     List<StudentsCourses> studentCourses = repository.getStudentCourse(studentId);
-    List<Apply> studentApply = studentCourses.stream()
-        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+
+    List<String> takeCourseIdList = studentCourses.stream().map(StudentsCourses::getTakeCourseId)
         .toList();
+
+    List<Apply> studentApply = repository.searchApplyByTakeCourseIdList(takeCourseIdList);
 
     StudentDetail studentDetail = new StudentDetail(responseStudent, studentCourses,
         studentApply);
