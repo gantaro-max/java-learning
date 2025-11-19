@@ -98,6 +98,7 @@ class StudentServiceTest {
     studentsCourses.setCourseName("JAVA");
     studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
     List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
+    List<String> studentsCoursesIdList = new ArrayList<>(List.of(testTakeCourseId));
 
     String testApplyId = "99999999-9999-9999-9999-999999999999";
     Apply apply = new Apply();
@@ -125,14 +126,14 @@ class StudentServiceTest {
 
     when(repository.getStudentById(studentId)).thenReturn(student);
     when(repository.getStudentCourse(studentId)).thenReturn(studentsCoursesList);
-    when(repository.searchApplyByTakeCourseId(testTakeCourseId)).thenReturn(applyList);
+    when(repository.searchApplyByTakeCourseIdList(studentsCoursesIdList)).thenReturn(applyList);
     when(converter.convertStudentToResponse(student)).thenReturn(responseStudent);
 
     Optional<StudentDetail> opStudentDetail = sut.getStudentDetail(studentId);
 
     verify(repository, times(1)).getStudentById(studentId);
     verify(repository, times(1)).getStudentCourse(studentId);
-    verify(repository, times(1)).searchApplyByTakeCourseId(testTakeCourseId);
+    verify(repository, times(1)).searchApplyByTakeCourseIdList(studentsCoursesIdList);
     verify(converter, times(1)).convertStudentToResponse(student);
 
     assertThat(opStudentDetail).isPresent().get().usingRecursiveComparison()
