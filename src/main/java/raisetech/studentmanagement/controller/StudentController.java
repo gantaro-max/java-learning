@@ -2,12 +2,14 @@ package raisetech.studentmanagement.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,11 +17,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
-import raisetech.studentmanagement.domain.UpdateStudent;
+import raisetech.studentmanagement.domain.UpdateDetail;
 import raisetech.studentmanagement.exception.ResourceNotFoundException;
 import raisetech.studentmanagement.service.StudentService;
 
@@ -59,7 +62,7 @@ public class StudentController {
    * @param registerStudent 受講生登録情報
    * @return 登録処理の結果
    */
-  @Operation(summary = "受講生登録", description = "受講生と受講生コース情報を登録します")
+  @Operation(summary = "受講生登録", description = "受講生と受講生コース情報と申込状況を登録します")
   @PostMapping("/students")
   public ResponseEntity<StudentDetail> registerStudent(
       @Valid @RequestBody RegisterStudent registerStudent) {
@@ -84,13 +87,13 @@ public class StudentController {
       throw new ResourceNotFoundException("該当が見つかりませんでした ID:" + studentId);
     }
     StudentDetail studentDetail = detail.get();
-    return new ResponseEntity<>(studentDetail, HttpStatus.OK);
+    return ResponseEntity.ok().body(studentDetail);
   }
 
   /**
-   * 受講生情報の更新処理です。 受講生の更新を行いその結果を返します。
+   * 受講生情報の更新処理です。 受講生、受講生コース情報、申込状況の更新を行いその結果を返します。
    *
-   * @param updateStudent 受講生更新情報
+   * @param updateDetail 更新用受講生詳細情報
    * @return 更新処理の結果
    */
   @Operation(summary = "受講生情報更新", description = "受講生情報の更新を行います")
@@ -98,10 +101,115 @@ public class StudentController {
   public ResponseEntity<StudentDetail> updateStudent(
       @Pattern(regexp = UUID_REGEXP,
           message = "IDの形式が不正です") @PathVariable("studentId") String studentId,
-      @Valid @RequestBody UpdateStudent updateStudent) {
-    StudentDetail updateDetail = service.updateStudent(updateStudent, studentId);
-    return new ResponseEntity<>(updateDetail, HttpStatus.OK);
+      @Valid @RequestBody UpdateDetail updateDetail) {
+    StudentDetail updatedDetail = service.updateStudent(updateDetail, studentId);
+    return ResponseEntity.ok().body(updatedDetail);
   }
 
+  /**
+   * 受講生検索です。受講生名から任意の受講生の情報を取得します
+   *
+   * @param fullName 受講生名
+   * @return 検索処理の結果
+   */
+  @GetMapping("/students/full-name")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByFullName(
+      @Pattern(regexp = "^[\\u3040-\\u309F\\u30A0-\\u30FF\\u4E00-\\u9FFF]+$",
+          message = "入力内容が不正です")
+      @RequestParam("fullName") String fullName) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByFullName(fullName);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/kana-name")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByKanaName(
+      @Pattern(regexp = "^[\\u30A0-\\u30FF]+$", message = "入力内容が不正です")
+      @RequestParam("kanaName") String kanaName) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByKanaName(kanaName);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/nick-name")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByNickName(
+      @NotBlank(message = "空にできません")
+      @RequestParam("nickName") String nickName) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByNickName(nickName);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/email")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByEmail(
+      @Pattern(regexp = "^[a-zA-Z0-9._%+-]+$", message = "入力内容が不正です")
+      @RequestParam("email") String email) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByEmail(email);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/address")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByAddress(
+      @NotBlank(message = "空にできません")
+      @RequestParam("address") String address) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByAddress(address);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/age")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByAge(
+      @Min(value = 18, message = "18以上を入力してください")
+      @Max(value = 100, message = "100以下を入力してください")
+      @RequestParam("age") Integer age) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByAge(age);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/gender")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByGender(
+      @NotBlank(message = "空にできません")
+      @RequestParam("gender") String gender) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByGender(gender);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/remark")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByRemark(
+      @NotBlank(message = "空にできません")
+      @RequestParam("remark") String remark) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByRemark(remark);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/deleted")
+  public ResponseEntity<List<StudentDetail>> searchStudentsByDeleted(
+      @RequestParam("deleted") boolean deleted) {
+    List<StudentDetail> studentDetailList = service.searchStudentsByDeleted(deleted);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/course-name")
+  public ResponseEntity<List<StudentDetail>> searchCoursesByCourseName(
+      @Pattern(regexp = "^[A-Z]+$", message = "入力内容が不正です")
+      @RequestParam("courseName") String courseName) {
+    List<StudentDetail> studentDetailList = service.searchCoursesByCourseName(courseName);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
+
+  @GetMapping("/students/apply-status")
+  public ResponseEntity<List<StudentDetail>> searchApplyByApplyStatus(
+      @Pattern(regexp = "^(仮申込|本申込|受講中|受講終了)$", message = "入力内容が不正です")
+      @RequestParam("applyStatus") String applyStatus) {
+    List<StudentDetail> studentDetailList = service.searchApplyByApplyStatus(applyStatus);
+
+    return ResponseEntity.ok().body(studentDetailList);
+  }
 
 }

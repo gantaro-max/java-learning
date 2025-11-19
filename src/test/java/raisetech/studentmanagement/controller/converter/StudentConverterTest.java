@@ -7,14 +7,18 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import raisetech.studentmanagement.data.Apply;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.ResponseStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
+import raisetech.studentmanagement.domain.UpCourseApply;
 import raisetech.studentmanagement.domain.UpdateStudent;
 
 class StudentConverterTest {
@@ -43,15 +47,28 @@ class StudentConverterTest {
     student.setGender("女");
     student.setRemark("なし");
     student.setDeleted(false);
+
     StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId("77777777-8888-9999-1111-222222222222");
     studentsCourses.setCourseId("4001");
     studentsCourses.setStudentId(student.getStudentId());
     studentsCourses.setCourseName("JAVA");
     studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
+
+    Apply apply = new Apply();
+    apply.setApplyId("99999999-9999-9999-9999-999999999999");
+    apply.setTakeCourseId(studentsCourses.getTakeCourseId());
+    apply.setApplyStatus("受講中");
+
     List<Student> studentList = new ArrayList<>();
     studentList.add(student);
+
     List<StudentsCourses> studentsCoursesList = new ArrayList<>();
     studentsCoursesList.add(studentsCourses);
+
+    List<Apply> applyList = new ArrayList<>();
+    applyList.add(apply);
+
     ResponseStudent responseStudent = new ResponseStudent();
     responseStudent.setStudentId(student.getStudentId());
     responseStudent.setFullName(student.getFullName());
@@ -62,12 +79,14 @@ class StudentConverterTest {
     responseStudent.setAge(student.getAge());
     responseStudent.setGender(student.getGender());
     responseStudent.setRemark(student.getRemark());
+
     StudentDetail studentDetail = new StudentDetail();
     studentDetail.setResponseStudent(responseStudent);
     studentDetail.setStudentsCourses(studentsCoursesList);
+    studentDetail.setApplyList(applyList);
 
     List<StudentDetail> resultDetailList = sut.convertStudentDetailList(studentList,
-        studentsCoursesList);
+        studentsCoursesList, applyList);
 
     assertThat(resultDetailList.get(0)).isEqualTo(studentDetail);
   }
@@ -119,6 +138,7 @@ class StudentConverterTest {
     student.setDeleted(false);
 
     StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId("77777777-8888-9999-1111-222222222222");
     studentsCourses.setCourseId("4001");
     studentsCourses.setStudentId(student.getStudentId());
     studentsCourses.setCourseName("JAVA");
@@ -126,11 +146,43 @@ class StudentConverterTest {
 
     StudentsCourses resultStudentCourse = sut.convertStudentCourse(registerStudent, student);
 
+    assertThat(resultStudentCourse.getTakeCourseId()).matches(UUID_REGEXP);
+    assertThat(resultStudentCourse.getTakeCourseId()).isNotNull();
+    assertThat(resultStudentCourse.getTakeCourseId()).isNotEmpty();
     assertThat(resultStudentCourse.getCourseId()).isEqualTo(studentsCourses.getCourseId());
     assertThat(resultStudentCourse.getStudentId()).isEqualTo(studentsCourses.getStudentId());
     assertThat(resultStudentCourse.getStartDate()).isCloseTo(studentsCourses.getStartDate(),
         within(1, ChronoUnit.SECONDS));
 
+
+  }
+  
+  @Test
+  void 受講生コース情報から新しい申込状況を作成できること() {
+    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
+    String studentId = "00000000-0000-0000-0000-000000000000";
+
+    StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId(testTakeCourseId);
+    studentsCourses.setCourseId("4001");
+    studentsCourses.setStudentId(studentId);
+    studentsCourses.setCourseName("JAVA");
+    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
+
+    String testApplyId = "99999999-9999-9999-9999-999999999999";
+
+    Apply apply = new Apply();
+    apply.setApplyId(testApplyId);
+    apply.setTakeCourseId(testTakeCourseId);
+    apply.setApplyStatus("仮申込");
+
+    Apply actualApply = sut.convertApply(studentsCourses);
+
+    assertThat(actualApply.getApplyId()).isNotNull();
+    assertThat(actualApply.getApplyId()).isNotEmpty();
+    assertThat(actualApply.getApplyId()).matches(UUID_REGEXP);
+    assertThat(actualApply.getTakeCourseId()).isEqualTo(apply.getTakeCourseId());
+    assertThat(actualApply.getApplyStatus()).isEqualTo(apply.getApplyStatus());
 
   }
 
@@ -207,6 +259,118 @@ class StudentConverterTest {
     Student resultStudent = sut.convertUpdateToStudent(updateStudent, student);
 
     assertThat(resultStudent).usingRecursiveComparison().isEqualTo(student);
+
+  }
+
+  @Test
+  void 更新用受講生コース申込状況と既存の受講生コース情報から更新用受講生コース情報を作成できること() {
+    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
+    String testApplyId = "99999999-9999-9999-9999-999999999999";
+
+    UpCourseApply upCourseApply = new UpCourseApply();
+    upCourseApply.setTakeCourseId(testTakeCourseId);
+    upCourseApply.setCourseId("1001");
+    upCourseApply.setApplyId(testApplyId);
+    upCourseApply.setApplyStatus("受講中");
+
+    List<UpCourseApply> upCourseApplyList = new ArrayList<>(List.of(upCourseApply));
+
+    String studentId = "00000000-0000-0000-0000-000000000000";
+
+    StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId(testTakeCourseId);
+    studentsCourses.setCourseId("4001");
+    studentsCourses.setStudentId(studentId);
+    studentsCourses.setCourseName("JAVA");
+    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
+
+    StudentsCourses result = new StudentsCourses();
+    result.setTakeCourseId(studentsCourses.getTakeCourseId());
+    result.setCourseId("1001");
+    result.setStudentId(studentsCourses.getStudentId());
+    result.setCourseName("AWS");
+    result.setStartDate(studentsCourses.getStartDate());
+
+    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
+
+    List<StudentsCourses> actualStudentsCoursesList = sut.convertUpdateToCourses(upCourseApplyList,
+        studentsCoursesList);
+    Optional<StudentsCourses> actualStudentsCourses = actualStudentsCoursesList.stream()
+        .filter(asc -> asc.getTakeCourseId().equals(testTakeCourseId)).findFirst();
+
+    assertThat(actualStudentsCourses).isPresent().get().usingRecursiveComparison()
+        .isEqualTo(result);
+
+
+  }
+
+  @Test
+  void 更新用受講生コース申込状況が受講終了の場合受講生ーコース情報の完了日が入力されること() {
+    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
+    String testApplyId = "99999999-9999-9999-9999-999999999999";
+
+    UpCourseApply upCourseApply = new UpCourseApply();
+    upCourseApply.setTakeCourseId(testTakeCourseId);
+    upCourseApply.setCourseId("4001");
+    upCourseApply.setApplyId(testApplyId);
+    upCourseApply.setApplyStatus("受講終了");
+
+    List<UpCourseApply> upCourseApplyList = new ArrayList<>(List.of(upCourseApply));
+
+    String studentId = "00000000-0000-0000-0000-000000000000";
+
+    StudentsCourses studentsCourses = new StudentsCourses();
+    studentsCourses.setTakeCourseId(testTakeCourseId);
+    studentsCourses.setCourseId("4001");
+    studentsCourses.setStudentId(studentId);
+    studentsCourses.setCourseName("JAVA");
+    studentsCourses.setStartDate(LocalDateTime.of(2025, 10, 10, 10, 10));
+    studentsCourses.setCompleteDate(LocalDateTime.now());
+
+    List<StudentsCourses> studentsCoursesList = new ArrayList<>(List.of(studentsCourses));
+
+    List<StudentsCourses> actualStudentsCoursesList = sut.convertUpdateToCourses(upCourseApplyList,
+        studentsCoursesList);
+    Optional<StudentsCourses> actualStudentsCourses = actualStudentsCoursesList.stream()
+        .filter(asc -> asc.getTakeCourseId().equals(testTakeCourseId)).findFirst();
+
+    assertThat(actualStudentsCourses).isPresent().get().extracting(StudentsCourses::getCompleteDate,
+            InstanceOfAssertFactories.LOCAL_DATE_TIME)
+        .isCloseTo(
+            studentsCourses.getCompleteDate(), within(1, ChronoUnit.SECONDS));
+
+  }
+
+  @Test
+  void 更新用受講生コース申込状況と既存の申込み状況から更新用申込状況を作成できること() {
+    String testTakeCourseId = "77777777-8888-9999-1111-222222222222";
+    String testApplyId = "99999999-9999-9999-9999-999999999999";
+
+    UpCourseApply upCourseApply = new UpCourseApply();
+    upCourseApply.setTakeCourseId(testTakeCourseId);
+    upCourseApply.setCourseId("1001");
+    upCourseApply.setApplyId(testApplyId);
+    upCourseApply.setApplyStatus("受講中");
+
+    List<UpCourseApply> upCourseApplyList = new ArrayList<>(List.of(upCourseApply));
+
+    Apply apply = new Apply();
+    apply.setApplyId(testApplyId);
+    apply.setTakeCourseId(testTakeCourseId);
+    apply.setApplyStatus("本申込");
+
+    List<Apply> applyList = new ArrayList<>(List.of(apply));
+
+    Apply result = new Apply();
+    result.setApplyId(testApplyId);
+    result.setTakeCourseId(testTakeCourseId);
+    result.setApplyStatus("受講中");
+
+    List<Apply> actualApplyList = sut.convertUpdateToApply(upCourseApplyList, applyList);
+    Optional<Apply> actualApply = actualApplyList.stream()
+        .filter(app -> app.getApplyId().equals(testApplyId)).findFirst();
+
+    assertThat(actualApply).isPresent().get().usingRecursiveComparison().isEqualTo(result);
 
   }
 

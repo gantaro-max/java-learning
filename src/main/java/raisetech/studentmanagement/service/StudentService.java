@@ -2,16 +2,19 @@ package raisetech.studentmanagement.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.studentmanagement.controller.converter.StudentConverter;
+import raisetech.studentmanagement.data.Apply;
 import raisetech.studentmanagement.data.Student;
 import raisetech.studentmanagement.data.StudentsCourses;
 import raisetech.studentmanagement.domain.RegisterStudent;
 import raisetech.studentmanagement.domain.ResponseStudent;
 import raisetech.studentmanagement.domain.StudentDetail;
-import raisetech.studentmanagement.domain.UpdateStudent;
+import raisetech.studentmanagement.domain.UpdateDetail;
 import raisetech.studentmanagement.exception.ResourceNotFoundException;
 import raisetech.studentmanagement.repository.StudentRepository;
 
@@ -38,7 +41,8 @@ public class StudentService {
   public List<StudentDetail> getStudentDetailList() {
     List<Student> students = repository.getStudentList();
     List<StudentsCourses> studentsCourses = repository.getStudentCourseList();
-    return converter.convertStudentDetailList(students, studentsCourses);
+    List<Apply> applyList = repository.getApplyList();
+    return converter.convertStudentDetailList(students, studentsCourses, applyList);
   }
 
   /**
@@ -55,13 +59,21 @@ public class StudentService {
     }
     Student foundStudent = opStudent.get();
     ResponseStudent responseStudent = converter.convertStudentToResponse(foundStudent);
-    StudentDetail studentDetail = new StudentDetail(responseStudent,
-        repository.getStudentCourse(studentId));
+
+    List<StudentsCourses> studentCourses = repository.getStudentCourse(studentId);
+
+    List<String> takeCourseIdList = studentCourses.stream().map(StudentsCourses::getTakeCourseId)
+        .toList();
+
+    List<Apply> studentApply = repository.searchApplyByTakeCourseIdList(takeCourseIdList);
+
+    StudentDetail studentDetail = new StudentDetail(responseStudent, studentCourses,
+        studentApply);
     return Optional.of(studentDetail);
   }
 
   /**
-   * 受講生と受講生コース情報の登録を行います。
+   * 受講生と受講生コース情報と申込状況の登録を行います。
    *
    * @param registerStudent 受講生登録情報
    * @return 受講生詳細
@@ -70,30 +82,157 @@ public class StudentService {
   public StudentDetail setStudentNewCourse(RegisterStudent registerStudent) {
     Student student = converter.convertRegisterToStudent(registerStudent);
     StudentsCourses newStudentCourse = converter.convertStudentCourse(registerStudent, student);
+    Apply newApply = converter.convertApply(newStudentCourse);
     repository.setStudentData(student);
     repository.setNewCourse(newStudentCourse);
+    repository.setNewApply(newApply);
     ResponseStudent responseStudent = converter.convertStudentToResponse(student);
     List<StudentsCourses> newStudentsCourses = repository.getStudentCourse(student.getStudentId());
-    return new StudentDetail(responseStudent, newStudentsCourses);
+
+    List<Apply> applyList = newStudentsCourses.stream()
+        .flatMap(nsc -> repository.searchApplyByTakeCourseId(nsc.getTakeCourseId()).stream())
+        .toList();
+    return new StudentDetail(responseStudent, newStudentsCourses, applyList);
   }
 
   /**
    * 受講生の更新処理を行います。
    *
-   * @param updateStudent 受講生更新情報
+   * @param updateDetail 更新用受講生詳細情報
    * @return 受講生詳細
    */
   @Transactional
-  public StudentDetail updateStudent(UpdateStudent updateStudent, String studentId) {
+  public StudentDetail updateStudent(UpdateDetail updateDetail, String studentId) {
     Student searchStudent = repository.getStudentById(studentId);
     if (searchStudent == null) {
       throw new ResourceNotFoundException("該当の受講生が見つかりません");
     }
-    Student newStudent = converter.convertUpdateToStudent(updateStudent, searchStudent);
+    List<StudentsCourses> searchCourses = repository.getStudentCourse(studentId);
+
+    List<Apply> searchApply = searchCourses.stream()
+        .flatMap(sc -> repository.searchApplyByTakeCourseId(sc.getTakeCourseId()).stream())
+        .toList();
+
+    Student newStudent = converter.convertUpdateToStudent(updateDetail.getUpdateStudent(),
+        searchStudent);
+    List<StudentsCourses> newStudentsCourses = converter.convertUpdateToCourses(
+        updateDetail.getUpCourseApplyList(), searchCourses);
+    List<Apply> newApplyList = converter.convertUpdateToApply(updateDetail.getUpCourseApplyList(),
+        searchApply);
     repository.updateStudent(newStudent);
+    for (StudentsCourses course : newStudentsCourses) {
+      repository.updateStudentsCourses(course);
+    }
+    for (Apply apply : newApplyList) {
+      repository.updateApply(apply);
+    }
     ResponseStudent responseStudent = converter.convertStudentToResponse(newStudent);
-    List<StudentsCourses> studentsCourses = repository.getStudentCourse(newStudent.getStudentId());
-    return new StudentDetail(responseStudent, studentsCourses);
+
+    return new StudentDetail(responseStudent, newStudentsCourses, newApplyList);
   }
+
+  /**
+   * 受講生検索です。 受講生名で検索された受講生の情報を取得したあと、その受講生に紐づく受講生コース情報を取得して設定します。
+   *
+   * @param fullName 受講生名
+   * @return 受講生詳細
+   */
+  public List<StudentDetail> searchStudentsByFullName(String fullName) {
+    List<Student> studentList = repository.searchStudentsByFullName(fullName);
+    return getStudentDetailList(studentList);
+  }
+
+  private List<StudentDetail> getStudentDetailList(List<Student> studentList) {
+    if (studentList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の受講生が見つかりません");
+    }
+
+    Set<String> studentIdList = studentList.stream().map(Student::getStudentId)
+        .collect(Collectors.toSet());
+
+    List<StudentsCourses> studentsCoursesList = repository.searchCoursesByStudentIdList(
+        studentIdList);
+
+    List<String> takeCourseIdList = studentsCoursesList.stream()
+        .map(StudentsCourses::getTakeCourseId).toList();
+
+    List<Apply> applyList = repository.searchApplyByTakeCourseIdList(takeCourseIdList);
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
+  public List<StudentDetail> searchStudentsByKanaName(String kanaName) {
+    List<Student> studentList = repository.searchStudentsByKanaName(kanaName);
+    return getStudentDetailList(studentList);
+  }
+
+  public List<StudentDetail> searchStudentsByNickName(String nickName) {
+    List<Student> studentList = repository.searchStudentsByNickName(nickName);
+    return getStudentDetailList(studentList);
+  }
+
+  public List<StudentDetail> searchStudentsByEmail(String email) {
+    List<Student> studentList = repository.searchStudentsByEmail(email);
+    return getStudentDetailList(studentList);
+  }
+
+  public List<StudentDetail> searchStudentsByAddress(String address) {
+    List<Student> studentList = repository.searchStudentsByAddress(address);
+    return getStudentDetailList(studentList);
+  }
+
+  public List<StudentDetail> searchStudentsByAge(Integer age) {
+    List<Student> studentList = repository.searchStudentsByAge(age);
+    return getStudentDetailList(studentList);
+  }
+
+  public List<StudentDetail> searchStudentsByGender(String gender) {
+    List<Student> studentList = repository.searchStudentsByGender(gender);
+    return getStudentDetailList(studentList);
+  }
+
+  public List<StudentDetail> searchStudentsByRemark(String remark) {
+    List<Student> studentList = repository.searchStudentsByRemark(remark);
+    return getStudentDetailList(studentList);
+  }
+
+  public List<StudentDetail> searchStudentsByDeleted(boolean deleted) {
+    List<Student> studentList = repository.searchStudentsByDeleted(deleted);
+    return getStudentDetailList(studentList);
+  }
+
+  public List<StudentDetail> searchCoursesByCourseName(String courseName) {
+    List<StudentsCourses> studentsCoursesList = repository.searchCoursesByCourseName(courseName);
+    if (studentsCoursesList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の受講生コースが見つかりません");
+    }
+    Set<String> studentIdList = studentsCoursesList.stream().map(StudentsCourses::getStudentId)
+        .collect(Collectors.toSet());
+
+    List<Student> studentList = repository.searchStudentsByStudentIdList(studentIdList);
+
+    List<Apply> applyList = repository.searchApplyByTakeCourseIdList(
+        studentsCoursesList.stream().map(StudentsCourses::getTakeCourseId)
+            .collect(Collectors.toList()));
+
+    return converter.convertStudentDetailList(studentList,
+        studentsCoursesList, applyList);
+  }
+
+  public List<StudentDetail> searchApplyByApplyStatus(String applyStatus) {
+    List<Apply> applyList = repository.searchApplyByApplyStatus(applyStatus);
+    if (applyList.isEmpty()) {
+      throw new ResourceNotFoundException("該当の申込状況が見つかりません");
+    }
+    List<StudentsCourses> studentsCoursesList = repository.searchCoursesByTakeCourseIdList(
+        applyList.stream().map(Apply::getTakeCourseId).collect(Collectors.toList()));
+    Set<String> studentIdList = studentsCoursesList.stream().map(StudentsCourses::getStudentId)
+        .collect(Collectors.toSet());
+    List<Student> studentList = repository.searchStudentsByStudentIdList(studentIdList);
+
+    return converter.convertStudentDetailList(studentList, studentsCoursesList, applyList);
+  }
+
 
 }

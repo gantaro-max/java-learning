@@ -1,5 +1,8 @@
 package raisetech.studentmanagement.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,9 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Path;
 import raisetech.studentmanagement.domain.ErrorResponse;
 import raisetech.studentmanagement.domain.ValidationError;
 
@@ -24,7 +24,7 @@ public class ProjectExceptionHandler {
       HttpServletRequest request) {
     logger.warn("入力にバリデーションエラーがあります", e);
     List<ValidationError> validationErrors = e.getBindingResult().getFieldErrors().stream().map(
-        fieldError -> new ValidationError(fieldError.getField(), fieldError.getDefaultMessage()))
+            fieldError -> new ValidationError(fieldError.getField(), fieldError.getDefaultMessage()))
         .toList();
     ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Bad Request",
         "入力にバリデーションエラーがあります", request.getRequestURI(), validationErrors);
@@ -41,8 +41,9 @@ public class ProjectExceptionHandler {
       for (Path.Node node : violation.getPropertyPath()) {
         fieldName = node.getName();
       }
-      if (fieldName == null)
+      if (fieldName == null) {
         fieldName = "unknownField";
+      }
       return new ValidationError(fieldName, violation.getMessage());
     }).toList();
 
@@ -55,9 +56,9 @@ public class ProjectExceptionHandler {
   @ExceptionHandler(ResourceNotFoundException.class)
   public ResponseEntity<ErrorResponse> notFoundException(ResourceNotFoundException e,
       HttpServletRequest request) {
-    logger.warn("該当ありません", e);
+    logger.warn(e.getMessage(), e);
     ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Not Found",
-        "該当ありません", request.getRequestURI());
+        e.getMessage(), request.getRequestURI());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
   }
 
@@ -65,7 +66,8 @@ public class ProjectExceptionHandler {
   public ResponseEntity<ErrorResponse> otherException(Exception e, HttpServletRequest request) {
     logger.error("サーバー内部で予期せぬエラーが発生しました", e);
     ErrorResponse errorResponse = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        "Internal Server Error", "サーバー内部で予期せぬエラーが発生しました", request.getRequestURI());
+        "Internal Server Error", "サーバー内部で予期せぬエラーが発生しました",
+        request.getRequestURI());
     return ResponseEntity.internalServerError().body(errorResponse);
   }
 
