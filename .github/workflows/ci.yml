@@ -8,6 +8,7 @@ on:
 
 env:
   EC2_USER: 'ec2-user'
+  # あなたの現在のIPアドレスを設定済みです
   EC2_HOST: '3.112.218.84'
   SRC_PATH: 'build/libs/*.jar'
   DEST_JAR_PATH: '/home/ec2-user/StudentManagement.jar'
@@ -34,7 +35,7 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew bootJar
 
-      # 【ステップ1】GitHub Actions側でサービスファイルを作成
+      # 【ステップ1】GitHub Actions側でサービスファイルを作成（変数を埋め込む）
       - name: Create Systemd Service File
         env:
           DB_URL: "jdbc:mysql://${{ secrets.RDS_ENDPOINT }}:3306/studentmanagement?useUnicode=true&characterEncoding=UTF-8"
@@ -81,19 +82,31 @@ jobs:
           host: ${{ env.EC2_HOST }}
           username: ${{ env.EC2_USER }}
           key: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
+          # タイムアウトを30分に延長
+          command_timeout: 30m
           script: |
-            # Java確認
+            echo "1. Checking Java installation..."
             if ! command -v java &> /dev/null; then
+                echo "Installing Java..."
                 sudo dnf install java-21-amazon-corretto-devel -y
+            else
+                echo "Java is already installed."
             fi
             
-            # 停止
+            echo "2. Stopping current process..."
             pkill -f 'java -jar' || true
             
-            # 配置（ホームディレクトリから本来の場所へ移動）
+            echo "3. Moving service file..."
+            # sudo mv は上書き移動してくれるので、古いファイルがあっても大丈夫です
             sudo mv /home/ec2-user/StudentManagement.service /etc/systemd/system/StudentManagement.service
             
-            # 反映・起動
+            echo "4. Reloading systemd..."
             sudo systemctl daemon-reload
+            
+            echo "5. Enabling service..."
             sudo systemctl enable StudentManagement
+            
+            echo "6. Restarting service (This may take time)..."
             sudo systemctl restart StudentManagement
+            
+            echo "Deployment Finished Successfully!"
