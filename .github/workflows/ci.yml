@@ -2,15 +2,16 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "main", "develop" ] # mainかdevelopブランチにpushされたら動く
+    branches: [ "main", "develop" ]
   pull_request:
-    branches: [ "main", "develop" ] # mainかdevelopブランチへのPRで作動する
+    branches: [ "main", "develop" ]
 
 env:
   EC2_USER: 'ec2-user'
   EC2_HOST: '54.248.39.15'
   SRC_PATH: 'build/libs/*.jar'
-  DEST_PATH: '/home/ec2-user/StudentManagement.jar'
+  DEST_JAR_PATH: '/home/ec2-user/StudentManagement.jar'
+  SERVICE_FILE_NAME: 'StudentManagement.service'
 
 jobs:
   build:
@@ -33,57 +34,67 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew bootJar
 
-      - name: SCP Copy Application to EC2
+      # 【ステップ1】GitHub Actions側でサービスファイルを作成（変数を埋め込む）
+      # EC2の中で作るのではなく、ここで作ることで記述ミスや権限エラーを防ぎます
+      - name: Create Systemd Service File
         env:
-          PRIVATE_KEY: ${{secrets.AWS_EC2_PRIVATE_KEY}}
+          DB_URL: "jdbc:mysql://${{ secrets.RDS_ENDPOINT }}:3306/studentmanagement?useUnicode=true&characterEncoding=UTF-8"
+          DB_USER: ${{ secrets.RDS_USERNAME }}
+          DB_PASS: ${{ secrets.RDS_PASSWORD }}
+        run: |
+          cat <<EOF > $SERVICE_FILE_NAME
+          [Unit]
+          Description=StudentManagement App
+          After=network.target
+          
+          [Service]
+          ExecStart=/usr/bin/java -jar $DEST_JAR_PATH
+          
+          Environment="SPRING_DATASOURCE_URL=${DB_URL}"
+          Environment="SPRING_DATASOURCE_USERNAME=${DB_USER}"
+          Environment="SPRING_DATASOURCE_PASSWORD=${DB_PASS}"
+          
+          User=ec2-user
+          Group=ec2-user
+          SuccessExitStatus=143
+          Restart=always
+          
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+      # 【ステップ2】SCPで Jarファイル と Serviceファイル を転送
+      - name: SCP Transfer
+        env:
+          PRIVATE_KEY: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          scp -o StrictHostKeyChecking=no -i private_key $SRC_PATH ${EC2_USER}@${EC2_HOST}:${DEST_PATH}
+          # Jar転送
+          scp -o StrictHostKeyChecking=no -i private_key $SRC_PATH ${EC2_USER}@${EC2_HOST}:${DEST_JAR_PATH}
+          # Serviceファイル転送（一旦ホームディレクトリへ）
+          scp -o StrictHostKeyChecking=no -i private_key $SERVICE_FILE_NAME ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/$SERVICE_FILE_NAME
 
+      # 【ステップ3】SSHでログインし、ファイルの配置と再起動のみを行う
       - name: SSH Application Deploy
         uses: appleboy/ssh-action@master
         with:
-          host: ${{env.EC2_HOST}}
-          username: ${{env.EC2_USER}}
-          key: ${{secrets.AWS_EC2_PRIVATE_KEY}}
-          envs: DEST_PATH,DB_URL,DB_USER,DB_PASS
-        env:
-          DB_URL: "jdbc:mysql://${{ secrets.RDS_ENDPOINT }}:3306/studentmanagement?useUnicode=true&characterEncoding=UTF-8"
-          DB_USER: ${{secrets.RDS_USERNAME}}
-          DB_PASS: ${{secrets.RDS_PASSWORD}}
-
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USER }}
+          key: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
           script: |
-            sudo dnf update -y
+            # Java確認
             if ! command -v java &> /dev/null; then
                 sudo dnf install java-21-amazon-corretto-devel -y
             fi
             
+            # 停止
             pkill -f 'java -jar' || true
             
-            sudo mkdir -p /etc/systemd/system
+            # 配置（ホームディレクトリから本来の場所へ移動）
+            # sudo mv は上書き移動してくれるので、古いファイルがあっても大丈夫です
+            sudo mv /home/ec2-user/StudentManagement.service /etc/systemd/system/StudentManagement.service
             
-            cat <<EOL | sudo tee /etc/systemd/system/StudentManagement.service > /dev/null
-            [Unit]
-            Description=StudentManagement App
-            After=network.target
-            
-            [Service]
-            ExecStart=/usr/bin/java -jar ${DEST_PATH}
-            
-            Environment="SPRING_DATASOURCE_URL=${DB_URL}"
-            Environment="SPRING_DATASOURCE_USERNAME=${DB_USER}"
-            Environment="SPRING_DATASOURCE_PASSWORD=${DB_PASS}"
-            
-            User=ec2-user
-            Group=ec2-user
-            SuccessExitStatus=143
-            Restart=always
-            
-            [Install]
-            WantedBy = multi-user.target
-            EOL
-            
+            # 反映・起動
             sudo systemctl daemon-reload
             sudo systemctl enable StudentManagement
             sudo systemctl restart StudentManagement
-             
