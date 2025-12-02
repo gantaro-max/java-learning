@@ -8,7 +8,6 @@ on:
 
 env:
   EC2_USER: 'ec2-user'
-  # あなたの現在のIPアドレス
   EC2_HOST: '52.199.63.94'
   SRC_PATH: 'build/libs/*.jar'
   DEST_JAR_PATH: '/home/ec2-user/StudentManagement.jar'
@@ -35,7 +34,7 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew bootJar
 
-      # 【変更点1】Javaのメモリ制限(-Xmx512m)を追加しました
+      # 【変更点1】メモリ制限を 256MB にして、停止タイムアウト(10秒)を追加
       - name: Create Systemd Service File
         env:
           DB_URL: "jdbc:mysql://${{ secrets.RDS_ENDPOINT }}:3306/studentmanagement?useUnicode=true&characterEncoding=UTF-8"
@@ -48,8 +47,8 @@ jobs:
           After=network.target
           
           [Service]
-          # メモリ不足を防ぐため、最大メモリを512MBに制限します
-          ExecStart=/usr/bin/java -Xmx512m -jar $DEST_JAR_PATH
+          # メモリを256MBに制限（t2.micro向け最適化）
+          ExecStart=/usr/bin/java -Xmx256m -jar $DEST_JAR_PATH
           
           Environment="SPRING_DATASOURCE_URL=${DB_URL}"
           Environment="SPRING_DATASOURCE_USERNAME=${DB_USER}"
@@ -59,6 +58,8 @@ jobs:
           Group=ec2-user
           SuccessExitStatus=143
           Restart=always
+          # 停止時に10秒待っても止まらなければ強制終了させる設定
+          TimeoutStopSec=10
           
           [Install]
           WantedBy=multi-user.target
@@ -72,7 +73,7 @@ jobs:
           scp -o StrictHostKeyChecking=no -i private_key $SRC_PATH ${EC2_USER}@${EC2_HOST}:${DEST_JAR_PATH}
           scp -o StrictHostKeyChecking=no -i private_key $SERVICE_FILE_NAME ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/$SERVICE_FILE_NAME
 
-      # 【変更点2】停止手順を「いきなり強制終了」に変更し、メモリを即時確保するようにしました
+      # 【変更点2】手動pkillをやめて、systemctlによる管理に一本化
       - name: SSH Application Deploy
         uses: appleboy/ssh-action@master
         with:
@@ -81,48 +82,28 @@ jobs:
           key: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
           command_timeout: 30m
           script: |
-            echo "0. Checking & Adding Swap Space..."
-            # スワップ領域が0なら作成する（EC2再起動対策）
-            if [ $(free | awk '/^Swap:/ {print $2}') -eq 0 ]; then
-              echo "Creating 2GB swap file..."
-              sudo dd if=/dev/zero of=/swapfile bs=128M count=16
-              sudo chmod 600 /swapfile
-              sudo mkswap /swapfile
-              sudo swapon /swapfile
-              echo "Swap created."
-            else
-              echo "Swap already exists."
-            fi
+            echo "0. Checking Swap..."
             free -h
 
-            # キャッシュをクリアして物理メモリを確保（ここを追加しました！）
-            echo "Clearing caches to prevent OOM..."
-            sudo sync && sudo sysctl -w vm.drop_caches=3
-            free -h
-
-            echo "1. Checking Java installation..."
+            echo "1. Checking Java..."
             if ! command -v java &> /dev/null; then
-                echo "Installing Java..."
                 sudo dnf install java-21-amazon-corretto-devel -y
             fi
             
-            echo "2. Force killing existing process (to free up memory NOW)..."
-            # systemctl stop を待たずに、いきなりプロセスを殺してメモリを空けます
-            sudo pkill -9 -f 'java -jar' || true
-            
-            # その後で systemd に「止まったよ」と伝えます
-            sudo systemctl stop StudentManagement || true
-            
-            echo "3. Moving service file..."
+            echo "2. Moving service file..."
             sudo mv /home/ec2-user/StudentManagement.service /etc/systemd/system/StudentManagement.service
             
-            echo "4. Reloading systemd..."
+            echo "3. Reloading systemd..."
             sudo systemctl daemon-reload
+            
+            # 念のため失敗状態をリセット
+            sudo systemctl reset-failed StudentManagement || true
+
+            echo "4. Restarting service..."
+            # restart コマンドは停止→開始を自動で行います
+            sudo systemctl restart StudentManagement
             
             echo "5. Enabling service..."
             sudo systemctl enable StudentManagement
-            
-            echo "6. Restarting service..."
-            sudo systemctl restart StudentManagement
             
             echo "Deployment Finished Successfully!"
