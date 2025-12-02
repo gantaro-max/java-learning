@@ -95,6 +95,11 @@ jobs:
             fi
             free -h
 
+            # キャッシュをクリアして物理メモリを確保（ここを追加しました！）
+            echo "Clearing caches to prevent OOM..."
+            sudo sync && sudo sysctl -w vm.drop_caches=3
+            free -h
+
             echo "1. Checking Java installation..."
             if ! command -v java &> /dev/null; then
                 echo "Installing Java..."
