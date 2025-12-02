@@ -51,39 +51,39 @@ jobs:
           DB_URL: "jdbc:mysql://${{ secrets.RDS_ENDPOINT }}:3306/studentmanagement?useUnicode=true&characterEncoding=UTF-8"
           DB_USER: ${{secrets.RDS_USERNAME}}
           DB_PASS: ${{secrets.RDS_PASSWORD}}
-        
-        script: |
-          sudo dnf update -y
-          if ! command -v java &> /dev/null; then
-              sudo dnf install java-21-amazon-corretto-devel -y
-          fi
-          
-          pkill -f 'java -jar' || true
-          
-          sudo mkdir -p /etc/systemd/system
-          
-          cat <<EOL | sudo tee /etc/systemd/system/StudentManagement.service > /dev/null
-          [Unit]
-          Description=StudentManagement App
-          After=network.target
-          
-          [Service]
-          ExecStart=/usr/bin/java -jar ${DEST_PATH}
-          
-          Environment="SPRING_DATASOURCE_URL=${DB_URL}"
-          Environment="SPRING_DATASOURCE_USERNAME=${DB_USER}"
-          Environment="SPRING_DATASOURCE_PASSWORD=${DB_PASS}"
-          
-          User=ec2-user
-          Group=ec2-user
-          SuccessExitStatus=143
-          Restart=always
-          
-          [Install]
-          WantedBy = multi-user.target
-          EOL
-          
-          sudo systemctl daemon-reload
-          sudo systemctl enable StudentManagement
-          sudo systemctl restart StudentManagement
+
+          script: |
+            sudo dnf update -y
+            if ! command -v java &> /dev/null; then
+                sudo dnf install java-21-amazon-corretto-devel -y
+            fi
+            
+            pkill -f 'java -jar' || true
+            
+            sudo mkdir -p /etc/systemd/system
+            
+            cat <<EOL | sudo tee /etc/systemd/system/StudentManagement.service > /dev/null
+            [Unit]
+            Description=StudentManagement App
+            After=network.target
+            
+            [Service]
+            ExecStart=/usr/bin/java -jar ${DEST_PATH}
+            
+            Environment="SPRING_DATASOURCE_URL=${DB_URL}"
+            Environment="SPRING_DATASOURCE_USERNAME=${DB_USER}"
+            Environment="SPRING_DATASOURCE_PASSWORD=${DB_PASS}"
+            
+            User=ec2-user
+            Group=ec2-user
+            SuccessExitStatus=143
+            Restart=always
+            
+            [Install]
+            WantedBy = multi-user.target
+            EOL
+            
+            sudo systemctl daemon-reload
+            sudo systemctl enable StudentManagement
+            sudo systemctl restart StudentManagement
              
