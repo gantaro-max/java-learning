@@ -81,6 +81,20 @@ jobs:
           key: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
           command_timeout: 30m
           script: |
+            echo "0. Checking & Adding Swap Space..."
+            # スワップ領域が0なら作成する（EC2再起動対策）
+            if [ $(free | awk '/^Swap:/ {print $2}') -eq 0 ]; then
+              echo "Creating 2GB swap file..."
+              sudo dd if=/dev/zero of=/swapfile bs=128M count=16
+              sudo chmod 600 /swapfile
+              sudo mkswap /swapfile
+              sudo swapon /swapfile
+              echo "Swap created."
+            else
+              echo "Swap already exists."
+            fi
+            free -h
+
             echo "1. Checking Java installation..."
             if ! command -v java &> /dev/null; then
                 echo "Installing Java..."
