@@ -8,7 +8,7 @@ on:
 
 env:
   EC2_USER: 'ec2-user'
-  # ↓↓↓【重要】EC2を「停止→開始」したのでIPが変わっています。新しいIPに書き換えてください！
+  # あなたの現在のIPアドレス
   EC2_HOST: '52.199.63.94'
   SRC_PATH: 'build/libs/*.jar'
   DEST_JAR_PATH: '/home/ec2-user/StudentManagement.jar'
@@ -35,7 +35,7 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew bootJar
 
-      # 【ステップ1】GitHub Actions側でサービスファイルを作成（変数を埋め込む）
+      # 【変更点1】Javaのメモリ制限(-Xmx512m)を追加しました
       - name: Create Systemd Service File
         env:
           DB_URL: "jdbc:mysql://${{ secrets.RDS_ENDPOINT }}:3306/studentmanagement?useUnicode=true&characterEncoding=UTF-8"
@@ -48,9 +48,9 @@ jobs:
           After=network.target
           
           [Service]
-          ExecStart=/usr/bin/java -jar $DEST_JAR_PATH
+          # メモリ不足を防ぐため、最大メモリを512MBに制限します
+          ExecStart=/usr/bin/java -Xmx512m -jar $DEST_JAR_PATH
           
-          # DB接続情報（ここが重要です！）
           Environment="SPRING_DATASOURCE_URL=${DB_URL}"
           Environment="SPRING_DATASOURCE_USERNAME=${DB_USER}"
           Environment="SPRING_DATASOURCE_PASSWORD=${DB_PASS}"
@@ -64,43 +64,37 @@ jobs:
           WantedBy=multi-user.target
           EOF
 
-      # 【ステップ2】SCPで Jarファイル と Serviceファイル を転送
       - name: SCP Transfer
         env:
           PRIVATE_KEY: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          # Jar転送
           scp -o StrictHostKeyChecking=no -i private_key $SRC_PATH ${EC2_USER}@${EC2_HOST}:${DEST_JAR_PATH}
-          # Serviceファイル転送（一旦ホームディレクトリへ）
           scp -o StrictHostKeyChecking=no -i private_key $SERVICE_FILE_NAME ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/$SERVICE_FILE_NAME
 
-      # 【ステップ3】SSHでログインし、ファイルの配置と再起動のみを行う
+      # 【変更点2】停止手順を「いきなり強制終了」に変更し、メモリを即時確保するようにしました
       - name: SSH Application Deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ env.EC2_HOST }}
           username: ${{ env.EC2_USER }}
           key: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
-          # タイムアウトを30分に延長
           command_timeout: 30m
           script: |
             echo "1. Checking Java installation..."
             if ! command -v java &> /dev/null; then
                 echo "Installing Java..."
                 sudo dnf install java-21-amazon-corretto-devel -y
-            else
-                echo "Java is already installed."
             fi
             
-            echo "2. Stopping current service (Force kill if needed)..."
-            # 【変更】60秒待っても止まらなければ強制的に次へ進む設定を追加
-            sudo timeout 60s systemctl stop StudentManagement || true
-            # 【変更】ゾンビプロセスを確実に殺すために -9 (SIGKILL) を追加
+            echo "2. Force killing existing process (to free up memory NOW)..."
+            # systemctl stop を待たずに、いきなりプロセスを殺してメモリを空けます
             sudo pkill -9 -f 'java -jar' || true
             
+            # その後で systemd に「止まったよ」と伝えます
+            sudo systemctl stop StudentManagement || true
+            
             echo "3. Moving service file..."
-            # sudo mv は上書き移動してくれるので、古いファイルがあっても大丈夫です
             sudo mv /home/ec2-user/StudentManagement.service /etc/systemd/system/StudentManagement.service
             
             echo "4. Reloading systemd..."
@@ -109,7 +103,7 @@ jobs:
             echo "5. Enabling service..."
             sudo systemctl enable StudentManagement
             
-            echo "6. Restarting service (This may take time)..."
+            echo "6. Restarting service..."
             sudo systemctl restart StudentManagement
             
             echo "Deployment Finished Successfully!"
