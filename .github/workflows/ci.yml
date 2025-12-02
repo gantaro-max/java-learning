@@ -8,8 +8,8 @@ on:
 
 env:
   EC2_USER: 'ec2-user'
-  # あなたの現在のIPアドレスを設定済みです
-  EC2_HOST: '3.112.218.84'
+  # ↓↓↓【重要】EC2を「停止→開始」したのでIPが変わっています。新しいIPに書き換えてください！
+  EC2_HOST: '52.199.63.94'
   SRC_PATH: 'build/libs/*.jar'
   DEST_JAR_PATH: '/home/ec2-user/StudentManagement.jar'
   SERVICE_FILE_NAME: 'StudentManagement.service'
@@ -93,14 +93,14 @@ jobs:
                 echo "Java is already installed."
             fi
             
-            echo "2. Stopping current service..."
-            # 【重要】いきなり pkill せず、まず systemd を止めます
-            sudo systemctl stop StudentManagement || true
-            
-            # 念のためのダメ押し（ゾンビプロセス退治）
-            pkill -f 'java -jar' || true
+            echo "2. Stopping current service (Force kill if needed)..."
+            # 【変更】60秒待っても止まらなければ強制的に次へ進む設定を追加
+            sudo timeout 60s systemctl stop StudentManagement || true
+            # 【変更】ゾンビプロセスを確実に殺すために -9 (SIGKILL) を追加
+            sudo pkill -9 -f 'java -jar' || true
             
             echo "3. Moving service file..."
+            # sudo mv は上書き移動してくれるので、古いファイルがあっても大丈夫です
             sudo mv /home/ec2-user/StudentManagement.service /etc/systemd/system/StudentManagement.service
             
             echo "4. Reloading systemd..."
@@ -109,7 +109,7 @@ jobs:
             echo "5. Enabling service..."
             sudo systemctl enable StudentManagement
             
-            echo "6. Restarting service..."
+            echo "6. Restarting service (This may take time)..."
             sudo systemctl restart StudentManagement
             
             echo "Deployment Finished Successfully!"
