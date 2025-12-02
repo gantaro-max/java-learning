@@ -93,11 +93,14 @@ jobs:
                 echo "Java is already installed."
             fi
             
-            echo "2. Stopping current process..."
+            echo "2. Stopping current service..."
+            # 【重要】いきなり pkill せず、まず systemd を止めます
+            sudo systemctl stop StudentManagement || true
+            
+            # 念のためのダメ押し（ゾンビプロセス退治）
             pkill -f 'java -jar' || true
             
             echo "3. Moving service file..."
-            # sudo mv は上書き移動してくれるので、古いファイルがあっても大丈夫です
             sudo mv /home/ec2-user/StudentManagement.service /etc/systemd/system/StudentManagement.service
             
             echo "4. Reloading systemd..."
@@ -106,7 +109,7 @@ jobs:
             echo "5. Enabling service..."
             sudo systemctl enable StudentManagement
             
-            echo "6. Restarting service (This may take time)..."
+            echo "6. Restarting service..."
             sudo systemctl restart StudentManagement
             
             echo "Deployment Finished Successfully!"
