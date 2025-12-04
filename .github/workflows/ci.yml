@@ -12,7 +12,7 @@ on:
 # ワークフロー全体で使用する定数をここでまとめて管理します
 env:
   EC2_USER: 'ec2-user'       # EC2へのログインユーザー名
-  EC2_HOST: '52.199.63.94'   # デプロイ先のEC2パブリックIPアドレス
+  EC2_HOST: '13.113.193.103'   # デプロイ先のEC2パブリックIPアドレス
   SRC_PATH: 'build/libs/*.jar'                          # ビルド成果物(Jar)のパス（GitHub Actions上）
   DEST_JAR_PATH: '/home/ec2-user/StudentManagement.jar' # 配置先のJarパス（EC2上）
   SERVICE_FILE_NAME: 'StudentManagement.service'        # 作成するsystemdサービス定義ファイルの名前
