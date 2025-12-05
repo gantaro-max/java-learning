@@ -1,135 +1,79 @@
-name: Java CI with Gradle
+name: Java CICD with Gradle
 
-# ■ トリガー設定
-# main または develop ブランチへの Push / Pull Request でこのワークフローを実行します
 on:
   push:
     branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main", "develop" ]
 
-# ■ 環境変数の定義
-# ワークフロー全体で使用する定数をここでまとめて管理します
 env:
-  EC2_USER: 'ec2-user'       # EC2へのログインユーザー名
-  EC2_HOST: '13.113.193.103'   # デプロイ先のEC2パブリックIPアドレス
-  SRC_PATH: 'build/libs/*.jar'                          # ビルド成果物(Jar)のパス（GitHub Actions上）
-  DEST_JAR_PATH: '/home/ec2-user/StudentManagement.jar' # 配置先のJarパス（EC2上）
-  SERVICE_FILE_NAME: 'StudentManagement.service'        # 作成するsystemdサービス定義ファイルの名前
+  EC2_USER: "ec2-user"
+  EC2_HOST: "18.183.101.168"
+  SRC_PATH: "build/libs/StudentManagement-0.0.1-SNAPSHOT.jar"
+  DEST_JAR_PATH: "/home/ec2-user/StudentManagement.jar"
+  SERVICE_FILE_NAME: "StudentManagement.service"
 
 jobs:
-  build:
-    # GitHubが提供する最新のUbuntu環境で実行します
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
-      # 1. ソースコードの取得
       - uses: actions/checkout@v4
 
-      # 2. Java環境のセットアップ (JDK 21を使用)
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: "21"
+          distribution: "temurin"
 
-      # 3. Gradleラッパーへの実行権限付与
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # 4. テストの実行 (単体テストなど)
       - name: Test with Gradle
         run: ./gradlew test
 
-      # 5. アプリケーションのビルド (実行可能なJarファイルを作成)
       - name: Build with Gradle Wrapper
         run: ./gradlew bootJar
 
-      # 6. systemdサービスファイルの作成
-      # EC2上で実行する際の設定ファイル（環境変数や起動コマンド）をここで作成します。
-      # EC2内で作成すると権限エラーなどが起きやすいため、Actions側で作成してから送る方式をとっています。
-      - name: Create Systemd Service File
+      - name: SCP Copy Application to EC2
         env:
-          # GitHub SecretsからDB接続情報を安全に取得
-          DB_URL: "jdbc:mysql://${{ secrets.RDS_ENDPOINT }}:3306/studentmanagement?useUnicode=true&characterEncoding=UTF-8"
-          DB_USER: ${{ secrets.RDS_USERNAME }}
-          DB_PASS: ${{ secrets.RDS_PASSWORD }}
-        run: |
-          cat <<EOF > $SERVICE_FILE_NAME
-          [Unit]
-          Description=StudentManagement App
-          After=network.target
-          
-          [Service]
-          # 起動コマンド: メモリ不足対策として最大ヒープサイズを256MBに制限 (-Xmx256m)
-          ExecStart=/usr/bin/java -Xmx256m -jar $DEST_JAR_PATH
-          
-          # 環境変数: Secretsから取得したDB接続情報をアプリに渡す
-          Environment="SPRING_DATASOURCE_URL=${DB_URL}"
-          Environment="SPRING_DATASOURCE_USERNAME=${DB_USER}"
-          Environment="SPRING_DATASOURCE_PASSWORD=${DB_PASS}"
-          
-          User=ec2-user
-          Group=ec2-user
-          SuccessExitStatus=143
-          Restart=always
-          # 停止時に10秒待っても終了しない場合は強制終了させる設定（停止処理のフリーズ防止）
-          TimeoutStopSec=10
-          
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-      # 7. ファイル転送 (SCP)
-      # 作成した「Jarファイル」と「サービス定義ファイル」をEC2へ転送します
-      - name: SCP Transfer
-        env:
-          PRIVATE_KEY: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
+          PRIVATE_KEY: ${{secrets.AWS_EC2_PRIVATE_KEY}}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          # アプリ本体(.jar)を転送
-          scp -o StrictHostKeyChecking=no -i private_key $SRC_PATH ${EC2_USER}@${EC2_HOST}:${DEST_JAR_PATH}
-          # サービス設定ファイル(.service)を一旦ホームディレクトリへ転送
-          scp -o StrictHostKeyChecking=no -i private_key $SERVICE_FILE_NAME ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/$SERVICE_FILE_NAME
+          scp -o StrictHostKeyChecking=no -i private_key ${SRC_PATH} ${EC2_USER}@${EC2_HOST}:${DEST_JAR_PATH}
 
-      # 8. SSHによるデプロイ実行
-      # EC2にログインして、アプリの配置・設定反映・再起動を行います
       - name: SSH Application Deploy
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.2.4
         with:
-          host: ${{ env.EC2_HOST }}
-          username: ${{ env.EC2_USER }}
-          key: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
-          command_timeout: 30m  # 処理が長引いても切断されないようタイムアウトを30分に延長
+          host: ${{env.EC2_HOST}}
+          username: ${{env.EC2_USER}}
+          key: ${{secrets.AWS_EC2_PRIVATE_KEY}}
+          envs: DEST_JAR_PATH,SERVICE_FILE_NAME
           script: |
-            echo "0. Checking Swap..."
-            # 現在のメモリ状況を確認（ログ用）
-            free -h
+            sudo dnf update -y            
+            cat <<EOF | sudo tee /etc/systemd/system/${SERVICE_FILE_NAME}
+            [Unit]
+            Description=StudentManagement App
 
-            echo "1. Checking Java..."
-            # Javaがインストールされていない場合はインストールを実行
-            if ! command -v java &> /dev/null; then
-                sudo dnf install java-21-amazon-corretto-devel -y
-            fi
-            
-            echo "2. Moving service file..."
-            # SCPで送ったサービスファイルを、正しいシステムディレクトリへ移動（上書き）
-            sudo mv /home/ec2-user/StudentManagement.service /etc/systemd/system/StudentManagement.service
-            
-            echo "3. Reloading systemd..."
-            # systemdに変更を認識させる
+            [Service]
+            ExecStart=java -jar ${DEST_JAR_PATH}
+            EnvironmentFile=/etc/sysconfig/StudentManagement
+            Restart=no
+            Type=simple
+            User=ec2-user
+            Group=ec2-user
+            SuccessExitStatus=143
+
+            [Install]
+            WantedBy=multi-user.target
+            EOF          
+
             sudo systemctl daemon-reload
-            
-            # サービスが失敗状態で固まっている場合にリセット（念のための処置）
-            sudo systemctl reset-failed StudentManagement || true
 
-            echo "4. Restarting service..."
-            # サービスの再起動（停止 → 起動）
-            # 手動のpkillを使わずsystemctlに管理させることで安全に再起動します
-            sudo systemctl restart StudentManagement
-            
-            echo "5. Enabling service..."
-            # サーバー再起動時にも自動でアプリが立ち上がるように設定
-            sudo systemctl enable StudentManagement
-            
-            echo "Deployment Finished Successfully!"
+            if sudo systemctl status StudentManagement 2>&1 | grep "Active: active (running)"; then
+              sudo systemctl restart StudentManagement
+            else
+              sudo systemctl start StudentManagement
+            fi
