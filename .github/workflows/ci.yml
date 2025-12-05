@@ -9,7 +9,7 @@ on:
 env:
   EC2_USER: "ec2-user"
   EC2_HOST: "18.183.101.168"
-  SRC_PATH: "build/libs/*.jar"
+  SRC_PATH: "build/libs/StudentManagement-0.0.1-SNAPSHOT.jar"
   DEST_JAR_PATH: "/home/ec2-user/StudentManagement.jar"
   SERVICE_FILE_NAME: "StudentManagement.service"
 
@@ -41,11 +41,11 @@ jobs:
         env:
           PRIVATE_KEY: ${{secrets.AWS_EC2_PRIVATE_KEY}}
         run: |
-          echo "${PRIVATE_KEY}" > private_key && chmod 600 private_key
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           scp -o StrictHostKeyChecking=no -i private_key ${SRC_PATH} ${EC2_USER}@${EC2_HOST}:${DEST_JAR_PATH}
 
       - name: SSH Application Deploy
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.2.4
         with:
           host: ${{env.EC2_HOST}}
           username: ${{env.EC2_USER}}
@@ -53,7 +53,7 @@ jobs:
           envs: DEST_JAR_PATH,SERVICE_FILE_NAME
           script: |
             sudo dnf update -y
-            if [ -f /etc/systemd/system/${SERVICE_FILE_NAME}]; then
+            if [ -f /etc/systemd/system/${SERVICE_FILE_NAME} ]; then
               echo "already environment file"              
             else
             cat <<EOF | sudo tee -a /etc/systemd/system/${SERVICE_FILE_NAME}
