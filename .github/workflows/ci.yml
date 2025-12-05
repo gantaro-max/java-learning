@@ -52,11 +52,8 @@ jobs:
           key: ${{secrets.AWS_EC2_PRIVATE_KEY}}
           envs: DEST_JAR_PATH,SERVICE_FILE_NAME
           script: |
-            sudo dnf update -y
-            if [ -f /etc/systemd/system/${SERVICE_FILE_NAME} ]; then
-              echo "already environment file"              
-            else
-            cat <<EOF | sudo tee -a /etc/systemd/system/${SERVICE_FILE_NAME}
+            sudo dnf update -y            
+            cat <<EOF | sudo tee /etc/systemd/system/${SERVICE_FILE_NAME}
             [Unit]
             Description=StudentManagement App
 
@@ -71,8 +68,7 @@ jobs:
 
             [Install]
             WantedBy=multi-user.target
-            EOF
-            fi
+            EOF          
 
             sudo systemctl daemon-reload
 
