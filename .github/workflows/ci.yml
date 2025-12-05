@@ -50,10 +50,10 @@ jobs:
           host: ${{env.EC2_HOST}}
           username: ${{env.EC2_USER}}
           key: ${{secrets.AWS_EC2_PRIVATE_KEY}}
-          envs: DEST_JAR_PATH
+          envs: DEST_JAR_PATH,SERVICE_FILE_NAME
           script: |
             sudo dnf update -y
-            if [ -f /etc/systemd/system/${SERVICE_FILE_NAME} ]; then
+            if [ -f /etc/systemd/system/${SERVICE_FILE_NAME}]; then
               echo "already environment file"              
             else
             cat <<EOF | sudo tee -a /etc/systemd/system/${SERVICE_FILE_NAME}
